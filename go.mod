@@ -1,4 +1,4 @@
-module internshipApplicationTemplate
+module chartographer-go
 
 go 1.17
 
