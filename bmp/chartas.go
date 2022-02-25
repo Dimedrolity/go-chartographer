@@ -8,7 +8,7 @@ import (
 
 //Реализация бизнес логики обработки изображений
 
-// TODO w h д.б. целыми числами. В api делать преобразование в int. При ошибке возвращать ошибку, не вызывая CreateImg
+// TODO w h д.б. целыми числами. В api делать преобразование в int. При ошибке возвращать ошибку, не вызывая NewImage
 
 const (
 	minWidth  = 1
@@ -17,7 +17,7 @@ const (
 	maxHeight = 50_000
 )
 
-func CreateImg(width int, height int) (*image.RGBA, error) {
+func NewImage(width int, height int) (image.Image, error) {
 	if width < minWidth {
 		return nil, errors.New(fmt.Sprintf("ошибка. Ширина изображения должна быть положительным числом.\n") +
 			fmt.Sprintf("Полученная ширина имеет значение %d", width))
