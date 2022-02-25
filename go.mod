@@ -3,6 +3,7 @@ module chartographer-go
 go 1.17
 
 require (
+	github.com/google/uuid v1.3.0
 	github.com/smartystreets/goconvey v1.7.2
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410
 )

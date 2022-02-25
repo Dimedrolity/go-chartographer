@@ -20,15 +20,16 @@ func TestEmptyImg(t *testing.T) {
 // должны совпадать реальные с ожидаемыми: размер файла, размер изображений, пиксели - все байты.
 func TestBMPLib(t *testing.T) {
 	Convey("Testing `bmp lib` function", t, func() {
-		imgBytes, _ := os.ReadFile("rgb.bmp")
-		r := bytes.NewReader(imgBytes)
+		initialBytes, _ := os.ReadFile("rgb.bmp")
+		r := bytes.NewReader(initialBytes)
 
 		img, _ := bmp.Decode(r)
-		w := bytes.Buffer{}
-		_ = bmp.Encode(&w, img)
+		encodeBytes, _ := Encode(&img)
 
-		want := len(imgBytes)
-		got := len(w.Bytes())
+		want := initialBytes
+		got := encodeBytes
 		So(got, ShouldResemble, want)
 	})
 }
+
+// нужна константная строка байтов, чтобы не зависеть от Ф.С.?

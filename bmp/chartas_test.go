@@ -49,33 +49,3 @@ func TestCreateImg_MinMaxSize(t *testing.T) {
 		testSize(maxWidth, maxHeight)
 	})
 }
-
-// Выделить структуру ChartasService, содержит путь к каталогу данных и все методы
-// Тогда нужно выделить интерфейс и методы сервиса? что даст?
-
-// инициализировать сервис - путь к каталогу данных
-
-// TestSaveImg - интеграционный тест для проверка, что изображение корректно сохраняется на диск
-//func TestSaveImg(t *testing.T) {
-//	Convey("SaveImg", t, func() {
-//		img := image.NewRGBA(image.Rect(0, 0, 1, 1))
-//		id, err := SaveImg(img)
-//		So(err, ShouldNotBeNil)
-//		So(id, ShouldHaveLength, 36)
-//		// отдельная папка для тестовых изображений?
-//		So(got, ShouldResemble, want)
-//
-//		// удалить это изображение.
-//
-//	})
-//}
-
-// сохранять нужно и по текущему id. не обязательно создание нового id.
-
-// удалить файл и создать новый.
-//ЛИБО переписать полностью текущий файл.
-//ЛИБО переписать частично текущий файл
-
-//func TestCreateFile(t *testing.T) {
-//	_ = os.WriteFile("img/a.bmp", []byte{0, 1, 0}, 0777)
-//}

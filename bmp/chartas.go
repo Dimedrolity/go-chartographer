@@ -39,34 +39,3 @@ func CreateImg(width int, height int) (*image.RGBA, error) {
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 	return img, nil
 }
-
-//var pathToFolder string
-//
-//func SetPath(path string) {
-//	pathToFolder = path
-//}
-
-// или отделить логику именования от записи на диск?
-// должен принимать путь до каталога, в котором сервис может хранить данные.
-//func SaveImg(img *image.RGBA) (string, error) {
-//	w := bytes.Buffer{}
-//	err := bmp.Encode(&w, img)
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	id := guid()
-//	name := id + ".bmp"
-//
-//	err = os.WriteFile(name, w.Bytes(), 0777)
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	return id, nil
-//}
-//
-//func guid() string {
-//	uuidWithHyphen := uuid.New()
-//	return uuidWithHyphen.String()
-//}
