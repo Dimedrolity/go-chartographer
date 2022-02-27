@@ -2,6 +2,8 @@ package bmp
 
 import (
 	. "github.com/smartystreets/goconvey/convey"
+	"image"
+	"image/color"
 	"testing"
 )
 
@@ -47,5 +49,135 @@ func TestCreateImg_MinMaxSize(t *testing.T) {
 	})
 	Convey("MaxSize", t, func() {
 		testSize(maxWidth, maxHeight)
+	})
+}
+
+func TestSetFragment_In(t *testing.T) {
+	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения", t, func() {
+		const (
+			imgWidth  = 2
+			imgHeight = 2
+		)
+		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+
+		const (
+			subWidth  = 1
+			subHeight = 1
+		)
+		fragment := image.NewRGBA(image.Rect(0, 0, subWidth, subHeight))
+		const (
+			subRedX = 0
+			subRedY = 0
+		)
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		fragment.SetRGBA(subRedX, subRedY, red)
+
+		const (
+			x       = 1
+			y       = 0
+			imgRedX = 1
+			imgRedY = 0
+		)
+		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
+		rect := image.Rect(x, y, x+subWidth, y+subHeight)
+		So(rect.In(img.Bounds()), ShouldBeTrue)
+
+		SetFragment(img, x, y, subWidth, subHeight, fragment)
+
+		for x := 0; x < imgWidth; x++ {
+			for y := 0; y < imgHeight; y++ {
+				c := color.RGBA{}
+				if x == imgRedX && y == imgRedY {
+					c = red
+				}
+
+				So(img.At(x, y), ShouldResemble, c)
+			}
+		}
+	})
+}
+
+func TestSetFragment_NotOverlaps(t *testing.T) {
+	Convey("SetFragment прямоугольники не пересекаются", t, func() {
+		const (
+			imgWidth  = 2
+			imgHeight = 2
+		)
+		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+
+		const (
+			fragmentWidth  = 1
+			fragmentHeight = 1
+		)
+		fragment := image.NewRGBA(image.Rect(0, 0, fragmentWidth, fragmentHeight))
+		const (
+			fragmentRedX = 0
+			fragmentRedY = 0
+		)
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		fragment.SetRGBA(fragmentRedX, fragmentRedY, red)
+
+		const (
+			x = 3
+			y = 3
+		)
+		rect := image.Rect(x, y, x+fragmentWidth, y+fragmentHeight)
+		// Убеждаемся, что прямоугольники не пересекаются
+		So(!rect.Overlaps(img.Bounds()), ShouldBeTrue)
+
+		SetFragment(img, x, y, fragmentWidth, fragmentHeight, fragment)
+
+		for x := 0; x < imgWidth; x++ {
+			for y := 0; y < imgHeight; y++ {
+				c := color.RGBA{}
+				So(img.At(x, y), ShouldResemble, c)
+			}
+		}
+	})
+}
+
+func TestSetFragment_PartIntersect(t *testing.T) {
+	Convey("SetFragment когда прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения", t, func() {
+		const (
+			imgWidth  = 2
+			imgHeight = 2
+		)
+		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+
+		const (
+			fragmentWidth  = 2
+			fragmentHeight = 2
+		)
+		fragment := image.NewRGBA(image.Rect(0, 0, fragmentWidth, fragmentHeight))
+
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		for x := 0; x < fragmentWidth; x++ {
+			for y := 0; y < fragmentHeight; y++ {
+				fragment.SetRGBA(x, y, red)
+			}
+		}
+
+		const (
+			x       = 1
+			y       = 1
+			imgRedX = 1
+			imgRedY = 1
+		)
+		rect := image.Rect(x, y, x+fragmentWidth, y+fragmentHeight)
+		// Убеждаемся, что прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения
+		So(rect.Bounds().Overlaps(img.Bounds()) && !rect.Bounds().In(img.Bounds()), ShouldBeTrue)
+
+		SetFragment(img, x, y, fragmentWidth, fragmentHeight, fragment)
+
+		for x := 0; x < imgWidth; x++ {
+			for y := 0; y < imgHeight; y++ {
+				c := color.RGBA{}
+				if x == imgRedX && y == imgRedY {
+					c = red
+				}
+
+				So(img.At(x, y), ShouldResemble, c)
+			}
+		}
 	})
 }
