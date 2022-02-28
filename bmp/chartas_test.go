@@ -99,46 +99,6 @@ func TestSetFragment_In(t *testing.T) {
 	})
 }
 
-func TestSetFragment_In_2(t *testing.T) {
-	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения", t, func() {
-		const (
-			imgWidth  = 2
-			imgHeight = 2
-		)
-		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
-
-		const (
-			x              = 1
-			y              = 0
-			fragmentWidth  = 1
-			fragmentHeight = 1
-		)
-		fragment := image.NewRGBA(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight))
-		const (
-			redX = 1
-			redY = 0
-		)
-		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
-		fragment.SetRGBA(redX, redY, red)
-
-		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
-		So(fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
-
-		SetFragment2(img, fragment)
-
-		for x := 0; x < imgWidth; x++ {
-			for y := 0; y < imgHeight; y++ {
-				c := color.RGBA{}
-				if x == redX && y == redY {
-					c = red
-				}
-
-				So(img.At(x, y), ShouldResemble, c)
-			}
-		}
-	})
-}
-
 func TestSetFragment_NotOverlaps(t *testing.T) {
 	Convey("SetFragment прямоугольники не пересекаются", t, func() {
 		const (

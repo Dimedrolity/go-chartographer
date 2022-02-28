@@ -69,14 +69,3 @@ func SetFragment(img Image, fragment image.Image, x, y, width, height int) {
 		}
 	}
 }
-
-func SetFragment2(img Image, fragment image.Image) {
-	intersect := img.Bounds().Intersect(fragment.Bounds())
-
-	for x := intersect.Min.X; x < intersect.Max.X; x++ {
-		for y := intersect.Min.Y; y < intersect.Max.Y; y++ {
-			c := fragment.At(x, y)
-			img.Set(x, y, c)
-		}
-	}
-}
