@@ -53,7 +53,8 @@ func TestCreateImg_MinMaxSize(t *testing.T) {
 }
 
 func TestSetFragment_In(t *testing.T) {
-	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения", t, func() {
+	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения.\n"+
+		"После вызова функции SetFragment красный пиксель фрагмента должен появиться в изображении", t, func() {
 		const (
 			imgWidth  = 2
 			imgHeight = 2
@@ -99,8 +100,48 @@ func TestSetFragment_In(t *testing.T) {
 	})
 }
 
+func TestSetFragment_In_FragmentWrongStart(t *testing.T) {
+	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения\n"+
+		"После вызова функции SetFragment красный пиксель фрагмента не должен появиться в изображении, "+
+		"так как прямоугольник фрагмента имеет начальные координаты не соотв. функции", t, func() {
+		const (
+			imgWidth  = 2
+			imgHeight = 2
+		)
+		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+
+		const (
+			x              = 1
+			y              = 0
+			fragmentWidth  = 1
+			fragmentHeight = 1
+		)
+		fragment := image.NewRGBA(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight))
+
+		const (
+			redX = 1
+			redY = 0
+		)
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		fragment.SetRGBA(redX, redY, red)
+
+		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
+		So(fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
+
+		SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
+
+		for x := 0; x < imgWidth; x++ {
+			for y := 0; y < imgHeight; y++ {
+				So(img.At(x, y), ShouldResemble, color.RGBA{})
+			}
+		}
+	})
+}
+
 func TestSetFragment_NotOverlaps(t *testing.T) {
-	Convey("SetFragment прямоугольники не пересекаются", t, func() {
+	Convey("SetFragment прямоугольники не пересекаются\n"+
+		"После вызова функции SetFragment красный пиксель фрагмента не должен появиться в изображении, "+
+		"так как прямоугольники не пересекаются", t, func() {
 		const (
 			imgWidth  = 2
 			imgHeight = 2
@@ -139,7 +180,8 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 }
 
 func TestSetFragment_PartIntersect(t *testing.T) {
-	Convey("SetFragment когда прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения", t, func() {
+	Convey("SetFragment когда прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения\n"+
+		"После вызова функции SetFragment красный пиксель фрагмента должен появиться в изображении", t, func() {
 		const (
 			imgWidth  = 2
 			imgHeight = 2
