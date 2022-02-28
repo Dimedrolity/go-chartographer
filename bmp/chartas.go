@@ -49,12 +49,18 @@ func NewImage(width, height int) (image.Image, error) {
 	return img, nil
 }
 
-// SetFragment измененяет пиксели img пикселями fragment, начиная с (x;y) по ширине width и высоте height
-// Меняется существующий массив байт img, это производительнее чем создавать абсолютно новое изображение.
+// SetFragment измененяет пиксели изображения img пикселями фрагмента fragment, начиная с координат изобржаения (x;y) по ширине width и высоте height.
+// Меняется существующий массив байт изображения, это производительнее чем создавать абсолютно новое изображение.
 // Примечание: если фрагмент перекрывает границы изображения, то часть фрагмента вне изображения игнорируется.
-func SetFragment(img Image, x, y, width, height int, fragment image.Image) {
-	subRect := image.Rect(x, y, x+width, y+height)
-	intersect := subRect.Intersect(img.Bounds())
+func SetFragment(img Image, fragment image.Image, x, y, width, height int) {
+	// Изображение и фрагмент должны иметь начальные координаты (0;0), иначе функция отработает некорректно.
+	start := image.Pt(0, 0)
+	if img.Bounds().Min != start || fragment.Bounds().Min != start {
+		return
+	}
+
+	fragmentRect := image.Rect(x, y, x+width, y+height)
+	intersect := img.Bounds().Intersect(fragmentRect)
 
 	for h := 0; h < intersect.Bounds().Dy(); h++ {
 		for w := 0; w < intersect.Bounds().Dx(); w++ {
@@ -64,4 +70,13 @@ func SetFragment(img Image, x, y, width, height int, fragment image.Image) {
 	}
 }
 
-// TODO упростить, сделать параметрами только изображения. У фрагмента должен быть прямоугольник с x,y,x+w,y+h
+func SetFragment2(img Image, fragment image.Image) {
+	intersect := img.Bounds().Intersect(fragment.Bounds())
+
+	for x := intersect.Min.X; x < intersect.Max.X; x++ {
+		for y := intersect.Min.Y; y < intersect.Max.Y; y++ {
+			c := fragment.At(x, y)
+			img.Set(x, y, c)
+		}
+	}
+}
