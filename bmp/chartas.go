@@ -9,8 +9,8 @@ import (
 
 //Реализация бизнес логики обработки изображений
 
-// Image дополняет image.Image
-type Image interface {
+// MutableImage дополняет image.Image
+type MutableImage interface {
 	image.Image
 	Set(x, y int, c color.Color)
 }
@@ -52,7 +52,7 @@ func NewImage(width, height int) (image.Image, error) {
 // SetFragment измененяет пиксели изображения img пикселями фрагмента fragment, начиная с координат изобржаения (x;y) по ширине width и высоте height.
 // Меняется существующий массив байт изображения, это производительнее чем создавать абсолютно новое изображение.
 // Примечание: если фрагмент перекрывает границы изображения, то часть фрагмента вне изображения игнорируется.
-func SetFragment(img Image, fragment image.Image, x, y, width, height int) {
+func SetFragment(img MutableImage, fragment image.Image, x, y, width, height int) {
 	// Изображение и фрагмент должны иметь начальные координаты (0;0), иначе функция отработает некорректно.
 	start := image.Pt(0, 0)
 	if img.Bounds().Min != start || fragment.Bounds().Min != start {
