@@ -33,7 +33,7 @@ func TestAppendExt(t *testing.T) {
 // TODO не использовать библиотеку bmp напрямую, только через публичное апи моего сервиса
 func TestBMPLib(t *testing.T) {
 	Convey("Testing `bmp lib` function", t, func() {
-		initialBytes, _ := os.ReadFile("rgb.bmp")
+		initialBytes, _ := os.ReadFile("testdata/rgb.bmp")
 		r := bytes.NewReader(initialBytes)
 
 		img, _ := bmp.Decode(r)
