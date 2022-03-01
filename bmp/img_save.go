@@ -9,9 +9,9 @@ import (
 
 // Encode
 //если еще сделать обертку над Decode, то интеграционный тест нужно будет переписать.
-func Encode(img *image.Image) ([]byte, error) {
+func Encode(img image.Image) ([]byte, error) {
 	buffer := bytes.Buffer{}
-	err := bmp.Encode(&buffer, *img)
+	err := bmp.Encode(&buffer, img)
 	if err != nil {
 		return nil, err
 	}
