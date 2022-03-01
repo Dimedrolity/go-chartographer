@@ -7,6 +7,9 @@ import (
 	"testing"
 )
 
+// -----------
+// NewImage
+// -----------
 func TestNewImage_ZeroWidth(t *testing.T) {
 	Convey("ZeroWidth", t, func() {
 		_, err := NewImage(0, 1)
@@ -52,9 +55,17 @@ func TestNewImage_MinMaxSize(t *testing.T) {
 	})
 }
 
-func TestSubImage(t *testing.T) {
-	Convey("SubImage", t, func() {
-		img := image.NewRGBA(image.Rect(0, 0, 2, 2))
+// -----------
+// Fragment
+// -----------
+func TestFragment_In(t *testing.T) {
+	Convey("Fragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения.\n"+
+		"После вызова функции Fragment красный пиксель изображения должен появиться в фрагменте", t, func() {
+		const (
+			imgWidth  = 2
+			imgHeight = 2
+		)
+		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
 		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
 		const (
 			redX = 1
@@ -63,25 +74,108 @@ func TestSubImage(t *testing.T) {
 		img.SetRGBA(redX, redY, red)
 
 		const (
-			subWidth  = 1
-			subHeight = 1
+			x              = 1
+			y              = 1
+			fragmentWidth  = 1
+			fragmentHeight = 1
 		)
-		sub, err := SubImage(img, redX, redY, subWidth, subHeight)
+		fragment, err := Fragment(img, x, y, fragmentWidth, fragmentHeight)
 		So(err, ShouldBeNil)
+		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
+		So(fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
 
-		bounds := sub.Bounds()
-		So(bounds.Dx(), ShouldEqual, subWidth)
-		So(bounds.Dy(), ShouldEqual, subHeight)
+		bounds := fragment.Bounds()
+		So(bounds.Dx(), ShouldEqual, fragmentWidth)
+		So(bounds.Dy(), ShouldEqual, fragmentHeight)
 
-		So(sub.At(redX, redY), ShouldResemble, red)
+		So(fragment.At(redX, redY), ShouldResemble, red)
 	})
 }
 
-// TODO тест, когда SubImage выходит за рамки исходного
-// чёрным цветом закрашивается та часть фрагмента, которая оказывается вне границ изображения (см. пример ниже).
-// Получается нужно будет вернуть sub-image запрошенного размера, но часть будет черным цветом.
-// TODO уточнить у авторов.
+func TestFragment_NotOverlaps(t *testing.T) {
+	Convey("Fragment когда прямоугольники не пересекаются\n"+
+		"Результатом Fragment должно быть полностью черное изображение", t, func() {
+		const (
+			imgWidth  = 2
+			imgHeight = 2
+		)
+		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		const (
+			redX = 1
+			redY = 1
+		)
+		img.SetRGBA(redX, redY, red)
 
+		const (
+			x              = imgWidth
+			y              = imgHeight
+			fragmentWidth  = 1
+			fragmentHeight = 1
+		)
+		fragment, err := Fragment(img, x, y, fragmentWidth, fragmentHeight)
+		So(err, ShouldBeNil)
+		// Убеждаемся, что прямоугольники не пересекаются
+		So(fragment.Bounds().Overlaps(img.Bounds()), ShouldBeFalse)
+
+		bounds := fragment.Bounds()
+		So(bounds.Dx(), ShouldEqual, fragmentWidth)
+		So(bounds.Dy(), ShouldEqual, fragmentHeight)
+
+		for y := 0; y < fragmentHeight; y++ {
+			for x := 0; x < fragmentWidth; x++ {
+				So(fragment.At(x, y), ShouldResemble, color.RGBA{})
+			}
+		}
+	})
+}
+
+func TestFragment_PartIntersect(t *testing.T) {
+	Convey("Fragment когда прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения\n"+
+		"После вызова функции Fragment во фрагменте должен появиться один красный пиксель", t, func() {
+		const (
+			imgWidth  = 2
+			imgHeight = 2
+		)
+		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		const (
+			redX = 1
+			redY = 1
+		)
+		img.SetRGBA(redX, redY, red)
+
+		const (
+			x              = redX
+			y              = redY
+			fragmentWidth  = 2
+			fragmentHeight = 2
+		)
+		fragment, err := Fragment(img, x, y, fragmentWidth, fragmentHeight)
+		So(err, ShouldBeNil)
+		// Убеждаемся, что прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения
+		So(fragment.Bounds().Overlaps(img.Bounds()) && !fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
+
+		bounds := fragment.Bounds()
+		So(bounds.Dx(), ShouldEqual, fragmentWidth)
+		So(bounds.Dy(), ShouldEqual, fragmentHeight)
+
+		for y := 0; y < fragmentHeight; y++ {
+			for x := 0; x < fragmentWidth; x++ {
+				c := color.RGBA{}
+				if x == redX && y == redY {
+					c = red
+				}
+
+				So(fragment.At(x, y), ShouldResemble, c)
+			}
+		}
+	})
+}
+
+// -----------
+// SetFragment
+// -----------
 func TestSetFragment_In(t *testing.T) {
 	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения.\n"+
 		"После вызова функции SetFragment красный пиксель фрагмента должен появиться в изображении", t, func() {
@@ -169,7 +263,7 @@ func TestSetFragment_In_FragmentWrongStart(t *testing.T) {
 }
 
 func TestSetFragment_NotOverlaps(t *testing.T) {
-	Convey("SetFragment прямоугольники не пересекаются\n"+
+	Convey("SetFragment когда прямоугольники не пересекаются\n"+
 		"После вызова функции SetFragment красный пиксель фрагмента не должен появиться в изображении, "+
 		"так как прямоугольники не пересекаются", t, func() {
 		const (
