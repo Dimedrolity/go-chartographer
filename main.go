@@ -10,6 +10,7 @@ func main() {
 	router := chi.NewRouter()
 
 	router.Post("/chartas/", createImage)
+	router.Post("/chartas/{id}/", setFragment)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

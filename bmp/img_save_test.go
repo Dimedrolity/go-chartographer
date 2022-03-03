@@ -35,9 +35,10 @@ func TestAppendExt(t *testing.T) {
 func TestDecodeEncode(t *testing.T) {
 	Convey("Байты изображения после Decode и Encode должны совпадать с исходными", t, func() {
 		initialBytes, _ := os.ReadFile("testdata/rgb.bmp")
-		r := bytes.NewReader(initialBytes)
 
-		img, _ := bmp.Decode(r)
+		img, err := Decode(initialBytes)
+		So(err, ShouldBeNil)
+
 		encodeBytes, _ := Encode(img)
 
 		want := initialBytes

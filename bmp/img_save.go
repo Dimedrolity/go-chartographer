@@ -7,8 +7,6 @@ import (
 	"image"
 )
 
-// Encode
-//если еще сделать обертку над Decode, то интеграционный тест нужно будет переписать.
 func Encode(img image.Image) ([]byte, error) {
 	buffer := bytes.Buffer{}
 	err := bmp.Encode(&buffer, img)
@@ -17,6 +15,17 @@ func Encode(img image.Image) ([]byte, error) {
 	}
 
 	return buffer.Bytes(), nil
+}
+
+// TODO принимать r io.Reader, чтобы не создавать свой
+func Decode(imgBytes []byte) (image.Image, error) {
+	r := bytes.NewReader(imgBytes)
+	img, err := bmp.Decode(r)
+	if err != nil {
+		return nil, err
+	}
+
+	return img, nil
 }
 
 func AppendExtension(filename string) string {

@@ -14,8 +14,6 @@ type MutableImage interface {
 	Set(x, y int, c color.Color)
 }
 
-// TODO w h д.б. целыми числами. В api делать преобразование в int. При ошибке возвращать ошибку, не вызывая NewImage
-
 const (
 	minWidth  = 1
 	minHeight = 1
@@ -25,7 +23,7 @@ const (
 
 // TODO создать свой тип ошибки
 
-func NewImage(width, height int) (image.Image, error) {
+func NewRGBA(width, height int) (image.Image, error) {
 	if width < minWidth {
 		return nil, errors.New(fmt.Sprintf("ошибка. Ширина изображения должна быть положительным числом.\n") +
 			fmt.Sprintf("Полученная ширина=%d", width))
@@ -93,12 +91,20 @@ func Fragment(img image.Image, x, y, width, height int) (image.Image, error) {
 
 // SetFragment измененяет пиксели изображения img пикселями фрагмента fragment, начиная с координат изобржаения (x;y) по ширине width и высоте height.
 // Меняется существующий массив байт изображения, это производительнее чем создавать абсолютно новое изображение.
-// Примечание: если фрагмент перекрывает границы изображения, то часть фрагмента вне изображения игнорируется.
-func SetFragment(img MutableImage, fragment image.Image, x, y, width, height int) {
-	// Изображение и фрагмент должны иметь начальные координаты (0;0), иначе функция отработает некорректно.
+// Примечания:
+// 1. если фрагмент перекрывает границы изображения, то часть фрагмента вне изображения игнорируется.
+// 2. изображение и фрагмент должны иметь начальные координаты (0;0).
+func SetFragment(img image.Image, fragment image.Image, x, y, width, height int) error {
+	mutableImage, ok := img.(MutableImage)
+	if !ok {
+		return errors.New("ошибка. Изображение должно реализовывать MutableImage")
+	}
+
 	start := image.Pt(0, 0)
 	if img.Bounds().Min != start || fragment.Bounds().Min != start {
-		return
+		return errors.New("ошибка. Изображение и фрагмент должны иметь начальные координаты (0;0). " +
+			fmt.Sprintf("изображение имеет %v, ", img.Bounds().Min) +
+			fmt.Sprintf("фрагмент имеет %v.", fragment.Bounds().Min))
 	}
 
 	fragmentRect := image.Rect(x, y, x+width, y+height)
@@ -107,7 +113,9 @@ func SetFragment(img MutableImage, fragment image.Image, x, y, width, height int
 	for h := 0; h < intersect.Bounds().Dy(); h++ {
 		for w := 0; w < intersect.Bounds().Dx(); w++ {
 			c := fragment.At(w, h)
-			img.Set(x+w, y+h, c)
+			mutableImage.Set(x+w, y+h, c)
 		}
 	}
+
+	return nil
 }

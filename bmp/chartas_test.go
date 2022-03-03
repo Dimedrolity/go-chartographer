@@ -8,39 +8,39 @@ import (
 )
 
 // -----------
-// NewImage
+// NewRGBA
 // -----------
 func TestNewImage_ZeroWidth(t *testing.T) {
 	Convey("ZeroWidth", t, func() {
-		_, err := NewImage(0, 1)
+		_, err := NewRGBA(0, 1)
 		So(err, ShouldNotBeNil)
 	})
 }
 
 func TestNewImage_ZeroHeight(t *testing.T) {
 	Convey("ZeroHeight", t, func() {
-		_, err := NewImage(1, 0)
+		_, err := NewRGBA(1, 0)
 		So(err, ShouldNotBeNil)
 	})
 }
 
 func TestNewImage_WidthExceeded(t *testing.T) {
 	Convey("WidthExceeded", t, func() {
-		_, err := NewImage(maxWidth+1, 1)
+		_, err := NewRGBA(maxWidth+1, 1)
 		So(err, ShouldNotBeNil)
 	})
 }
 
 func TestNewImage_HeightExceeded(t *testing.T) {
 	Convey("HeightExceeded", t, func() {
-		_, err := NewImage(1, maxHeight+1)
+		_, err := NewRGBA(1, maxHeight+1)
 		So(err, ShouldNotBeNil)
 	})
 }
 
 func TestNewImage_MinMaxSize(t *testing.T) {
 	testSize := func(width, height int) {
-		img, err := NewImage(width, height)
+		img, err := NewRGBA(width, height)
 		So(err, ShouldBeNil)
 
 		rect := img.Bounds()
@@ -205,7 +205,8 @@ func TestSetFragment_In(t *testing.T) {
 		rect := image.Rect(x, y, x+fragmentWidth, y+fragmentHeight)
 		So(rect.In(img.Bounds()), ShouldBeTrue)
 
-		SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
+		err := SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
+		So(err, ShouldBeNil)
 
 		const (
 			imgRedX = x
@@ -226,7 +227,7 @@ func TestSetFragment_In(t *testing.T) {
 
 func TestSetFragment_In_FragmentWrongStart(t *testing.T) {
 	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения\n"+
-		"После вызова функции SetFragment красный пиксель фрагмента не должен появиться в изображении, "+
+		"После вызова функции SetFragment должна быть ошибка, "+
 		"так как прямоугольник фрагмента имеет начальные координаты не соотв. функции", t, func() {
 		const (
 			imgWidth  = 2
@@ -252,13 +253,8 @@ func TestSetFragment_In_FragmentWrongStart(t *testing.T) {
 		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
 		So(fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
 
-		SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
-
-		for x := 0; x < imgWidth; x++ {
-			for y := 0; y < imgHeight; y++ {
-				So(img.At(x, y), ShouldResemble, color.RGBA{})
-			}
-		}
+		err := SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
+		So(err, ShouldNotBeNil)
 	})
 }
 
@@ -292,7 +288,8 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 		// Убеждаемся, что прямоугольники не пересекаются
 		So(!rect.Overlaps(img.Bounds()), ShouldBeTrue)
 
-		SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
+		err := SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
+		So(err, ShouldBeNil)
 
 		for x := 0; x < imgWidth; x++ {
 			for y := 0; y < imgHeight; y++ {
@@ -335,7 +332,8 @@ func TestSetFragment_PartIntersect(t *testing.T) {
 		// Убеждаемся, что прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения
 		So(rect.Bounds().Overlaps(img.Bounds()) && !rect.Bounds().In(img.Bounds()), ShouldBeTrue)
 
-		SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
+		err := SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
+		So(err, ShouldBeNil)
 
 		for x := 0; x < imgWidth; x++ {
 			for y := 0; y < imgHeight; y++ {
