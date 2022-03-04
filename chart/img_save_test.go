@@ -39,7 +39,7 @@ func TestDecodeEncode(t *testing.T) {
 		file, err := os.Open(path)
 		So(err, ShouldBeNil)
 
-		img, err := Decode(file)
+		img, err := bmp.Decode(file)
 		So(err, ShouldBeNil)
 		err = file.Close()
 		So(err, ShouldBeNil)

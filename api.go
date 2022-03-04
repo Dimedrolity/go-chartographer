@@ -1,6 +1,7 @@
 package main
 
 import (
+	"golang.org/x/image/bmp"
 	"net/http"
 	"os"
 	"strconv"
@@ -78,7 +79,7 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fragment, err := chart.Decode(req.Body)
+	fragment, err := bmp.Decode(req.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -93,7 +94,7 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	img, err := chart.Decode(file)
+	img, err := bmp.Decode(file)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -5,7 +5,6 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/image/bmp"
 	"image"
-	"io"
 )
 
 func Encode(img image.Image) ([]byte, error) {
@@ -16,15 +15,6 @@ func Encode(img image.Image) ([]byte, error) {
 	}
 
 	return buffer.Bytes(), nil
-}
-
-func Decode(r io.Reader) (image.Image, error) {
-	img, err := bmp.Decode(r)
-	if err != nil {
-		return nil, err
-	}
-
-	return img, nil
 }
 
 func AppendExtension(filename string) string {
