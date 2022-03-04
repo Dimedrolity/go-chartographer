@@ -1,4 +1,4 @@
-package bmp
+package chart
 
 import (
 	"bytes"

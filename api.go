@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"chartographer-go/bmp"
+	"chartographer-go/chart"
 )
 
 // TODO директория должна указываться при инициализации приложения
@@ -27,20 +27,20 @@ func createImage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	img, err := bmp.NewRGBA(width, height)
+	img, err := chart.NewRGBA(width, height)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	imgBytes, err := bmp.Encode(img)
+	imgBytes, err := chart.Encode(img)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	id := bmp.Guid()
-	name := bmp.AppendExtension(id)
+	id := chart.Guid()
+	name := chart.AppendExtension(id)
 
 	err = os.WriteFile(pathToFolder+name, imgBytes, 0777)
 	if err != nil {
@@ -78,14 +78,14 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fragment, err := bmp.Decode(req.Body)
+	fragment, err := chart.Decode(req.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	id := chi.URLParam(req, "id")
-	name := bmp.AppendExtension(id)
+	name := chart.AppendExtension(id)
 
 	file, err := os.Open(pathToFolder + name)
 	if err != nil {
@@ -93,7 +93,7 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	img, err := bmp.Decode(file)
+	img, err := chart.Decode(file)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -104,13 +104,13 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = bmp.SetFragment(img, fragment, x, y, width, height)
+	err = chart.SetFragment(img, fragment, x, y, width, height)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	imgBytes, err := bmp.Encode(img)
+	imgBytes, err := chart.Encode(img)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

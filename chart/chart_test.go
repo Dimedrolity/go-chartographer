@@ -1,4 +1,4 @@
-package bmp
+package chart
 
 import (
 	. "github.com/smartystreets/goconvey/convey"
