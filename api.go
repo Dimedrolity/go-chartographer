@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -79,12 +78,7 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fragmentBytes, err := io.ReadAll(req.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	fragment, err := bmp.Decode(fragmentBytes)
+	fragment, err := bmp.Decode(req.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -93,13 +87,18 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")
 	name := bmp.AppendExtension(id)
 
-	imgBytes, err := os.ReadFile(pathToFolder + name)
+	file, err := os.Open(pathToFolder + name)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	img, err := bmp.Decode(imgBytes)
+	img, err := bmp.Decode(file)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = file.Close()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -111,7 +110,7 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	imgBytes, err = bmp.Encode(img)
+	imgBytes, err := bmp.Encode(img)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

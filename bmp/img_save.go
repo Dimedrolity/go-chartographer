@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/image/bmp"
 	"image"
+	"io"
 )
 
 func Encode(img image.Image) ([]byte, error) {
@@ -17,9 +18,7 @@ func Encode(img image.Image) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// TODO принимать r io.Reader, чтобы не создавать свой
-func Decode(imgBytes []byte) (image.Image, error) {
-	r := bytes.NewReader(imgBytes)
+func Decode(r io.Reader) (image.Image, error) {
 	img, err := bmp.Decode(r)
 	if err != nil {
 		return nil, err

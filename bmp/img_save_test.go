@@ -34,13 +34,21 @@ func TestAppendExt(t *testing.T) {
 // TODO не использовать библиотеку bmp напрямую, только через публичное апи моего сервиса
 func TestDecodeEncode(t *testing.T) {
 	Convey("Байты изображения после Decode и Encode должны совпадать с исходными", t, func() {
-		initialBytes, _ := os.ReadFile("testdata/rgb.bmp")
+		const path = "testdata/rgb.bmp"
 
-		img, err := Decode(initialBytes)
+		file, err := os.Open(path)
 		So(err, ShouldBeNil)
 
-		encodeBytes, _ := Encode(img)
+		img, err := Decode(file)
+		So(err, ShouldBeNil)
+		err = file.Close()
+		So(err, ShouldBeNil)
 
+		encodeBytes, err := Encode(img)
+		So(err, ShouldBeNil)
+
+		initialBytes, err := os.ReadFile(path)
+		So(err, ShouldBeNil)
 		want := initialBytes
 		got := encodeBytes
 		So(got, ShouldResemble, want)
