@@ -12,6 +12,7 @@ func main() {
 	router.Post("/chartas/", createImage)
 	router.Post("/chartas/{id}/", setFragment)
 	router.Get("/chartas/{id}/", fragment)
+	router.Delete("/chartas/{id}/", deleteImage)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

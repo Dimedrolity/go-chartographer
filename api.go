@@ -179,3 +179,14 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 }
+
+func deleteImage(w http.ResponseWriter, req *http.Request) {
+	id := chi.URLParam(req, "id")
+	name := chart.AppendExtension(id)
+
+	err := os.Remove(pathToFolder + name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
