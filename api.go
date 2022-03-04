@@ -123,3 +123,64 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 }
+
+func fragment(w http.ResponseWriter, req *http.Request) {
+	queryValues := req.URL.Query()
+	x, err := strconv.Atoi(queryValues.Get("x"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	y, err := strconv.Atoi(queryValues.Get("y"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	width, err := strconv.Atoi(queryValues.Get("width"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	height, err := strconv.Atoi(queryValues.Get("height"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	id := chi.URLParam(req, "id")
+	name := chart.AppendExtension(id)
+
+	file, err := os.Open(pathToFolder + name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	img, err := bmp.Decode(file)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = file.Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fragment, err := chart.Fragment(img, x, y, width, height)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fragmentBytes, err := chart.Encode(fragment)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(fragmentBytes)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
