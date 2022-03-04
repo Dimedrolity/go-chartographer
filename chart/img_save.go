@@ -22,6 +22,5 @@ func AppendExtension(filename string) string {
 }
 
 func Guid() string {
-	uuidWithHyphen := uuid.New()
-	return uuidWithHyphen.String()
+	return uuid.NewString()
 }

@@ -173,14 +173,9 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fragmentBytes, err := chart.Encode(fragment)
+	err = bmp.Encode(w, fragment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-
-	_, err = w.Write(fragmentBytes)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
