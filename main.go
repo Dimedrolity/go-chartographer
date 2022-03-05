@@ -9,10 +9,15 @@ import (
 func main() {
 	router := chi.NewRouter()
 
-	router.Post("/chartas/", createImage)
-	router.Post("/chartas/{id}/", setFragment)
-	router.Get("/chartas/{id}/", fragment)
-	router.Delete("/chartas/{id}/", deleteImage)
+	router.Route("/chartas", func(r chi.Router) {
+		r.Post("/", createImage)
+
+		r.Route("/{id}", func(r chi.Router) {
+			r.Post("/", setFragment)
+			r.Get("/", fragment)
+			r.Delete("/", deleteImage)
+		})
+	})
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
