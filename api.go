@@ -1,19 +1,17 @@
 package main
 
 import (
-	"golang.org/x/image/bmp"
+	"errors"
 	"net/http"
 	"os"
 	"strconv"
+
+	"golang.org/x/image/bmp"
 
 	"github.com/go-chi/chi/v5"
 
 	"chartographer-go/chart"
 )
-
-// TODO директория должна указываться при инициализации приложения
-// TODO должна создаваться, если она не существует.
-var pathToFolder = "data/"
 
 func createImage(w http.ResponseWriter, req *http.Request) {
 	queryValues := req.URL.Query()
@@ -34,16 +32,7 @@ func createImage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	imgBytes, err := chart.Encode(img)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	id := chart.Guid()
-	name := chart.AppendExtension(id)
-
-	err = os.WriteFile(pathToFolder+name, imgBytes, 0777)
+	id, err := chart.SaveNewImage(img)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -86,22 +75,14 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 	}
 
 	id := chi.URLParam(req, "id")
-	name := chart.AppendExtension(id)
 
-	file, err := os.Open(pathToFolder + name)
+	img, err := chart.GetImage(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	img, err := bmp.Decode(file)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err = file.Close()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		if errors.Is(err, os.ErrNotExist) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -111,13 +92,7 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	imgBytes, err := chart.Encode(img)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = os.WriteFile(pathToFolder+name, imgBytes, 0777)
+	err = chart.SaveImage(id, img)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -148,22 +123,13 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 	}
 
 	id := chi.URLParam(req, "id")
-	name := chart.AppendExtension(id)
-
-	file, err := os.Open(pathToFolder + name)
+	img, err := chart.GetImage(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	img, err := bmp.Decode(file)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err = file.Close()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		if errors.Is(err, os.ErrNotExist) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -182,11 +148,14 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 
 func deleteImage(w http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")
-	name := chart.AppendExtension(id)
 
-	err := os.Remove(pathToFolder + name)
+	err := chart.DeleteImage(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		if errors.Is(err, os.ErrNotExist) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 }

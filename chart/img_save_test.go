@@ -10,24 +10,24 @@ import (
 	"testing"
 )
 
-// Выделить структуру ChartasService, содержит путь к каталогу данных и все методы
+// Выделить структуру ChartService, содержит путь к каталогу данных и все методы
 // Тогда нужно выделить интерфейс и методы сервиса? что даст?
 
-// инициализировать сервис - путь к каталогу данных
+// TODO использовать public api
+//func TestGuid(t *testing.T) {
+//	Convey("guid", t, func() {
+//		id := guid()
+//		So(id, ShouldHaveLength, 36)
+//	})
+//}
 
-func TestGuid(t *testing.T) {
-	Convey("Guid", t, func() {
-		id := Guid()
-		So(id, ShouldHaveLength, 36)
-	})
-}
-
-func TestAppendExt(t *testing.T) {
-	Convey("AppendExtension", t, func() {
-		filename := AppendExtension("qwerty")
-		So(filename, ShouldEqual, "qwerty.bmp")
-	})
-}
+// TODO использовать public api
+//func TestAppendExt(t *testing.T) {
+//	Convey("appendExtension", t, func() {
+//		filename := appendExtension("qwerty")
+//		So(filename, ShouldEqual, "qwerty.bmp")
+//	})
+//}
 
 // TestDecodeEncode - интеграционный тест библиотеки "golang.org/x/image/bmp" для того, чтобы повысить доверие.
 // Библиотека должна кодировать/декодировать верно, должны совпадать все реальные байты с ожидаемыми.
