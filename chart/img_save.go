@@ -2,10 +2,12 @@ package chart
 
 import (
 	"bytes"
-	"github.com/google/uuid"
-	"golang.org/x/image/bmp"
 	"image"
 	"os"
+	"path/filepath"
+
+	"github.com/google/uuid"
+	"golang.org/x/image/bmp"
 )
 
 func Encode(img image.Image) ([]byte, error) {
@@ -20,16 +22,29 @@ func Encode(img image.Image) ([]byte, error) {
 
 // TODO может в отдельный pkg?
 
-// TODO директория должна указываться при инициализации приложения
-// TODO должна создаваться, если она не существует.
-var pathToFolder = "data/"
+var dirPath string
+
+func filename(id string) string {
+	return filepath.Join(dirPath, id+".bmp")
+}
+
+// SetImagesDir - создает директорию, при необходимости, и устанавливает путь к директории
+func SetImagesDir(path string) error {
+	// If path is already a directory, MkdirAll does nothing and returns nil.
+	err := os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	dirPath = path
+
+	return nil
+}
 
 // GetImage считывает байты изображения и декодирует в image.Image.
 // Один из вариантов ошибки - os.ErrNotExist.
 func GetImage(id string) (image.Image, error) {
-	filename := pathToFolder + id + ".bmp"
-
-	file, err := os.Open(filename)
+	file, err := os.Open(filename(id))
 	if err != nil {
 		return nil, err
 	}
@@ -53,9 +68,7 @@ func SaveImage(id string, img image.Image) error {
 		return err
 	}
 
-	filename := pathToFolder + id + ".bmp"
-
-	err = os.WriteFile(filename, imgBytes, 0777)
+	err = os.WriteFile(filename(id), imgBytes, 0777)
 	if err != nil {
 		return err
 	}
@@ -77,9 +90,7 @@ func SaveNewImage(img image.Image) (string, error) {
 
 // DeleteImage удаляет файл изображения.
 func DeleteImage(id string) error {
-	filename := pathToFolder + id + ".bmp"
-
-	err := os.Remove(filename)
+	err := os.Remove(filename(id))
 	if err != nil {
 		return err
 	}

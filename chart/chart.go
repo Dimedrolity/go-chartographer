@@ -21,7 +21,7 @@ const (
 	maxHeight = 50_000
 )
 
-// TODO создать свой тип ошибки
+// TODO создать свой тип ошибки?
 
 func NewRGBA(width, height int) (image.Image, error) {
 	if width < minWidth {
@@ -45,8 +45,6 @@ func NewRGBA(width, height int) (image.Image, error) {
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 	return img, nil
 }
-
-// TODO w h д.б. целыми числами. В api делать преобразование в int. При ошибке возвращать ошибку, не вызывая Fragment
 
 const (
 	fragmentMinWidth  = 1

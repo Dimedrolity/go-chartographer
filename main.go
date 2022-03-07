@@ -1,12 +1,22 @@
 package main
 
 import (
-	"github.com/go-chi/chi/v5"
 	"log"
 	"net/http"
+	"os"
+
+	"github.com/go-chi/chi/v5"
+
+	"chartographer-go/chart"
 )
 
 func main() {
+	pathToImages := os.Args[1]
+	err := chart.SetImagesDir(pathToImages)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	router := chi.NewRouter()
 
 	router.Route("/chartas", func(r chi.Router) {
