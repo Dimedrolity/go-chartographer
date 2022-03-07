@@ -75,6 +75,9 @@ func Fragment(img image.Image, x, y, width, height int) (image.Image, error) {
 	}
 
 	fragment := image.NewRGBA(image.Rect(x, y, x+width, y+height))
+	if !img.Bounds().Overlaps(fragment.Bounds()) {
+		return nil, errors.New("ошибка. Изображение и фрагмент не пересекаются по координатам")
+	}
 	intersect := img.Bounds().Intersect(fragment.Bounds())
 
 	for h := intersect.Min.Y; h < intersect.Max.Y; h++ {
@@ -90,7 +93,7 @@ func Fragment(img image.Image, x, y, width, height int) (image.Image, error) {
 // SetFragment измененяет пиксели изображения img пикселями фрагмента fragment, начиная с координат изобржаения (x;y) по ширине width и высоте height.
 // Меняется существующий массив байт изображения, это производительнее чем создавать абсолютно новое изображение.
 // Примечания:
-// 1. если фрагмент перекрывает границы изображения, то часть фрагмента вне изображения игнорируется.
+// 1. если фрагмент частично выходит за границы изображения, то часть фрагмента вне изображения игнорируется.
 // 2. изображение и фрагмент должны иметь начальные координаты (0;0).
 func SetFragment(img image.Image, fragment image.Image, x, y, width, height int) error {
 	mutableImage, ok := img.(MutableImage)
@@ -106,6 +109,10 @@ func SetFragment(img image.Image, fragment image.Image, x, y, width, height int)
 	}
 
 	fragmentRect := image.Rect(x, y, x+width, y+height)
+	if !img.Bounds().Overlaps(fragmentRect) {
+		return errors.New("ошибка. Изображение и фрагмент не пересекаются по координатам")
+	}
+
 	intersect := img.Bounds().Intersect(fragmentRect)
 
 	for h := 0; h < intersect.Bounds().Dy(); h++ {

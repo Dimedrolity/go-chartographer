@@ -113,20 +113,10 @@ func TestFragment_NotOverlaps(t *testing.T) {
 			fragmentWidth  = 1
 			fragmentHeight = 1
 		)
-		fragment, err := Fragment(img, x, y, fragmentWidth, fragmentHeight)
-		So(err, ShouldBeNil)
-		// Убеждаемся, что прямоугольники не пересекаются
-		So(fragment.Bounds().Overlaps(img.Bounds()), ShouldBeFalse)
+		So(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight).Bounds().Overlaps(img.Bounds()), ShouldBeFalse)
 
-		bounds := fragment.Bounds()
-		So(bounds.Dx(), ShouldEqual, fragmentWidth)
-		So(bounds.Dy(), ShouldEqual, fragmentHeight)
-
-		for y := 0; y < fragmentHeight; y++ {
-			for x := 0; x < fragmentWidth; x++ {
-				So(fragment.At(x, y), ShouldResemble, color.RGBA{})
-			}
-		}
+		_, err := Fragment(img, x, y, fragmentWidth, fragmentHeight)
+		So(err, ShouldNotBeNil)
 	})
 }
 
@@ -289,7 +279,7 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 		So(!rect.Overlaps(img.Bounds()), ShouldBeTrue)
 
 		err := SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
-		So(err, ShouldBeNil)
+		So(err, ShouldNotBeNil)
 
 		for x := 0; x < imgWidth; x++ {
 			for y := 0; y < imgHeight; y++ {

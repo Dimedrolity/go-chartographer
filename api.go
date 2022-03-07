@@ -88,7 +88,7 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 
 	err = chart.SetFragment(img, fragment, x, y, width, height)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -135,7 +135,7 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 
 	fragment, err := chart.Fragment(img, x, y, width, height)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
