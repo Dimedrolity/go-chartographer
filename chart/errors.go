@@ -13,8 +13,8 @@ type SizeError struct {
 	minHeight, height, maxHeight int
 }
 
-func (err *SizeError) Error() string {
-	return fmt.Sprintf("width должно быть в диапазоне [%d; %d] и ", err.minWidth, err.maxWidth) +
-		fmt.Sprintf("height в диапазоне [%d; %d].\n", err.minHeight, err.maxHeight) +
-		fmt.Sprintf("Получено width=%d, height=%d", err.width, err.height)
+func (e *SizeError) Error() string {
+	return fmt.Sprintf("width должно быть в диапазоне [%d; %d] и ", e.minWidth, e.maxWidth) +
+		fmt.Sprintf("height в диапазоне [%d; %d].\n", e.minHeight, e.maxHeight) +
+		fmt.Sprintf("Получено width=%d, height=%d", e.width, e.height)
 }

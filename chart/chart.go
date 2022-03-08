@@ -21,6 +21,8 @@ const (
 	maxHeight = 50_000
 )
 
+// NewRGBA создает image.RGBA
+// Возможна ошибка типа *SizeError
 func NewRGBA(width, height int) (image.Image, error) {
 	if width < minWidth || width > maxWidth ||
 		height < minHeight || height > maxHeight {
@@ -43,6 +45,7 @@ const (
 
 // Fragment возвращает фрагмент изображения img, начиная с координат изобржаения (x;y) по ширине width и высоте height.
 // Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).
+// Возможны ошибки ErrNotOverlaps или типа *SizeError
 func Fragment(img image.Image, x, y, width, height int) (image.Image, error) {
 	if width < fragmentMinWidth || width > fragmentMaxWidth ||
 		height < fragmentMinHeight || height > fragmentMaxHeight {
