@@ -27,8 +27,13 @@ func createImage(w http.ResponseWriter, req *http.Request) {
 	}
 
 	img, err := chart.NewRGBA(width, height)
+	var errSize *chart.SizeError
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		if errors.As(err, &errSize) || errors.Is(err, chart.ErrNotOverlaps) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -134,8 +139,13 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 	}
 
 	fragment, err := chart.Fragment(img, x, y, width, height)
+	var errSize *chart.SizeError
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		if errors.As(err, &errSize) || errors.Is(err, chart.ErrNotOverlaps) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 

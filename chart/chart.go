@@ -21,25 +21,13 @@ const (
 	maxHeight = 50_000
 )
 
-// TODO создать свой тип ошибки?
-
 func NewRGBA(width, height int) (image.Image, error) {
-	if width < minWidth {
-		return nil, errors.New(fmt.Sprintf("ошибка. Ширина изображения должна быть положительным числом.\n") +
-			fmt.Sprintf("Полученная ширина=%d", width))
-	}
-	if height < minHeight {
-		return nil, errors.New(fmt.Sprintf("ошибка. Высота изображения должна быть положительным числом.\n") +
-			fmt.Sprintf("Полученная высота=%d", height))
-	}
-
-	if width > maxWidth {
-		return nil, errors.New(fmt.Sprintf("ошибка. Изображение превышает допустимый размер, максимально допустимая ширина = %d.\n", maxWidth) +
-			fmt.Sprintf("Полученная ширина=%d", width))
-	}
-	if height > maxHeight {
-		return nil, errors.New(fmt.Sprintf("ошибка. Изображение превышает допустимый размер, максимально допустимая высота = %d.\n", maxHeight) +
-			fmt.Sprintf("Полученная высота=%d", height))
+	if width < minWidth || width > maxWidth ||
+		height < minHeight || height > maxHeight {
+		return nil, &SizeError{
+			minWidth: minWidth, width: width, maxWidth: maxWidth,
+			minHeight: minHeight, height: height, maxHeight: maxHeight,
+		}
 	}
 
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
@@ -56,27 +44,17 @@ const (
 // Fragment возвращает фрагмент изображения img, начиная с координат изобржаения (x;y) по ширине width и высоте height.
 // Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).
 func Fragment(img image.Image, x, y, width, height int) (image.Image, error) {
-	if width < fragmentMinWidth {
-		return nil, errors.New(fmt.Sprintf("ошибка. Ширина изображения должна быть положительным числом.\n") +
-			fmt.Sprintf("Полученная ширина имеет значение %d", width))
-	}
-	if height < fragmentMinHeight {
-		return nil, errors.New(fmt.Sprintf("ошибка. Высота изображения должна быть положительным числом.\n") +
-			fmt.Sprintf("Полученная высота имеет значение %d", height))
-	}
-
-	if width > fragmentMaxWidth {
-		return nil, errors.New(fmt.Sprintf("ошибка. Изображение превышает допустимый размер, максимально допустимая ширина = %d.\n", fragmentMaxWidth) +
-			fmt.Sprintf("Полученная ширина имеет значение %d", width))
-	}
-	if height > fragmentMaxHeight {
-		return nil, errors.New(fmt.Sprintf("ошибка. Изображение превышает допустимый размер, максимально допустимая высота = %d.\n", fragmentMaxHeight) +
-			fmt.Sprintf("Полученная высота имеет значение %d", height))
+	if width < fragmentMinWidth || width > fragmentMaxWidth ||
+		height < fragmentMinHeight || height > fragmentMaxHeight {
+		return nil, &SizeError{
+			minWidth: fragmentMinWidth, width: width, maxWidth: fragmentMaxWidth,
+			minHeight: fragmentMinHeight, height: height, maxHeight: fragmentMaxHeight,
+		}
 	}
 
 	fragment := image.NewRGBA(image.Rect(x, y, x+width, y+height))
 	if !img.Bounds().Overlaps(fragment.Bounds()) {
-		return nil, errors.New("ошибка. Изображение и фрагмент не пересекаются по координатам")
+		return nil, ErrNotOverlaps
 	}
 	intersect := img.Bounds().Intersect(fragment.Bounds())
 
@@ -98,19 +76,19 @@ func Fragment(img image.Image, x, y, width, height int) (image.Image, error) {
 func SetFragment(img image.Image, fragment image.Image, x, y, width, height int) error {
 	mutableImage, ok := img.(MutableImage)
 	if !ok {
-		return errors.New("ошибка. Изображение должно реализовывать MutableImage")
+		return errors.New("изображение должно реализовывать MutableImage")
 	}
 
 	start := image.Pt(0, 0)
 	if img.Bounds().Min != start || fragment.Bounds().Min != start {
-		return errors.New("ошибка. Изображение и фрагмент должны иметь начальные координаты (0;0). " +
+		return errors.New("изображение и фрагмент должны иметь начальные координаты (0;0). " +
 			fmt.Sprintf("изображение имеет %v, ", img.Bounds().Min) +
 			fmt.Sprintf("фрагмент имеет %v.", fragment.Bounds().Min))
 	}
 
 	fragmentRect := image.Rect(x, y, x+width, y+height)
 	if !img.Bounds().Overlaps(fragmentRect) {
-		return errors.New("ошибка. Изображение и фрагмент не пересекаются по координатам")
+		return ErrNotOverlaps
 	}
 
 	intersect := img.Bounds().Intersect(fragmentRect)

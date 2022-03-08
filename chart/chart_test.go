@@ -1,6 +1,7 @@
 package chart
 
 import (
+	"errors"
 	. "github.com/smartystreets/goconvey/convey"
 	"image"
 	"image/color"
@@ -10,31 +11,27 @@ import (
 // -----------
 // NewRGBA
 // -----------
-func TestNewImage_ZeroWidth(t *testing.T) {
-	Convey("ZeroWidth", t, func() {
-		_, err := NewRGBA(0, 1)
-		So(err, ShouldNotBeNil)
-	})
-}
+func TestNewImage_WrongSize(t *testing.T) {
+	var errSize *SizeError
 
-func TestNewImage_ZeroHeight(t *testing.T) {
-	Convey("ZeroHeight", t, func() {
-		_, err := NewRGBA(1, 0)
-		So(err, ShouldNotBeNil)
+	Convey("test minWidth-1", t, func() {
+		_, err := NewRGBA(minWidth-1, 1)
+		So(errors.As(err, &errSize), ShouldBeTrue)
 	})
-}
 
-func TestNewImage_WidthExceeded(t *testing.T) {
-	Convey("WidthExceeded", t, func() {
+	Convey("test minHeight-1", t, func() {
+		_, err := NewRGBA(1, minHeight-1)
+		So(errors.As(err, &errSize), ShouldBeTrue)
+	})
+
+	Convey("test maxWidth+1", t, func() {
 		_, err := NewRGBA(maxWidth+1, 1)
-		So(err, ShouldNotBeNil)
+		So(errors.As(err, &errSize), ShouldBeTrue)
 	})
-}
 
-func TestNewImage_HeightExceeded(t *testing.T) {
-	Convey("HeightExceeded", t, func() {
+	Convey("test maxHeight+1", t, func() {
 		_, err := NewRGBA(1, maxHeight+1)
-		So(err, ShouldNotBeNil)
+		So(errors.As(err, &errSize), ShouldBeTrue)
 	})
 }
 
@@ -116,7 +113,7 @@ func TestFragment_NotOverlaps(t *testing.T) {
 		So(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight).Bounds().Overlaps(img.Bounds()), ShouldBeFalse)
 
 		_, err := Fragment(img, x, y, fragmentWidth, fragmentHeight)
-		So(err, ShouldNotBeNil)
+		So(errors.Is(err, ErrNotOverlaps), ShouldBeTrue)
 	})
 }
 
