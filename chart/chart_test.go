@@ -1,43 +1,31 @@
-package chart
+package chart_test
 
 import (
 	"errors"
-	. "github.com/smartystreets/goconvey/convey"
 	"image"
 	"image/color"
 	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
+
+	"chartographer-go/chart"
 )
 
 // -----------
 // NewRGBA
 // -----------
-func TestNewImage_WrongSize(t *testing.T) {
-	var errSize *SizeError
+func TestNewRGBA(t *testing.T) {
+	const (
+		minWidth  = 1
+		minHeight = 1
+		maxWidth  = 20_000
+		maxHeight = 50_000
+	)
 
-	Convey("test minWidth-1", t, func() {
-		_, err := NewRGBA(minWidth-1, 1)
-		So(errors.As(err, &errSize), ShouldBeTrue)
-	})
+	// Позитивные тесты
 
-	Convey("test minHeight-1", t, func() {
-		_, err := NewRGBA(1, minHeight-1)
-		So(errors.As(err, &errSize), ShouldBeTrue)
-	})
-
-	Convey("test maxWidth+1", t, func() {
-		_, err := NewRGBA(maxWidth+1, 1)
-		So(errors.As(err, &errSize), ShouldBeTrue)
-	})
-
-	Convey("test maxHeight+1", t, func() {
-		_, err := NewRGBA(1, maxHeight+1)
-		So(errors.As(err, &errSize), ShouldBeTrue)
-	})
-}
-
-func TestNewImage_MinMaxSize(t *testing.T) {
 	testSize := func(width, height int) {
-		img, err := NewRGBA(width, height)
+		img, err := chart.NewRGBA(width, height)
 		So(err, ShouldBeNil)
 
 		rect := img.Bounds()
@@ -49,6 +37,27 @@ func TestNewImage_MinMaxSize(t *testing.T) {
 	})
 	Convey("MaxSize", t, func() {
 		testSize(maxWidth, maxHeight)
+	})
+
+	// Негативные тесты
+
+	var errSize *chart.SizeError
+
+	Convey("test minWidth-1", t, func() {
+		_, err := chart.NewRGBA(minWidth-1, 1)
+		So(errors.As(err, &errSize), ShouldBeTrue)
+	})
+	Convey("test minHeight-1", t, func() {
+		_, err := chart.NewRGBA(1, minHeight-1)
+		So(errors.As(err, &errSize), ShouldBeTrue)
+	})
+	Convey("test maxWidth+1", t, func() {
+		_, err := chart.NewRGBA(maxWidth+1, 1)
+		So(errors.As(err, &errSize), ShouldBeTrue)
+	})
+	Convey("test maxHeight+1", t, func() {
+		_, err := chart.NewRGBA(1, maxHeight+1)
+		So(errors.As(err, &errSize), ShouldBeTrue)
 	})
 }
 
@@ -76,7 +85,7 @@ func TestFragment_In(t *testing.T) {
 			fragmentWidth  = 1
 			fragmentHeight = 1
 		)
-		fragment, err := Fragment(img, x, y, fragmentWidth, fragmentHeight)
+		fragment, err := chart.Fragment(img, x, y, fragmentWidth, fragmentHeight)
 		So(err, ShouldBeNil)
 		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
 		So(fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
@@ -86,6 +95,49 @@ func TestFragment_In(t *testing.T) {
 		So(bounds.Dy(), ShouldEqual, fragmentHeight)
 
 		So(fragment.At(redX, redY), ShouldResemble, red)
+	})
+}
+
+func TestFragment_PartIntersect(t *testing.T) {
+	Convey("Fragment когда прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения\n"+
+		"После вызова функции Fragment во фрагменте должен появиться один красный пиксель", t, func() {
+		const (
+			imgWidth  = 2
+			imgHeight = 2
+		)
+		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		const (
+			redX = 1
+			redY = 1
+		)
+		img.SetRGBA(redX, redY, red)
+
+		const (
+			x              = redX
+			y              = redY
+			fragmentWidth  = 2
+			fragmentHeight = 2
+		)
+		fragment, err := chart.Fragment(img, x, y, fragmentWidth, fragmentHeight)
+		So(err, ShouldBeNil)
+		// Убеждаемся, что прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения
+		So(fragment.Bounds().Overlaps(img.Bounds()) && !fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
+
+		bounds := fragment.Bounds()
+		So(bounds.Dx(), ShouldEqual, fragmentWidth)
+		So(bounds.Dy(), ShouldEqual, fragmentHeight)
+
+		for y := 0; y < fragmentHeight; y++ {
+			for x := 0; x < fragmentWidth; x++ {
+				c := color.RGBA{}
+				if x == redX && y == redY {
+					c = red
+				}
+
+				So(fragment.At(x, y), ShouldResemble, c)
+			}
+		}
 	})
 }
 
@@ -112,51 +164,55 @@ func TestFragment_NotOverlaps(t *testing.T) {
 		)
 		So(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight).Bounds().Overlaps(img.Bounds()), ShouldBeFalse)
 
-		_, err := Fragment(img, x, y, fragmentWidth, fragmentHeight)
-		So(errors.Is(err, ErrNotOverlaps), ShouldBeTrue)
+		_, err := chart.Fragment(img, x, y, fragmentWidth, fragmentHeight)
+		So(errors.Is(err, chart.ErrNotOverlaps), ShouldBeTrue)
 	})
 }
 
-func TestFragment_PartIntersect(t *testing.T) {
-	Convey("Fragment когда прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения\n"+
-		"После вызова функции Fragment во фрагменте должен появиться один красный пиксель", t, func() {
-		const (
-			imgWidth  = 2
-			imgHeight = 2
-		)
-		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
-		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
-		const (
-			redX = 1
-			redY = 1
-		)
-		img.SetRGBA(redX, redY, red)
+func TestFragment_Size(t *testing.T) {
+	const (
+		fragmentMinWidth  = 1
+		fragmentMinHeight = 1
+		fragmentMaxWidth  = 5_000
+		fragmentMaxHeight = 5_000
+	)
+	emptyImg := image.NewRGBA(image.Rect(0, 0, 1, 1))
 
-		const (
-			x              = redX
-			y              = redY
-			fragmentWidth  = 2
-			fragmentHeight = 2
-		)
-		fragment, err := Fragment(img, x, y, fragmentWidth, fragmentHeight)
+	// Позитивные тесты
+
+	testSize := func(width, height int) {
+		img, err := chart.Fragment(emptyImg, 0, 0, width, height)
 		So(err, ShouldBeNil)
-		// Убеждаемся, что прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения
-		So(fragment.Bounds().Overlaps(img.Bounds()) && !fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
 
-		bounds := fragment.Bounds()
-		So(bounds.Dx(), ShouldEqual, fragmentWidth)
-		So(bounds.Dy(), ShouldEqual, fragmentHeight)
+		rect := img.Bounds()
+		So(rect.Dx(), ShouldEqual, width)
+		So(rect.Dy(), ShouldEqual, height)
+	}
+	Convey("MinSize", t, func() {
+		testSize(fragmentMinWidth, fragmentMinHeight)
+	})
+	Convey("MaxSize", t, func() {
+		testSize(fragmentMaxWidth, fragmentMaxHeight)
+	})
 
-		for y := 0; y < fragmentHeight; y++ {
-			for x := 0; x < fragmentWidth; x++ {
-				c := color.RGBA{}
-				if x == redX && y == redY {
-					c = red
-				}
+	// Негативные тесты
 
-				So(fragment.At(x, y), ShouldResemble, c)
-			}
-		}
+	var errSize *chart.SizeError
+	Convey("test minWidth-1", t, func() {
+		_, err := chart.Fragment(emptyImg, 0, 0, fragmentMinWidth-1, 1)
+		So(errors.As(err, &errSize), ShouldBeTrue)
+	})
+	Convey("test minHeight-1", t, func() {
+		_, err := chart.Fragment(emptyImg, 0, 0, 1, fragmentMinHeight-1)
+		So(errors.As(err, &errSize), ShouldBeTrue)
+	})
+	Convey("test maxWidth+1", t, func() {
+		_, err := chart.Fragment(emptyImg, 0, 0, fragmentMaxWidth+1, 1)
+		So(errors.As(err, &errSize), ShouldBeTrue)
+	})
+	Convey("test maxHeight+1", t, func() {
+		_, err := chart.Fragment(emptyImg, 0, 0, 1, fragmentMaxHeight+1)
+		So(errors.As(err, &errSize), ShouldBeTrue)
 	})
 }
 
@@ -192,7 +248,7 @@ func TestSetFragment_In(t *testing.T) {
 		rect := image.Rect(x, y, x+fragmentWidth, y+fragmentHeight)
 		So(rect.In(img.Bounds()), ShouldBeTrue)
 
-		err := SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
+		err := chart.SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
 		So(err, ShouldBeNil)
 
 		const (
@@ -240,7 +296,7 @@ func TestSetFragment_In_FragmentWrongStart(t *testing.T) {
 		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
 		So(fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
 
-		err := SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
+		err := chart.SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
 		So(err, ShouldNotBeNil)
 	})
 }
@@ -275,7 +331,7 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 		// Убеждаемся, что прямоугольники не пересекаются
 		So(!rect.Overlaps(img.Bounds()), ShouldBeTrue)
 
-		err := SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
+		err := chart.SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
 		So(err, ShouldNotBeNil)
 
 		for x := 0; x < imgWidth; x++ {
@@ -319,7 +375,7 @@ func TestSetFragment_PartIntersect(t *testing.T) {
 		// Убеждаемся, что прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения
 		So(rect.Bounds().Overlaps(img.Bounds()) && !rect.Bounds().In(img.Bounds()), ShouldBeTrue)
 
-		err := SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
+		err := chart.SetFragment(img, fragment, x, y, fragmentWidth, fragmentHeight)
 		So(err, ShouldBeNil)
 
 		for x := 0; x < imgWidth; x++ {
