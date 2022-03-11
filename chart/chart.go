@@ -14,6 +14,9 @@ type MutableImage interface {
 	Set(x, y int, c color.Color)
 }
 
+// TODO использовать draw.Image интерфейс
+// NewRGBA можно использовать в качестве draw.Image, первым параметром - dst - для Draw()
+
 const (
 	minWidth  = 1
 	minHeight = 1
@@ -31,7 +34,7 @@ func NewRGBA(width, height int) (image.Image, error) {
 			minHeight: minHeight, height: height, maxHeight: maxHeight,
 		}
 	}
-
+	// TODO тут выделяется память под изображение, и если оно макс размера, будет out of memory
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 	return img, nil
 }
