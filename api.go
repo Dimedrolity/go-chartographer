@@ -169,3 +169,17 @@ func deleteImage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 }
+
+func deleteImage2(w http.ResponseWriter, req *http.Request) {
+	id := chi.URLParam(req, "id")
+
+	err := chart.DeleteImage2(id)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+}

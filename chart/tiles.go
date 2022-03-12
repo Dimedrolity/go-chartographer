@@ -84,3 +84,13 @@ func SaveTiledImage(id string, img image.Image) error {
 
 	return nil
 }
+
+// DeleteImage2 удаляет изображение с диска.
+func DeleteImage2(id string) error {
+	err := os.RemoveAll(filepath.Join(dirPath, id))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

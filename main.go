@@ -19,6 +19,10 @@ func main() {
 
 	router := chi.NewRouter()
 
+	router.Route("/v2/chartas", func(r chi.Router) {
+		r.Delete("/{id}/", deleteImage2)
+	})
+
 	router.Route("/chartas", func(r chi.Router) {
 		r.Post("/", createImage)
 
