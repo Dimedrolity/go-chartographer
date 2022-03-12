@@ -394,8 +394,11 @@ func TestSetFragment_PartIntersect(t *testing.T) {
 // TODO дописать тест. Получается интеграционный тест, так как происходит запись на диск
 func TestCreateImage(t *testing.T) {
 	Convey("Создание тайлов и запись тайлов на диск", t, func() {
+		err := chart.SetImagesDir("testdata")
+		So(err, ShouldBeNil)
+
 		const maxTileSize = 10
-		_, err := chart.CreateImage(25, 25, maxTileSize)
+		_, err = chart.CreateImage(25, 25, maxTileSize)
 
 		// проверка, что созданы изображения-тайлы нужных размеров
 
