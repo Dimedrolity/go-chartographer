@@ -7,37 +7,58 @@ import (
 	"golang.org/x/image/bmp"
 	"image"
 	"image/color"
-	"os"
 	"testing"
 )
 
-// Выделить структуру ChartService, содержит путь к каталогу данных и все методы
-// Тогда нужно выделить интерфейс и методы сервиса? что даст?
-
-// TestDecodeEncode - интеграционный тест библиотеки "golang.org/x/image/bmp" для того, чтобы повысить доверие.
+// TestEncodeDecode - интеграционный тест библиотеки "golang.org/x/image/bmp" для того, чтобы повысить доверие.
 // Библиотека должна кодировать/декодировать верно, должны совпадать все реальные байты с ожидаемыми.
-func TestDecodeEncode(t *testing.T) {
-	Convey("Байты изображения после Decode и Encode должны совпадать с исходными", t, func() {
-		const path = "testdata/rgb.bmp"
+func TestEncodeDecode(t *testing.T) {
+	Convey("Байты изображения после Encode и Decode должны совпадать с исходными", t, func() {
+		// Assign
+		img := image.NewRGBA(image.Rect(0, 0, 2, 2))
 
-		file, err := os.Open(path)
-		So(err, ShouldBeNil)
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		const (
+			redX = 0
+			redY = 0
+		)
+		img.Set(redX, redY, red)
 
-		img, err := bmp.Decode(file)
-		So(err, ShouldBeNil)
-		err = file.Close()
-		So(err, ShouldBeNil)
+		green := color.RGBA{R: 0, G: 255, B: 0, A: 255}
+		const (
+			greenX = 1
+			greenY = 0
+		)
+		img.Set(greenX, greenY, green)
 
+		blue := color.RGBA{R: 0, G: 0, B: 255, A: 255}
+		const (
+			blueX = 0
+			blueY = 1
+		)
+		img.Set(blueX, blueY, blue)
+
+		white := color.RGBA{R: 255, G: 255, B: 255, A: 255}
+		const (
+			whiteX = 1
+			whiteY = 1
+		)
+		img.Set(whiteX, whiteY, white)
+
+		// Act
 		buffer := bytes.Buffer{}
-		err = bmp.Encode(&buffer, img)
+		err := bmp.Encode(&buffer, img)
 		So(err, ShouldBeNil)
-		encodeBytes := buffer.Bytes()
 
-		initialBytes, err := os.ReadFile(path)
+		decodedImg, err := bmp.Decode(&buffer)
 		So(err, ShouldBeNil)
-		want := initialBytes
-		got := encodeBytes
-		So(got, ShouldResemble, want)
+
+		// Assert
+		So(img.Bounds(), ShouldResemble, decodedImg.Bounds())
+		So(decodedImg.At(redX, redY), ShouldResemble, red)
+		So(decodedImg.At(greenX, greenY), ShouldResemble, green)
+		So(decodedImg.At(blueX, blueY), ShouldResemble, blue)
+		So(decodedImg.At(whiteX, whiteY), ShouldResemble, white)
 	})
 }
 
@@ -71,6 +92,3 @@ func TestEncodeDecode_RectStartNotZero(t *testing.T) {
 		So(decodedImg.Bounds().Min, ShouldResemble, image.Pt(0, 0))
 	})
 }
-
-// нужна константная строка байтов, чтобы не зависеть от Ф.С.?
-// TODO посмотреть тесты в библиотеках для image и bmp
