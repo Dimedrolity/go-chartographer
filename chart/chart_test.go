@@ -1,6 +1,8 @@
 package chart_test
 
 import (
+	"chartographer-go/store"
+	"chartographer-go/tile"
 	"errors"
 	"image"
 	"image/color"
@@ -394,7 +396,7 @@ func TestSetFragment_PartIntersect(t *testing.T) {
 // TODO дописать тест. Получается интеграционный тест, так как происходит запись на диск
 func TestCreateImage(t *testing.T) {
 	Convey("Создание тайлов и запись тайлов на диск", t, func() {
-		err := chart.SetImagesDir("testdata")
+		err := store.SetImagesDir("testdata")
 		So(err, ShouldBeNil)
 
 		const maxTileSize = 10
@@ -414,7 +416,7 @@ func TestCreateTiles(t *testing.T) {
 			maxTileSize = 10
 		)
 
-		tiles := chart.CreateTiles(width, height, maxTileSize)
+		tiles := tile.CreateTiles(width, height, maxTileSize)
 
 		So(tiles, ShouldHaveLength, 9)
 		// 1-я строка
@@ -448,3 +450,18 @@ func TestCreateTiles(t *testing.T) {
 		So(tiles[8].Max, ShouldResemble, image.Pt(25, 25))
 	})
 }
+
+//func TestCreateImage2(t *testing.T) {
+//	Convey("Создание тайлов и запись тайлов на диск", t, func() {
+//		err := chart.SetImagesDir("testdata")
+//		So(err, ShouldBeNil)
+//
+//		imgStore := store.New()
+//
+//		w, h, err := chart.GetImageSize("c59ae0ce-fdda-4442-88ab-6ddb8abad8a0")
+//		So(err, ShouldBeNil)
+//
+//		So(w, ShouldEqual, 255)
+//		So(h, ShouldEqual, 255)
+//	})
+//}

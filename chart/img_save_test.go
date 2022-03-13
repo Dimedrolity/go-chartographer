@@ -2,6 +2,7 @@ package chart
 
 import (
 	"bytes"
+	"chartographer-go/store"
 	. "github.com/smartystreets/goconvey/convey"
 	"golang.org/x/image/bmp"
 	"image"
@@ -44,7 +45,7 @@ func TestDecodeEncode(t *testing.T) {
 		err = file.Close()
 		So(err, ShouldBeNil)
 
-		encodeBytes, err := Encode(img)
+		encodeBytes, err := store.Encode(img)
 		So(err, ShouldBeNil)
 
 		initialBytes, err := os.ReadFile(path)
@@ -72,7 +73,7 @@ func TestEncodeDecode_RectStartNotZero(t *testing.T) {
 				img.Set(x, y, red)
 			}
 		}
-		encodeBytes, _ := Encode(img)
+		encodeBytes, _ := store.Encode(img)
 
 		r := bytes.NewReader(encodeBytes)
 		decodedImg, _ := bmp.Decode(r)
