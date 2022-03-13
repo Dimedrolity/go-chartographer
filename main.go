@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chartographer-go/chart"
 	"chartographer-go/store"
 	"log"
 	"net/http"
@@ -16,10 +17,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	chart.TileMaxSize = 1000
+
 	router := chi.NewRouter()
 
 	router.Route("/chartas", func(r chi.Router) {
-		//r.Post("/", createImage)
+		r.Post("/", createImage)
 
 		r.Route("/{id}", func(r chi.Router) {
 			//r.Post("/", setFragment)

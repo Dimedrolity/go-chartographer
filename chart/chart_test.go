@@ -16,6 +16,23 @@ import (
 // -----------
 // NewRGBA
 // -----------
+// TODO дописать тест. Получается интеграционный тест, так как происходит запись на диск
+func TestCreateImage(t *testing.T) {
+	Convey("Создание тайлов и запись тайлов на диск", t, func() {
+		err := store.SetImagesDir("testdata")
+		So(err, ShouldBeNil)
+
+		const tileSize = 10
+		chart.TileMaxSize = tileSize
+		_, err = chart.NewRgbaBmp(25, 25)
+
+		// проверка, что созданы изображения-тайлы нужных размеров
+
+		So(err, ShouldBeNil)
+	})
+}
+
+// TODO обновить тесты, должны использовать новую функцию создания (с разбивкой на тайлы)
 func TestNewRGBA(t *testing.T) {
 	const (
 		minWidth  = 1
@@ -390,21 +407,6 @@ func TestSetFragment_PartIntersect(t *testing.T) {
 				So(img.At(x, y), ShouldResemble, c)
 			}
 		}
-	})
-}
-
-// TODO дописать тест. Получается интеграционный тест, так как происходит запись на диск
-func TestCreateImage(t *testing.T) {
-	Convey("Создание тайлов и запись тайлов на диск", t, func() {
-		err := store.SetImagesDir("testdata")
-		So(err, ShouldBeNil)
-
-		const maxTileSize = 10
-		_, err = chart.CreateImage(25, 25, maxTileSize)
-
-		// проверка, что созданы изображения-тайлы нужных размеров
-
-		So(err, ShouldBeNil)
 	})
 }
 
