@@ -34,11 +34,12 @@ func SetImagesDir(path string) error {
 // TODO выделить в структуру TileRepository, и фукнцию NewTileRepo(tileMaxSize). Тогда сделать все фукнции методами Repo
 var TileMaxSize int
 
-// Image - модель изображения, разделенного на тайлы
+// Image - модель изображения, разделенного на тайлы.
 type Image struct {
-	Id string
 	image.Config
+	Id          string
 	TileMaxSize int
+	Tiles       []image.Rectangle
 }
 
 func Encode(img image.Image) ([]byte, error) {
@@ -148,13 +149,14 @@ func CreateImage(width, height int) (*Image, error) {
 	}
 
 	img := &Image{
-		Id: id,
 		Config: image.Config{
 			ColorModel: color.RGBAModel,
 			Width:      width,
 			Height:     height,
 		},
+		Id:          id,
 		TileMaxSize: TileMaxSize,
+		Tiles:       tiles,
 	}
 	imageStore.Set(id, img)
 

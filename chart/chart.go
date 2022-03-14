@@ -67,12 +67,11 @@ func GetFragment(imgConfig *store.Image, x, y, width, height int) (image.Image, 
 		return nil, ErrNotOverlaps
 	}
 
-	tiles := tile.CreateTiles(imgConfig.Width, imgConfig.Height, imgConfig.TileMaxSize)
-	intersects := tile.FilterOverlappedTiles(tiles, fragmentRect)
+	overlapped := tile.FilterOverlappedTiles(imgConfig.Tiles, fragmentRect)
 
 	img := image.NewRGBA(fragmentRect)
 
-	for _, t := range intersects {
+	for _, t := range overlapped {
 		tileImg, err := store.GetTile(imgConfig.Id, t.Min.X, t.Min.Y)
 		if err != nil {
 			return nil, err
