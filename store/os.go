@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/image/bmp"
 	"image"
+	"image/color"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -31,6 +32,13 @@ func SetImagesDir(path string) error {
 // Необходимо проинициализировать перед использованием функций текущего pkg
 // TODO выделить в структуру TileRepository, и фукнцию NewTileRepo(tileMaxSize). Тогда сделать все фукнции методами Repo
 var TileMaxSize int
+
+// Image - модель изображения, разделенного на тайлы
+type Image struct {
+	Id string
+	image.Config
+	TileMaxSize int
+}
 
 func Encode(img image.Image) ([]byte, error) {
 	buffer := bytes.Buffer{}
@@ -109,9 +117,9 @@ func DeleteImage(id string) error {
 	return nil
 }
 
-// CreateImage создает RGBA изображение формата BMP.
+// CreateImage создает RGBA изображение формата BMP, возвращает модель изображения.
 // Если ширина/высота изображения больше TileMaxSize, то изображение разделяется на тайлы.
-func CreateImage(width, height int) (string, error) {
+func CreateImage(width, height int) (*Image, error) {
 	id := uuid.NewString()
 	tiles := tile.CreateTiles(width, height, TileMaxSize)
 
@@ -120,11 +128,20 @@ func CreateImage(width, height int) (string, error) {
 
 		err := SaveTile(id, img)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 	}
 
-	return id, nil
+	img := &Image{
+		Id: id,
+		Config: image.Config{
+			ColorModel: color.RGBAModel,
+			Width:      width,
+			Height:     height,
+		},
+		TileMaxSize: TileMaxSize,
+	}
+	return img, nil
 }
 
 // SaveImage кодирует изображение в байты и сохраняет на диск.

@@ -32,56 +32,57 @@ func TestCreateImage(t *testing.T) {
 	})
 }
 
-// TODO обновить тесты, должны использовать новую функцию создания (с разделением на тайлы)
+// TODO не нужно записывать на диск при выполнении теста.
+// Необходимо сделать ОС зависимостью и передавать стаб.
 func TestNewRGBA(t *testing.T) {
-	const (
-		minWidth  = 1
-		minHeight = 1
-		maxWidth  = 20_000
-		maxHeight = 50_000
-	)
+	Convey("init", t, func() {
+		const (
+			minWidth  = 1
+			minHeight = 1
+			maxWidth  = 20_000
+			maxHeight = 50_000
+		)
 
-	// Позитивные тесты
+		store.TileMaxSize = 1000
+		err := store.SetImagesDir("testdata")
+		So(err, ShouldBeNil)
 
-	testSize := func(width, height int) {
-		//id, err := chart.NewRgbaBmp(width, height)
-		//So(err, ShouldBeNil)
-		//// узнать размеры по ID
-		//// ИЛИ
-		//// сделать, чтобы функция возвращала сущность изображения, имеющую Id, Width, Height?
-		//// если это только для теста, то не стоит.
-		//
-		//// TODO проверить размер
-		//rect := img.Bounds()
-		//So(rect.Dx(), ShouldEqual, width)
-		//So(rect.Dy(), ShouldEqual, height)
-	}
-	Convey("MinSize", t, func() {
-		testSize(minWidth, minHeight)
-	})
-	Convey("MaxSize", t, func() {
-		testSize(maxWidth, maxHeight)
-	})
+		// Позитивные тесты
 
-	// Негативные тесты
+		testSize := func(width, height int) {
+			img, err := chart.NewRgbaBmp(width, height)
+			So(err, ShouldBeNil)
 
-	var errSize *chart.SizeError
+			So(img.Width, ShouldEqual, width)
+			So(img.Height, ShouldEqual, height)
+		}
+		Convey("MinSize", func() {
+			testSize(minWidth, minHeight)
+		})
+		Convey("MaxSize", func() {
+			testSize(maxWidth, maxHeight)
+		})
 
-	Convey("test minWidth-1", t, func() {
-		_, err := chart.NewRgbaBmp(minWidth-1, 1)
-		So(errors.As(err, &errSize), ShouldBeTrue)
-	})
-	Convey("test minHeight-1", t, func() {
-		_, err := chart.NewRgbaBmp(1, minHeight-1)
-		So(errors.As(err, &errSize), ShouldBeTrue)
-	})
-	Convey("test maxWidth+1", t, func() {
-		_, err := chart.NewRgbaBmp(maxWidth+1, 1)
-		So(errors.As(err, &errSize), ShouldBeTrue)
-	})
-	Convey("test maxHeight+1", t, func() {
-		_, err := chart.NewRgbaBmp(1, maxHeight+1)
-		So(errors.As(err, &errSize), ShouldBeTrue)
+		// Негативные тесты
+
+		var errSize *chart.SizeError
+
+		Convey("test minWidth-1", func() {
+			_, err := chart.NewRgbaBmp(minWidth-1, 1)
+			So(errors.As(err, &errSize), ShouldBeTrue)
+		})
+		Convey("test minHeight-1", func() {
+			_, err := chart.NewRgbaBmp(1, minHeight-1)
+			So(errors.As(err, &errSize), ShouldBeTrue)
+		})
+		Convey("test maxWidth+1", func() {
+			_, err := chart.NewRgbaBmp(maxWidth+1, 1)
+			So(errors.As(err, &errSize), ShouldBeTrue)
+		})
+		Convey("test maxHeight+1", func() {
+			_, err := chart.NewRgbaBmp(1, maxHeight+1)
+			So(errors.As(err, &errSize), ShouldBeTrue)
+		})
 	})
 }
 
