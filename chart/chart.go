@@ -25,7 +25,7 @@ const (
 // NewRgbaBmp разделяет размеры изображения на тайлы, создает image.RGBA изображения в соответствии с тайлами,
 // записывает изображения на диск в формате BMP.
 // Возможна ошибка типа *SizeError
-func NewRgbaBmp(width, height int) (*store.Image, error) {
+func NewRgbaBmp(width, height int) (*store.TiledImage, error) {
 	if width < minWidth || width > maxWidth ||
 		height < minHeight || height > maxHeight {
 		return nil, &SizeError{
@@ -52,7 +52,7 @@ const (
 // GetFragment возвращает фрагмент изображения id, начиная с координат изобржаения (x; y) по ширине width и высоте height.
 // Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).
 // Возможны ошибки SizeError, ErrNotOverlaps и типа *os.PathError, например os.ErrNotExist.
-func GetFragment(imgConfig *store.Image, x, y, width, height int) (image.Image, error) {
+func GetFragment(imgConfig *store.TiledImage, x, y, width, height int) (image.Image, error) {
 	if width < fragmentMinWidth || width > fragmentMaxWidth ||
 		height < fragmentMinHeight || height > fragmentMaxHeight {
 		return nil, &SizeError{
@@ -72,6 +72,7 @@ func GetFragment(imgConfig *store.Image, x, y, width, height int) (image.Image, 
 	img := image.NewRGBA(fragmentRect)
 
 	for _, t := range overlapped {
+		// TODO использовать зависимость Tiler
 		tileImg, err := store.GetTile(imgConfig.Id, t.Min.X, t.Min.Y)
 		if err != nil {
 			return nil, err

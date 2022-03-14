@@ -1,14 +1,9 @@
-// Package store содержит CRUD-функции для разделенных на тайлы изображений.
 package store
 
 import (
 	"bytes"
-	"chartographer-go/tile"
-	"errors"
-	"github.com/google/uuid"
 	"golang.org/x/image/bmp"
 	"image"
-	"image/color"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -34,8 +29,8 @@ func SetImagesDir(path string) error {
 // TODO выделить в структуру TileRepository, и фукнцию NewTileRepo(tileMaxSize). Тогда сделать все фукнции методами Repo
 var TileMaxSize int
 
-// Image - модель изображения, разделенного на тайлы.
-type Image struct {
+// TiledImage - модель изображения, разделенного на тайлы.
+type TiledImage struct {
 	image.Config
 	Id          string
 	TileMaxSize int
@@ -52,18 +47,12 @@ func Encode(img image.Image) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// ImageStore - это зависимость для Repo.
 // TODO инициализировать зависимость извне.
-var imageStore = New()
+var imageRepo = New()
 
-var ErrNotExist = errors.New("изображение не найдено")
-
-func GetImage(id string) (*Image, error) {
-	img, ok := imageStore.Get(id)
-	if !ok {
-		return nil, ErrNotExist
-	}
-	return img, nil
+func GetImage(id string) (*TiledImage, error) {
+	// TODO удалить эту функцию
+	return imageRepo.GetImage(id)
 }
 
 // GetTile считывает с диска изображение-тайл с координатами (x; y) изображения id и декодирует в формат BMP.
@@ -129,36 +118,25 @@ func DeleteImage(id string) error {
 	if err != nil {
 		return err
 	}
+	imageRepo.DeleteImage(id)
 
 	return nil
 }
 
 // CreateImage создает RGBA изображение формата BMP, возвращает модель изображения.
 // Если ширина/высота изображения больше TileMaxSize, то изображение разделяется на тайлы.
-func CreateImage(width, height int) (*Image, error) {
-	id := uuid.NewString()
-	tiles := tile.CreateTiles(width, height, TileMaxSize)
+func CreateImage(width, height int) (*TiledImage, error) {
+	img := imageRepo.CreateImage(width, height)
 
-	for _, t := range tiles {
-		img := image.NewRGBA(t)
+	for _, t := range img.Tiles {
+		i := image.NewRGBA(t)
 
-		err := SaveTile(id, img)
+		// TODO использовать зависимость Tiler
+		err := SaveTile(img.Id, i)
 		if err != nil {
 			return nil, err
 		}
 	}
-
-	img := &Image{
-		Config: image.Config{
-			ColorModel: color.RGBAModel,
-			Width:      width,
-			Height:     height,
-		},
-		Id:          id,
-		TileMaxSize: TileMaxSize,
-		Tiles:       tiles,
-	}
-	imageStore.Set(id, img)
 
 	return img, nil
 }
