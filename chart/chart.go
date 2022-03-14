@@ -24,19 +24,25 @@ const (
 	maxHeight = 50_000
 )
 
-// NewRGBA создает image.RGBA
+// NewRgbaBmp разделяет размеры изображения на тайлы, создает image.RGBA изображения в соответствии с тайлами,
+// записывает изображения на диск в формате BMP.
 // Возможна ошибка типа *SizeError
-func NewRGBA(width, height int) (image.Image, error) {
+// TODO возвращать image.Image? Тогда необходимо создать свою структуру TiledImage и реализовать интерфейс
+func NewRgbaBmp(width, height int) (string, error) {
 	if width < minWidth || width > maxWidth ||
 		height < minHeight || height > maxHeight {
-		return nil, &SizeError{
+		return "", &SizeError{
 			minWidth: minWidth, width: width, maxWidth: maxWidth,
 			minHeight: minHeight, height: height, maxHeight: maxHeight,
 		}
 	}
-	// TODO тут выделяется память под изображение, и если оно макс размера, будет out of memory
-	img := image.NewRGBA(image.Rect(0, 0, width, height))
-	return img, nil
+
+	id, err := store.CreateImage(width, height)
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
 }
 
 const (
@@ -107,23 +113,4 @@ func SetFragment(img image.Image, fragment image.Image, x, y, width, height int)
 	}
 
 	return nil
-}
-
-// NewRgbaBmp разделяет размеры изображения на тайлы, создает RGBA изображения в соответствии с тайлами,
-// записывает изображения на диск в формате BMP.
-func NewRgbaBmp(width, height int) (string, error) {
-	if width < minWidth || width > maxWidth ||
-		height < minHeight || height > maxHeight {
-		return "", &SizeError{
-			minWidth: minWidth, width: width, maxWidth: maxWidth,
-			minHeight: minHeight, height: height, maxHeight: maxHeight,
-		}
-	}
-
-	id, err := store.CreateImage(width, height)
-	if err != nil {
-		return "", err
-	}
-
-	return id, nil
 }
