@@ -29,7 +29,7 @@ func createImage(w http.ResponseWriter, req *http.Request) {
 	id, err := chart.NewRgbaBmp(width, height)
 	var errSize *chart.SizeError
 	if err != nil {
-		if errors.As(err, &errSize) || errors.Is(err, chart.ErrNotOverlaps) {
+		if errors.As(err, &errSize) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
