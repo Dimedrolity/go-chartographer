@@ -3,6 +3,7 @@ package chart
 
 import (
 	"chartographer-go/store"
+	"chartographer-go/tile"
 	"errors"
 	"fmt"
 	"image"
@@ -13,9 +14,6 @@ type MutableImage interface {
 	image.Image
 	Set(x, y int, c color.Color)
 }
-
-// TODO использовать draw.Image интерфейс
-// NewRGBA можно использовать в качестве draw.Image, первым параметром - dst - для Draw()
 
 const (
 	minWidth  = 1
@@ -50,6 +48,41 @@ const (
 	fragmentMaxWidth  = 5_000
 	fragmentMaxHeight = 5_000
 )
+
+// GetFragment возвращает фрагмент изображения id, начиная с координат изобржаения (x; y) по ширине width и высоте height.
+// Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).
+// Возможны ошибки SizeError, ErrNotOverlaps и типа *os.PathError, например os.ErrNotExist.
+func GetFragment(imgConfig *store.Image, x, y, width, height int) (image.Image, error) {
+	if width < fragmentMinWidth || width > fragmentMaxWidth ||
+		height < fragmentMinHeight || height > fragmentMaxHeight {
+		return nil, &SizeError{
+			minWidth: fragmentMinWidth, width: width, maxWidth: fragmentMaxWidth,
+			minHeight: fragmentMinHeight, height: height, maxHeight: fragmentMaxHeight,
+		}
+	}
+
+	imgRect := image.Rect(0, 0, imgConfig.Width, imgConfig.Height)
+	fragmentRect := image.Rect(x, y, x+width, y+height)
+	if !imgRect.Overlaps(fragmentRect) {
+		return nil, ErrNotOverlaps
+	}
+
+	tiles := tile.CreateTiles(imgConfig.Width, imgConfig.Height, imgConfig.TileMaxSize)
+	intersects := tile.FilterOverlappedTiles(tiles, fragmentRect)
+
+	img := image.NewRGBA(fragmentRect)
+
+	for _, t := range intersects {
+		tileImg, err := store.GetTile(imgConfig.Id, t.Min.X, t.Min.Y)
+		if err != nil {
+			return nil, err
+		}
+
+		tile.DrawIntersection(img, tileImg, fragmentRect)
+	}
+
+	return img, nil
+}
 
 // Fragment возвращает фрагмент изображения img, начиная с координат изобржаения (x;y) по ширине width и высоте height.
 // Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).

@@ -3,6 +3,7 @@ package tile
 
 import (
 	"image"
+	"image/draw"
 )
 
 func min(a, b int) int {
@@ -38,4 +39,10 @@ func FilterOverlappedTiles(imgTiles []image.Rectangle, fragment image.Rectangle)
 		}
 	}
 	return overlapped
+}
+
+// DrawIntersection закрашивает dst пикселями tile, которые пересекаются с fragment
+func DrawIntersection(dst draw.Image, tile image.Image, fragment image.Rectangle) {
+	intersect := tile.Bounds().Intersect(fragment)
+	draw.Draw(dst, intersect, tile, intersect.Min, draw.Src)
 }

@@ -4,6 +4,7 @@ import (
 	"chartographer-go/chart"
 	"chartographer-go/store"
 	"errors"
+	"golang.org/x/image/bmp"
 	"net/http"
 	"os"
 	"strconv"
@@ -98,57 +99,57 @@ func createImage(w http.ResponseWriter, req *http.Request) {
 //	}
 //}
 
-//func fragment(w http.ResponseWriter, req *http.Request) {
-//	queryValues := req.URL.Query()
-//	x, err := strconv.Atoi(queryValues.Get("x"))
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusBadRequest)
-//		return
-//	}
-//	y, err := strconv.Atoi(queryValues.Get("y"))
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusBadRequest)
-//		return
-//	}
-//	width, err := strconv.Atoi(queryValues.Get("width"))
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusBadRequest)
-//		return
-//	}
-//	height, err := strconv.Atoi(queryValues.Get("height"))
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusBadRequest)
-//		return
-//	}
-//
-//	id := chi.URLParam(req, "id")
-//	img, err := chart.GetImage(id)
-//	if err != nil {
-//		if errors.Is(err, os.ErrNotExist) {
-//			http.Error(w, err.Error(), http.StatusNotFound)
-//		} else {
-//			http.Error(w, err.Error(), http.StatusInternalServerError)
-//		}
-//		return
-//	}
-//
-//	fragment, err := chart.Fragment(img, x, y, width, height)
-//	var errSize *chart.SizeError
-//	if err != nil {
-//		if errors.As(err, &errSize) || errors.Is(err, chart.ErrNotOverlaps) {
-//			http.Error(w, err.Error(), http.StatusBadRequest)
-//		} else {
-//			http.Error(w, err.Error(), http.StatusInternalServerError)
-//		}
-//		return
-//	}
-//
-//	err = bmp.Encode(w, fragment)
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusInternalServerError)
-//		return
-//	}
-//}
+func fragment(w http.ResponseWriter, req *http.Request) {
+	queryValues := req.URL.Query()
+	x, err := strconv.Atoi(queryValues.Get("x"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	y, err := strconv.Atoi(queryValues.Get("y"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	width, err := strconv.Atoi(queryValues.Get("width"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	height, err := strconv.Atoi(queryValues.Get("height"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	id := chi.URLParam(req, "id")
+
+	img, err := store.GetImage(id)
+	if err != nil {
+		if errors.Is(err, store.ErrNotExist) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+
+	fragment, err := chart.GetFragment(img, x, y, width, height)
+	var errSize *chart.SizeError
+	if err != nil {
+		if errors.As(err, &errSize) || errors.Is(err, chart.ErrNotOverlaps) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	err = bmp.Encode(w, fragment)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
 
 func deleteImage(w http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")

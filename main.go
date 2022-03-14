@@ -25,7 +25,7 @@ func main() {
 
 		r.Route("/{id}", func(r chi.Router) {
 			//r.Post("/", setFragment)
-			//r.Get("/", fragment)
+			r.Get("/", fragment)
 			r.Delete("/", deleteImage)
 		})
 	})

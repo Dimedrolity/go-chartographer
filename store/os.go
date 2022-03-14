@@ -4,6 +4,7 @@ package store
 import (
 	"bytes"
 	"chartographer-go/tile"
+	"errors"
 	"github.com/google/uuid"
 	"golang.org/x/image/bmp"
 	"image"
@@ -48,6 +49,20 @@ func Encode(img image.Image) ([]byte, error) {
 	}
 
 	return buffer.Bytes(), nil
+}
+
+// ImageStore - это зависимость для Repo.
+// TODO инициализировать зависимость извне.
+var imageStore = New()
+
+var ErrNotExist = errors.New("изображение не найдено")
+
+func GetImage(id string) (*Image, error) {
+	img, ok := imageStore.Get(id)
+	if !ok {
+		return nil, ErrNotExist
+	}
+	return img, nil
 }
 
 // GetTile считывает с диска изображение-тайл с координатами (x; y) изображения id и декодирует в формат BMP.
@@ -141,6 +156,8 @@ func CreateImage(width, height int) (*Image, error) {
 		},
 		TileMaxSize: TileMaxSize,
 	}
+	imageStore.Set(id, img)
+
 	return img, nil
 }
 
