@@ -1,8 +1,10 @@
-// Package store содержит фукнции записи изображения на диск, получения тайлов
+// Package store содержит CRUD-функции для разделенных на тайлы изображений.
 package store
 
 import (
 	"bytes"
+	"chartographer-go/tile"
+	"github.com/google/uuid"
 	"golang.org/x/image/bmp"
 	"image"
 	"os"
@@ -25,6 +27,11 @@ func SetImagesDir(path string) error {
 	return nil
 }
 
+// TileMaxSize определяет максимальный размер тайла по ширине и высоте.
+// Необходимо проинициализировать перед использованием функций текущего pkg
+// TODO выделить в структуру TileRepository, и фукнцию NewTileRepo(tileMaxSize). Тогда сделать все фукнции методами Repo
+var TileMaxSize int
+
 func Encode(img image.Image) ([]byte, error) {
 	buffer := bytes.Buffer{}
 	err := bmp.Encode(&buffer, img)
@@ -35,7 +42,7 @@ func Encode(img image.Image) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// GetTile считывает с диска изображение-тайл с координатами (x; y) изображения id и декодирует в image.Image.
+// GetTile считывает с диска изображение-тайл с координатами (x; y) изображения id и декодирует в формат BMP.
 // Возможны ошибки типа *os.PathError, например os.ErrNotExist.
 func GetTile(id string, x, y int) (image.Image, error) {
 	filename := filepath.Join(dirPath, id, strconv.Itoa(y), strconv.Itoa(x)+".bmp")
@@ -58,9 +65,15 @@ func GetTile(id string, x, y int) (image.Image, error) {
 	return img, nil
 }
 
-// SaveTile сохраняет тайл-изображение на диск.
-// Необходим id и img.Bounds для именования папок и файлов.
-// Необходим сам img, чтобы сделать Encode и получить байты.
+// SaveTile декодирует тайл-изображение в формат BMP и сохраняет на диск.
+// По id создается папка на диске для тайлов изображения,
+// каждый тайл хранится в папке начальной координаты Y, файл именуется координатой X.
+//
+// Пример структуры файлов для изображения с id="3a8cc52-8997-4adb-8a09-918c29aa10c4" и координатами тайла (0; 10):
+//
+// 23a8cc52-8997-4adb-8a09-918c29aa10c4
+// 	+---- 10
+//		+---- 0.bmp
 func SaveTile(id string, img image.Image) error {
 	// TODO можно было бы обойтись без буфера, Create файл и bmp.Encode(файл)
 	// 	file, err := os.OpenFile(filepath.Join(dir, x+".bmp"), os.O_WRONLY|os.O_CREATE, 0777)
@@ -94,6 +107,24 @@ func DeleteImage(id string) error {
 	}
 
 	return nil
+}
+
+// CreateImage создает RGBA изображение формата BMP.
+// Если ширина/высота изображения больше TileMaxSize, то изображение разделяется на тайлы.
+func CreateImage(width, height int) (string, error) {
+	id := uuid.NewString()
+	tiles := tile.CreateTiles(width, height, TileMaxSize)
+
+	for _, t := range tiles {
+		img := image.NewRGBA(t)
+
+		err := SaveTile(id, img)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return id, nil
 }
 
 // SaveImage кодирует изображение в байты и сохраняет на диск.

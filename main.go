@@ -1,7 +1,6 @@
 package main
 
 import (
-	"chartographer-go/chart"
 	"chartographer-go/store"
 	"log"
 	"net/http"
@@ -17,7 +16,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	chart.TileMaxSize = 1000
+	store.TileMaxSize = 1000
 
 	router := chi.NewRouter()
 

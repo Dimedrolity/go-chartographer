@@ -3,10 +3,8 @@ package chart
 
 import (
 	"chartographer-go/store"
-	"chartographer-go/tile"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"image"
 	"image/color"
 )
@@ -111,13 +109,8 @@ func SetFragment(img image.Image, fragment image.Image, x, y, width, height int)
 	return nil
 }
 
-// TileMaxSize разбиение изображение на тайлы (части) NxN.
-// Необходимо проинициализировать перед использованием функцией текущего pkg
-var TileMaxSize int
-
-// NewRgbaBmp разбивает размеры изображения на тайлы, создает RGBA изображения в соответствии с тайлами,
-// записывает изображения на диск в формате BMP
-// TODO разбить функцию, сейчас она делает все подряд.
+// NewRgbaBmp разделяет размеры изображения на тайлы, создает RGBA изображения в соответствии с тайлами,
+// записывает изображения на диск в формате BMP.
 func NewRgbaBmp(width, height int) (string, error) {
 	if width < minWidth || width > maxWidth ||
 		height < minHeight || height > maxHeight {
@@ -127,15 +120,9 @@ func NewRgbaBmp(width, height int) (string, error) {
 		}
 	}
 
-	id := uuid.NewString()
-	tiles := tile.CreateTiles(width, height, TileMaxSize)
-
-	for _, t := range tiles {
-		img := image.NewRGBA(t)
-		err := store.SaveTile(id, img)
-		if err != nil {
-			return "", err
-		}
+	id, err := store.CreateImage(width, height)
+	if err != nil {
+		return "", err
 	}
 
 	return id, nil

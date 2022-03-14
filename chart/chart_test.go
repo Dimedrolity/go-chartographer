@@ -23,7 +23,7 @@ func TestCreateImage(t *testing.T) {
 		So(err, ShouldBeNil)
 
 		const tileSize = 10
-		chart.TileMaxSize = tileSize
+		store.TileMaxSize = tileSize
 		_, err = chart.NewRgbaBmp(25, 25)
 
 		// проверка, что созданы изображения-тайлы нужных размеров
@@ -32,7 +32,7 @@ func TestCreateImage(t *testing.T) {
 	})
 }
 
-// TODO обновить тесты, должны использовать новую функцию создания (с разбивкой на тайлы)
+// TODO обновить тесты, должны использовать новую функцию создания (с разделением на тайлы)
 func TestNewRGBA(t *testing.T) {
 	const (
 		minWidth  = 1
