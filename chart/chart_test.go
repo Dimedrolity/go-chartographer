@@ -1,7 +1,6 @@
 package chart_test
 
 import (
-	"chartographer-go/store"
 	"chartographer-go/tile"
 	"chartographer-go/tiledimage"
 	"errors"
@@ -44,7 +43,7 @@ func TestNewRGBA(t *testing.T) {
 			maxHeight = 50_000
 		)
 
-		store.TileMaxSize = 1000
+		tile.MaxSize = 1000
 		tileRepo := &TestTileRepository{}
 		chart.TileRepo = tileRepo
 

@@ -13,6 +13,11 @@ func min(a, b int) int {
 	return b
 }
 
+// MaxSize определяет максимальный размер тайла по ширине и высоте.
+// Необходимо проинициализировать перед использованием функций текущего pkg
+// TODO выделить в структуру Tiler, и фукнцию NewTiler(tileMaxSize). Тогда сделать все фукнции методами Tiler
+var MaxSize int
+
 // CreateTiles делит прямоугольник указанного размера (width и height) на несколько тайлов (прямоугольников)
 // с максимальным размером tileMaxSize
 func CreateTiles(width, height, tileMaxSize int) []image.Rectangle {

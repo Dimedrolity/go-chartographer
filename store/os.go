@@ -100,14 +100,6 @@ func (r *FileSystemTileRepository) DeleteImage(id string) error {
 	return nil
 }
 
-////
-
-// TileMaxSize определяет максимальный размер тайла по ширине и высоте.
-// Необходимо проинициализировать перед использованием функций текущего pkg
-// TODO выделить в структуру Tiler, и фукнцию NewTiler(tileMaxSize). Тогда сделать все фукнции методами Tiler
-// Это не нужно хранить в TiledImgRepo, так как репо предназначен для хранения самой модели TiledImage.
-var TileMaxSize int
-
 func Encode(img image.Image) ([]byte, error) {
 	buffer := bytes.Buffer{}
 	err := bmp.Encode(&buffer, img)

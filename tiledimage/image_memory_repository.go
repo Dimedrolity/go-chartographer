@@ -1,7 +1,6 @@
 package tiledimage
 
 import (
-	"chartographer-go/store"
 	"chartographer-go/tile"
 	"errors"
 	"github.com/google/uuid"
@@ -35,7 +34,9 @@ func (r *InMemoryImageRepo) createImage(width, height int) *Image {
 	id := uuid.NewString()
 	// TODO использовать зависимость Tiler
 	// TileMaxSize будет доступен через Tiler.TileMaxSize. Передавать его в CreateTiles не нужно.
-	tiles := tile.CreateTiles(width, height, store.TileMaxSize)
+	tiles := tile.CreateTiles(width, height, tile.MaxSize)
+
+	// TODO принимать структуру Image единственным параметром
 
 	img := &Image{
 		Config: image.Config{
@@ -44,7 +45,7 @@ func (r *InMemoryImageRepo) createImage(width, height int) *Image {
 			Height:     height,
 		},
 		Id:          id,
-		TileMaxSize: store.TileMaxSize, // TileMaxSize будет доступен через Tiler.TileMaxSize
+		TileMaxSize: tile.MaxSize, // TileMaxSize будет доступен через Tiler.TileMaxSize
 		Tiles:       tiles,
 	}
 	r.store[id] = img

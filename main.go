@@ -3,6 +3,7 @@ package main
 import (
 	"chartographer-go/chart"
 	"chartographer-go/store"
+	"chartographer-go/tile"
 	"chartographer-go/tiledimage"
 	"log"
 	"net/http"
@@ -19,7 +20,7 @@ func main() {
 	}
 	chart.TileRepo = tileRepo
 
-	store.TileMaxSize = 1000
+	tile.MaxSize = 1000
 	chart.ImageRepo = tiledimage.NewInMemoryImageRepo()
 
 	router := chi.NewRouter()
