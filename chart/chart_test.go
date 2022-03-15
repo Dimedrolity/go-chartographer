@@ -13,9 +13,9 @@ import (
 	"chartographer-go/chart"
 )
 
-// -----------
-// NewRGBA
-// -----------
+//
+// Создание изображения
+//
 
 // TestTileRepository - заглушка (stub)
 type TestTileRepository struct {
@@ -34,8 +34,24 @@ func (r *TestTileRepository) DeleteImage(id string) error {
 	return nil
 }
 
+//TestImageRepo - заглушка (stub)
+type TestImageRepo struct {
+	images map[string]*tiledimage.Image
+}
+
+func (r *TestImageRepo) Add(img *tiledimage.Image) {
+	r.images[img.Id] = img
+}
+func (r *TestImageRepo) Get(id string) (*tiledimage.Image, error) {
+	return r.images[id], nil
+}
+func (r *TestImageRepo) Delete(id string) error {
+	delete(r.images, id)
+	return nil
+}
+
 func TestNewRGBA(t *testing.T) {
-	chart.ImageRepo = tiledimage.NewInMemoryImageRepo()
+	chart.ImageRepo = &TestImageRepo{images: make(map[string]*tiledimage.Image)}
 
 	Convey("init", t, func() {
 		const (
@@ -88,14 +104,14 @@ func TestNewRGBA(t *testing.T) {
 	})
 }
 
-// -----------
-// Fragment
-// -----------
+//
+// Получение фрагмента изображения
+//
+
 func TestFragment_In(t *testing.T) {
 	Convey("Fragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения.\n"+
 		"После вызова функции Fragment красный пиксель изображения должен появиться в фрагменте", t, func() {
-		// TODO использовать стаб
-		imageRepo := tiledimage.NewInMemoryImageRepo()
+		imageRepo := &TestImageRepo{images: make(map[string]*tiledimage.Image)}
 		chart.ImageRepo = imageRepo
 
 		tile.MaxSize = 1000
@@ -113,16 +129,7 @@ func TestFragment_In(t *testing.T) {
 		img.SetRGBA(redX, redY, red)
 
 		id := "0"
-		imageRepo.Add(&tiledimage.Image{
-			Id: id,
-			Config: image.Config{
-				Width:  img.Bounds().Dx(),
-				Height: img.Bounds().Dy(),
-			},
-			TileMaxSize: tile.MaxSize,
-			Tiles:       []image.Rectangle{img.Bounds()},
-		})
-		_ = tileRepo.SaveTile(id, img) // чтобы getTile возвращал стаб
+		_ = tileRepo.SaveTile(id, img) // чтобы getTile, вызываемый в chart.GetFragment, возвращал стаб
 
 		const (
 			x              = 1
@@ -130,11 +137,20 @@ func TestFragment_In(t *testing.T) {
 			fragmentWidth  = 1
 			fragmentHeight = 1
 		)
-		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
-		So(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight).In(img.Bounds()), ShouldBeTrue)
 
-		tiledImg, err := imageRepo.Get(id)
-		So(err, ShouldBeNil)
+		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
+		fragmentRect := image.Rect(x, y, x+fragmentWidth, y+fragmentHeight)
+		So(fragmentRect.In(img.Bounds()), ShouldBeTrue)
+
+		tiledImg := &tiledimage.Image{
+			Id: id,
+			Config: image.Config{
+				Width:  img.Bounds().Dx(),
+				Height: img.Bounds().Dy(),
+			},
+			TileMaxSize: tile.MaxSize,
+			Tiles:       []image.Rectangle{img.Bounds()},
+		}
 		fragment, err := chart.GetFragment(tiledImg, x, y, fragmentWidth, fragmentHeight)
 		So(err, ShouldBeNil)
 
@@ -149,6 +165,14 @@ func TestFragment_In(t *testing.T) {
 func TestFragment_PartIntersect(t *testing.T) {
 	Convey("Fragment когда прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения\n"+
 		"После вызова функции Fragment во фрагменте должен появиться один красный пиксель", t, func() {
+		imageRepo := &TestImageRepo{images: make(map[string]*tiledimage.Image)}
+		chart.ImageRepo = imageRepo
+
+		tile.MaxSize = 1000
+
+		tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+		chart.TileRepo = tileRepo
+
 		const (
 			imgWidth  = 2
 			imgHeight = 2
@@ -161,16 +185,32 @@ func TestFragment_PartIntersect(t *testing.T) {
 		)
 		img.SetRGBA(redX, redY, red)
 
+		id := "0"
+		_ = tileRepo.SaveTile(id, img) // чтобы getTile, вызываемый в chart.GetFragment, возвращал стаб
+
 		const (
 			x              = redX
 			y              = redY
 			fragmentWidth  = 2
 			fragmentHeight = 2
 		)
-		fragment, err := chart.Fragment(img, x, y, fragmentWidth, fragmentHeight)
-		So(err, ShouldBeNil)
+
+		tiledImg := &tiledimage.Image{
+			Id: id,
+			Config: image.Config{
+				Width:  img.Bounds().Dx(),
+				Height: img.Bounds().Dy(),
+			},
+			TileMaxSize: tile.MaxSize,
+			Tiles:       []image.Rectangle{img.Bounds()},
+		}
+
 		// Убеждаемся, что прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения
-		So(fragment.Bounds().Overlaps(img.Bounds()) && !fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
+		fragmentRect := image.Rect(x, y, x+fragmentWidth, y+fragmentHeight)
+		So(fragmentRect.Bounds().Overlaps(img.Bounds()) && !fragmentRect.Bounds().In(img.Bounds()), ShouldBeTrue)
+
+		fragment, err := chart.GetFragment(tiledImg, x, y, fragmentWidth, fragmentHeight)
+		So(err, ShouldBeNil)
 
 		bounds := fragment.Bounds()
 		So(bounds.Dx(), ShouldEqual, fragmentWidth)
@@ -192,6 +232,14 @@ func TestFragment_PartIntersect(t *testing.T) {
 func TestFragment_NotOverlaps(t *testing.T) {
 	Convey("Fragment когда прямоугольники не пересекаются\n"+
 		"Результатом Fragment должно быть полностью черное изображение", t, func() {
+		imageRepo := &TestImageRepo{images: make(map[string]*tiledimage.Image)}
+		chart.ImageRepo = imageRepo
+
+		tile.MaxSize = 1000
+
+		tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+		chart.TileRepo = tileRepo
+
 		const (
 			imgWidth  = 2
 			imgHeight = 2
@@ -204,15 +252,31 @@ func TestFragment_NotOverlaps(t *testing.T) {
 		)
 		img.SetRGBA(redX, redY, red)
 
+		id := "0"
+		_ = tileRepo.SaveTile(id, img) // чтобы getTile, вызываемый в chart.GetFragment, возвращал стаб
+
 		const (
 			x              = imgWidth
 			y              = imgHeight
 			fragmentWidth  = 1
 			fragmentHeight = 1
 		)
-		So(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight).Bounds().Overlaps(img.Bounds()), ShouldBeFalse)
 
-		_, err := chart.Fragment(img, x, y, fragmentWidth, fragmentHeight)
+		// Убеждаемся, что прямоугольники не пересекаются
+		fragmentRect := image.Rect(x, y, x+fragmentWidth, y+fragmentHeight)
+		So(fragmentRect.Overlaps(img.Bounds()), ShouldBeFalse)
+
+		tiledImg := &tiledimage.Image{
+			Id: id,
+			Config: image.Config{
+				Width:  img.Bounds().Dx(),
+				Height: img.Bounds().Dy(),
+			},
+			TileMaxSize: tile.MaxSize,
+			Tiles:       []image.Rectangle{img.Bounds()},
+		}
+		_, err := chart.GetFragment(tiledImg, x, y, fragmentWidth, fragmentHeight)
+
 		So(errors.Is(err, chart.ErrNotOverlaps), ShouldBeTrue)
 	})
 }
