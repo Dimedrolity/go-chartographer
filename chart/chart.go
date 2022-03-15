@@ -122,34 +122,6 @@ func GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Im
 	return img, nil
 }
 
-// Fragment возвращает фрагмент изображения img, начиная с координат изобржаения (x;y) по ширине width и высоте height.
-// Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).
-// Возможны ошибки ErrNotOverlaps или типа *SizeError
-func Fragment(img image.Image, x, y, width, height int) (image.Image, error) {
-	if width < fragmentMinWidth || width > fragmentMaxWidth ||
-		height < fragmentMinHeight || height > fragmentMaxHeight {
-		return nil, &SizeError{
-			minWidth: fragmentMinWidth, width: width, maxWidth: fragmentMaxWidth,
-			minHeight: fragmentMinHeight, height: height, maxHeight: fragmentMaxHeight,
-		}
-	}
-
-	fragment := image.NewRGBA(image.Rect(x, y, x+width, y+height))
-	if !img.Bounds().Overlaps(fragment.Bounds()) {
-		return nil, ErrNotOverlaps
-	}
-	intersect := img.Bounds().Intersect(fragment.Bounds())
-
-	for h := intersect.Min.Y; h < intersect.Max.Y; h++ {
-		for w := intersect.Min.X; w < intersect.Max.X; w++ {
-			c := img.At(w, h)
-			fragment.Set(w, h, c)
-		}
-	}
-
-	return fragment, nil
-}
-
 // SetFragment измененяет пиксели изображения img пикселями фрагмента fragment, начиная с координат изобржаения (x;y) по ширине width и высоте height.
 // Меняется существующий массив байт изображения, это производительнее чем создавать абсолютно новое изображение.
 // Примечания:

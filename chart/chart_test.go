@@ -282,18 +282,39 @@ func TestFragment_NotOverlaps(t *testing.T) {
 }
 
 func TestFragment_Size(t *testing.T) {
+	imageRepo := &TestImageRepo{images: make(map[string]*tiledimage.Image)}
+	chart.ImageRepo = imageRepo
+
+	tile.MaxSize = 1000
+
+	tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+	chart.TileRepo = tileRepo
+
+	emptyImg := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	id := "0"
+	_ = tileRepo.SaveTile(id, emptyImg) // чтобы getTile, вызываемый в chart.GetFragment, возвращал стаб
+
+	tiledEmptyImg := &tiledimage.Image{
+		Id: id,
+		Config: image.Config{
+			Width:  emptyImg.Bounds().Dx(),
+			Height: emptyImg.Bounds().Dy(),
+		},
+		TileMaxSize: tile.MaxSize,
+		Tiles:       []image.Rectangle{emptyImg.Bounds()},
+	}
+
 	const (
 		fragmentMinWidth  = 1
 		fragmentMinHeight = 1
 		fragmentMaxWidth  = 5_000
 		fragmentMaxHeight = 5_000
 	)
-	emptyImg := image.NewRGBA(image.Rect(0, 0, 1, 1))
 
 	// Позитивные тесты
 
 	testSize := func(width, height int) {
-		img, err := chart.Fragment(emptyImg, 0, 0, width, height)
+		img, err := chart.GetFragment(tiledEmptyImg, 0, 0, width, height)
 		So(err, ShouldBeNil)
 
 		rect := img.Bounds()
@@ -311,19 +332,19 @@ func TestFragment_Size(t *testing.T) {
 
 	var errSize *chart.SizeError
 	Convey("test minWidth-1", t, func() {
-		_, err := chart.Fragment(emptyImg, 0, 0, fragmentMinWidth-1, 1)
+		_, err := chart.GetFragment(tiledEmptyImg, 0, 0, fragmentMinWidth-1, 1)
 		So(errors.As(err, &errSize), ShouldBeTrue)
 	})
 	Convey("test minHeight-1", t, func() {
-		_, err := chart.Fragment(emptyImg, 0, 0, 1, fragmentMinHeight-1)
+		_, err := chart.GetFragment(tiledEmptyImg, 0, 0, 1, fragmentMinHeight-1)
 		So(errors.As(err, &errSize), ShouldBeTrue)
 	})
 	Convey("test maxWidth+1", t, func() {
-		_, err := chart.Fragment(emptyImg, 0, 0, fragmentMaxWidth+1, 1)
+		_, err := chart.GetFragment(tiledEmptyImg, 0, 0, fragmentMaxWidth+1, 1)
 		So(errors.As(err, &errSize), ShouldBeTrue)
 	})
 	Convey("test maxHeight+1", t, func() {
-		_, err := chart.Fragment(emptyImg, 0, 0, 1, fragmentMaxHeight+1)
+		_, err := chart.GetFragment(tiledEmptyImg, 0, 0, 1, fragmentMaxHeight+1)
 		So(errors.As(err, &errSize), ShouldBeTrue)
 	})
 }
