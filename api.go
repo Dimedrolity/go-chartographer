@@ -123,7 +123,7 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 
 	id := chi.URLParam(req, "id")
 
-	img, err := store.ImageRepo.GetImage(id)
+	img, err := chart.ImageRepo.GetImage(id)
 	if err != nil {
 		if errors.Is(err, store.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -153,7 +153,7 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 func deleteImage(w http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")
 
-	err := store.DeleteImage(id)
+	err := chart.DeleteImage(id)
 	if err != nil {
 		if errors.Is(err, store.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)

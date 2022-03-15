@@ -32,7 +32,7 @@ type InMemoryImageRepo struct {
 	mu    *sync.Mutex
 }
 
-func New() *InMemoryImageRepo {
+func NewInMemoryImageRepo() *InMemoryImageRepo {
 	return &InMemoryImageRepo{
 		store: make(map[string]*TiledImage),
 		mu:    &sync.Mutex{},

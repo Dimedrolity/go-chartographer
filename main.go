@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chartographer-go/chart"
 	"chartographer-go/store"
 	"log"
 	"net/http"
@@ -15,10 +16,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	store.TileRepo = tileRepo
+	chart.TileRepo = tileRepo
 
 	store.TileMaxSize = 1000
-	store.ImageRepo = store.New()
+	chart.ImageRepo = store.NewInMemoryImageRepo()
 
 	router := chi.NewRouter()
 

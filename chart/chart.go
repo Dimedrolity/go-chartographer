@@ -10,6 +10,11 @@ import (
 	"image/color"
 )
 
+// ImageRepo
+//TODO не использовать глобальные переменную. Выделить структуру сервиса и принимать репо в конструкторе (NewInMemoryImageRepo)
+var ImageRepo store.TiledImageRepository
+var TileRepo store.TileRepository
+
 type MutableImage interface {
 	image.Image
 	Set(x, y int, c color.Color)
@@ -34,18 +39,32 @@ func NewRgbaBmp(width, height int) (*store.TiledImage, error) {
 		}
 	}
 
-	img := store.ImageRepo.CreateImage(width, height)
+	img := ImageRepo.CreateImage(width, height)
 
 	for _, t := range img.Tiles {
 		i := image.NewRGBA(t)
 
-		err := store.TileRepo.SaveTile(img.Id, i)
+		err := TileRepo.SaveTile(img.Id, i)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	return img, nil
+}
+
+func DeleteImage(id string) error {
+	err := ImageRepo.DeleteImage(id)
+	if err != nil {
+		return err
+	}
+
+	err = TileRepo.DeleteImage(id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 const (
@@ -78,7 +97,7 @@ func GetFragment(imgConfig *store.TiledImage, x, y, width, height int) (image.Im
 	img := image.NewRGBA(fragmentRect)
 
 	for _, t := range overlapped {
-		tileImg, err := store.TileRepo.GetTile(imgConfig.Id, t.Min.X, t.Min.Y)
+		tileImg, err := TileRepo.GetTile(imgConfig.Id, t.Min.X, t.Min.Y)
 		if err != nil {
 			return nil, err
 		}

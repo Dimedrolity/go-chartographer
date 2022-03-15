@@ -35,8 +35,6 @@ func NewFileSystemTileRepo(dirPath string) (*FileSystemTileRepository, error) {
 	return repo, nil
 }
 
-var TileRepo TileRepository
-
 // GetTile считывает с диска изображение-тайл с координатами (x; y) изображения id и декодирует в формат BMP.
 // Возможны ошибки типа *os.PathError, например os.ErrNotExist.
 func (r *FileSystemTileRepository) GetTile(id string, x, y int) (image.Image, error) {
@@ -102,22 +100,6 @@ func (r *FileSystemTileRepository) DeleteImage(id string) error {
 	return nil
 }
 
-// DeleteImage
-//TODO выделить в слой сервиса
-func DeleteImage(id string) error {
-	err := ImageRepo.DeleteImage(id)
-	if err != nil {
-		return err
-	}
-
-	err = TileRepo.DeleteImage(id)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 ////
 
 // TileMaxSize определяет максимальный размер тайла по ширине и высоте.
@@ -135,7 +117,3 @@ func Encode(img image.Image) ([]byte, error) {
 
 	return buffer.Bytes(), nil
 }
-
-// ImageRepo TODO не использовать глобальную переменную.
-// Выделить сущность FileSystemTileRepository, она будет принимать в конструкторе ImRepo. Нет, репозитории не должны зависеть друг от друга.
-var ImageRepo TiledImageRepository

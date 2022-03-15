@@ -32,7 +32,8 @@ func (r *TestTileRepository) DeleteImage(string) error {
 }
 
 func TestNewRGBA(t *testing.T) {
-	store.ImageRepo = store.New()
+	// TODO использовать стаб
+	chart.ImageRepo = store.NewInMemoryImageRepo()
 
 	Convey("init", t, func() {
 		const (
@@ -44,7 +45,7 @@ func TestNewRGBA(t *testing.T) {
 
 		store.TileMaxSize = 1000
 		tileRepo := &TestTileRepository{}
-		store.TileRepo = tileRepo
+		chart.TileRepo = tileRepo
 
 		// Позитивные тесты
 
@@ -111,6 +112,8 @@ func TestFragment_In(t *testing.T) {
 			fragmentHeight = 1
 		)
 		fragment, err := chart.Fragment(img, x, y, fragmentWidth, fragmentHeight)
+		// TODO необходимо, чтобы getTile возвращал стаб, тогда тестировать chart.GetFragment
+
 		So(err, ShouldBeNil)
 		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
 		So(fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
