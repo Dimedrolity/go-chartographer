@@ -12,10 +12,18 @@ import (
 
 // Возможно надо разделить ImageRepo и Tile по pkg.
 
-type ImageRepository interface {
+// TiledImage - модель изображения, разделенного на тайлы.
+type TiledImage struct {
+	image.Config
+	Id          string
+	TileMaxSize int
+	Tiles       []image.Rectangle
+}
+
+type TiledImageRepository interface {
 	CreateImage(width, height int) *TiledImage
 	GetImage(id string) (*TiledImage, error)
-	DeleteImage(id string)
+	DeleteImage(id string) error
 }
 
 // InMemoryImageRepo является потокобезопасным in-memory хранилищем конфигов изображений.
@@ -73,13 +81,19 @@ func (r *InMemoryImageRepo) getImage(id string) (*TiledImage, error) {
 	return img, nil
 }
 
-func (r *InMemoryImageRepo) DeleteImage(id string) {
+func (r *InMemoryImageRepo) DeleteImage(id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.deleteImage(id)
+	return r.deleteImage(id)
 }
 
-func (r *InMemoryImageRepo) deleteImage(id string) {
+func (r *InMemoryImageRepo) deleteImage(id string) error {
+	_, ok := r.store[id]
+	if !ok {
+		return ErrNotExist
+	}
+
 	delete(r.store, id)
-	return
+
+	return nil
 }

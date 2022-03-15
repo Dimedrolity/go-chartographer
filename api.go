@@ -6,7 +6,6 @@ import (
 	"errors"
 	"golang.org/x/image/bmp"
 	"net/http"
-	"os"
 	"strconv"
 
 	//"golang.org/x/image/bmp"
@@ -124,7 +123,7 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 
 	id := chi.URLParam(req, "id")
 
-	img, err := store.GetImage(id)
+	img, err := store.ImageRepo.GetImage(id)
 	if err != nil {
 		if errors.Is(err, store.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -156,7 +155,7 @@ func deleteImage(w http.ResponseWriter, req *http.Request) {
 
 	err := store.DeleteImage(id)
 	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
+		if errors.Is(err, store.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

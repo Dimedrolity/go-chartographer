@@ -17,6 +17,7 @@ func main() {
 	}
 
 	store.TileMaxSize = 1000
+	store.ImageRepo = store.New()
 
 	router := chi.NewRouter()
 

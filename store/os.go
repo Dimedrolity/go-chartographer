@@ -29,14 +29,6 @@ func SetImagesDir(path string) error {
 // TODO выделить в структуру TileRepository, и фукнцию NewTileRepo(tileMaxSize). Тогда сделать все фукнции методами Repo
 var TileMaxSize int
 
-// TiledImage - модель изображения, разделенного на тайлы.
-type TiledImage struct {
-	image.Config
-	Id          string
-	TileMaxSize int
-	Tiles       []image.Rectangle
-}
-
 func Encode(img image.Image) ([]byte, error) {
 	buffer := bytes.Buffer{}
 	err := bmp.Encode(&buffer, img)
@@ -47,13 +39,9 @@ func Encode(img image.Image) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// TODO инициализировать зависимость извне.
-var imageRepo = New()
-
-func GetImage(id string) (*TiledImage, error) {
-	// TODO удалить эту функцию
-	return imageRepo.GetImage(id)
-}
+// ImageRepo TODO не использовать глобальную переменную.
+// Выделить сущность TileRepo, она будет принимать в конструкторе ImRepo
+var ImageRepo TiledImageRepository
 
 // GetTile считывает с диска изображение-тайл с координатами (x; y) изображения id и декодирует в формат BMP.
 // Возможны ошибки типа *os.PathError, например os.ErrNotExist.
@@ -114,11 +102,15 @@ func SaveTile(id string, img image.Image) error {
 
 // DeleteImage удаляет изображение с диска.
 func DeleteImage(id string) error {
-	err := os.RemoveAll(filepath.Join(dirPath, id))
+	err := ImageRepo.DeleteImage(id)
 	if err != nil {
 		return err
 	}
-	imageRepo.DeleteImage(id)
+
+	err = os.RemoveAll(filepath.Join(dirPath, id))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -126,7 +118,7 @@ func DeleteImage(id string) error {
 // CreateImage создает RGBA изображение формата BMP, возвращает модель изображения.
 // Если ширина/высота изображения больше TileMaxSize, то изображение разделяется на тайлы.
 func CreateImage(width, height int) (*TiledImage, error) {
-	img := imageRepo.CreateImage(width, height)
+	img := ImageRepo.CreateImage(width, height)
 
 	for _, t := range img.Tiles {
 		i := image.NewRGBA(t)
@@ -140,30 +132,3 @@ func CreateImage(width, height int) (*TiledImage, error) {
 
 	return img, nil
 }
-
-// SaveImage кодирует изображение в байты и сохраняет на диск.
-//func SaveImage(id string, img image.Image) error {
-//	imgBytes, err := Encode(img)
-//	if err != nil {
-//		return err
-//	}
-//
-//	err = os.WriteFile(filename(id), imgBytes, 0777)
-//	if err != nil {
-//		return err
-//	}
-//
-//	return nil
-//}
-
-// SaveNewImage создает уникальный id, и сохраняет изображение, возвращает id.
-//func SaveNewImage(img image.Image) (string, error) {
-//	id := uuid.NewString()
-//
-//	err := SaveImage(id, img)
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	return id, nil
-//}
