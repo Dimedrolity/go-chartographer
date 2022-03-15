@@ -17,22 +17,24 @@ import (
 // NewRGBA
 // -----------
 
-// TestTileRepository - заглушка
+// TestTileRepository - заглушка (stub)
 type TestTileRepository struct {
+	images map[string]image.Image
 }
 
-func (r *TestTileRepository) GetTile(string, int, int) (image.Image, error) {
-	return nil, nil
+func (r *TestTileRepository) GetTile(id string, _ int, _ int) (image.Image, error) {
+	return r.images[id], nil
 }
-func (r *TestTileRepository) SaveTile(string, image.Image) error {
+func (r *TestTileRepository) SaveTile(id string, img image.Image) error {
+	r.images[id] = img
 	return nil
 }
-func (r *TestTileRepository) DeleteImage(string) error {
+func (r *TestTileRepository) DeleteImage(id string) error {
+	delete(r.images, id)
 	return nil
 }
 
 func TestNewRGBA(t *testing.T) {
-	// TODO использовать стаб
 	chart.ImageRepo = tiledimage.NewInMemoryImageRepo()
 
 	Convey("init", t, func() {
@@ -44,7 +46,7 @@ func TestNewRGBA(t *testing.T) {
 		)
 
 		tile.MaxSize = 1000
-		tileRepo := &TestTileRepository{}
+		tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
 		chart.TileRepo = tileRepo
 
 		// Позитивные тесты
@@ -60,7 +62,6 @@ func TestNewRGBA(t *testing.T) {
 			testSize(minWidth, minHeight)
 		})
 		Convey("MaxSize", func() {
-			// TODO вернуть maxWidth вместо 1. Временное решение, пока OS используется для хранения тайлов
 			testSize(maxWidth, maxHeight)
 		})
 
@@ -93,11 +94,17 @@ func TestNewRGBA(t *testing.T) {
 func TestFragment_In(t *testing.T) {
 	Convey("Fragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения.\n"+
 		"После вызова функции Fragment красный пиксель изображения должен появиться в фрагменте", t, func() {
-		const (
-			imgWidth  = 2
-			imgHeight = 2
-		)
-		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+		// TODO использовать стаб
+		imageRepo := tiledimage.NewInMemoryImageRepo()
+		chart.ImageRepo = imageRepo
+
+		tile.MaxSize = 1000
+
+		tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+		chart.TileRepo = tileRepo
+
+		const imgSize = 2
+		img := image.NewRGBA(image.Rect(0, 0, imgSize, imgSize))
 		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
 		const (
 			redX = 1
@@ -105,18 +112,31 @@ func TestFragment_In(t *testing.T) {
 		)
 		img.SetRGBA(redX, redY, red)
 
+		id := "0"
+		imageRepo.Add(&tiledimage.Image{
+			Id: id,
+			Config: image.Config{
+				Width:  img.Bounds().Dx(),
+				Height: img.Bounds().Dy(),
+			},
+			TileMaxSize: tile.MaxSize,
+			Tiles:       []image.Rectangle{img.Bounds()},
+		})
+		_ = tileRepo.SaveTile(id, img) // чтобы getTile возвращал стаб
+
 		const (
 			x              = 1
 			y              = 1
 			fragmentWidth  = 1
 			fragmentHeight = 1
 		)
-		fragment, err := chart.Fragment(img, x, y, fragmentWidth, fragmentHeight)
-		// TODO необходимо, чтобы getTile возвращал стаб, тогда тестировать chart.GetFragment
-
-		So(err, ShouldBeNil)
 		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
-		So(fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
+		So(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight).In(img.Bounds()), ShouldBeTrue)
+
+		tiledImg, err := imageRepo.Get(id)
+		So(err, ShouldBeNil)
+		fragment, err := chart.GetFragment(tiledImg, x, y, fragmentWidth, fragmentHeight)
+		So(err, ShouldBeNil)
 
 		bounds := fragment.Bounds()
 		So(bounds.Dx(), ShouldEqual, fragmentWidth)
