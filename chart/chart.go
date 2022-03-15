@@ -72,8 +72,7 @@ func GetFragment(imgConfig *store.TiledImage, x, y, width, height int) (image.Im
 	img := image.NewRGBA(fragmentRect)
 
 	for _, t := range overlapped {
-		// TODO использовать зависимость Tiler
-		tileImg, err := store.GetTile(imgConfig.Id, t.Min.X, t.Min.Y)
+		tileImg, err := store.TileRepo.GetTile(imgConfig.Id, t.Min.X, t.Min.Y)
 		if err != nil {
 			return nil, err
 		}

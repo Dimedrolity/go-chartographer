@@ -50,6 +50,7 @@ func (r *InMemoryImageRepo) CreateImage(width, height int) *TiledImage {
 func (r *InMemoryImageRepo) createImage(width, height int) *TiledImage {
 	id := uuid.NewString()
 	// TODO использовать зависимость Tiler
+	// TileMaxSize будет доступен через Tiler.TileMaxSize. Передавать его в CreateTiles не нужно.
 	tiles := tile.CreateTiles(width, height, TileMaxSize)
 
 	img := &TiledImage{
@@ -59,7 +60,7 @@ func (r *InMemoryImageRepo) createImage(width, height int) *TiledImage {
 			Height:     height,
 		},
 		Id:          id,
-		TileMaxSize: TileMaxSize,
+		TileMaxSize: TileMaxSize, // TileMaxSize будет доступен через Tiler.TileMaxSize
 		Tiles:       tiles,
 	}
 	r.store[id] = img

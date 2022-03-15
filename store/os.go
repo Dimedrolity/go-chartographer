@@ -9,44 +9,38 @@ import (
 	"strconv"
 )
 
-var dirPath string
-
-// SetImagesDir - создает директорию, при необходимости, и устанавливает путь к директории
-func SetImagesDir(path string) error {
-	// If path is already a directory, MkdirAll does nothing and returns nil.
-	err := os.MkdirAll(path, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	dirPath = path
-
-	return nil
+// TileRepository
+// наверно не должен работать с image.Image, чтобы в репозитории не было кодирования/декодирования.
+type TileRepository interface {
+	SaveTile(id string, img image.Image) error
+	GetTile(id string, x, y int) (image.Image, error)
+	DeleteImage(id string) error
 }
 
-// TileMaxSize определяет максимальный размер тайла по ширине и высоте.
-// Необходимо проинициализировать перед использованием функций текущего pkg
-// TODO выделить в структуру TileRepository, и фукнцию NewTileRepo(tileMaxSize). Тогда сделать все фукнции методами Repo
-var TileMaxSize int
+// FileSystemTileRepository - хранит изображения-тайлы в файлах на диске.
+type FileSystemTileRepository struct {
+	dirPath string
+}
 
-func Encode(img image.Image) ([]byte, error) {
-	buffer := bytes.Buffer{}
-	err := bmp.Encode(&buffer, img)
+func NewFileSystemTileRepo(dirPath string) (*FileSystemTileRepository, error) {
+	// If path is already a directory, MkdirAll does nothing and returns nil.
+	err := os.MkdirAll(dirPath, os.ModePerm)
 	if err != nil {
 		return nil, err
 	}
 
-	return buffer.Bytes(), nil
+	repo := &FileSystemTileRepository{
+		dirPath: dirPath,
+	}
+	return repo, nil
 }
 
-// ImageRepo TODO не использовать глобальную переменную.
-// Выделить сущность TileRepo, она будет принимать в конструкторе ImRepo
-var ImageRepo TiledImageRepository
+var TileRepo TileRepository
 
 // GetTile считывает с диска изображение-тайл с координатами (x; y) изображения id и декодирует в формат BMP.
 // Возможны ошибки типа *os.PathError, например os.ErrNotExist.
-func GetTile(id string, x, y int) (image.Image, error) {
-	filename := filepath.Join(dirPath, id, strconv.Itoa(y), strconv.Itoa(x)+".bmp")
+func (r *FileSystemTileRepository) GetTile(id string, x, y int) (image.Image, error) {
+	filename := filepath.Join(r.dirPath, id, strconv.Itoa(y), strconv.Itoa(x)+".bmp")
 
 	file, err := os.Open(filename)
 	if err != nil {
@@ -75,7 +69,7 @@ func GetTile(id string, x, y int) (image.Image, error) {
 // 23a8cc52-8997-4adb-8a09-918c29aa10c4
 // 	+---- 10
 //		+---- 0.bmp
-func SaveTile(id string, img image.Image) error {
+func (r *FileSystemTileRepository) SaveTile(id string, img image.Image) error {
 	// TODO можно было бы обойтись без буфера, Create файл и bmp.Encode(файл)
 	// 	file, err := os.OpenFile(filepath.Join(dir, x+".bmp"), os.O_WRONLY|os.O_CREATE, 0777)
 	encode, err := Encode(img)
@@ -84,7 +78,7 @@ func SaveTile(id string, img image.Image) error {
 	}
 
 	y := strconv.Itoa(img.Bounds().Min.Y)
-	dir := filepath.Join(dirPath, id, y)
+	dir := filepath.Join(r.dirPath, id, y)
 	err = os.MkdirAll(dir, 0777)
 	if err != nil {
 		return err
@@ -100,14 +94,23 @@ func SaveTile(id string, img image.Image) error {
 	return nil
 }
 
-// DeleteImage удаляет изображение с диска.
+func (r *FileSystemTileRepository) DeleteImage(id string) error {
+	err := os.RemoveAll(filepath.Join(r.dirPath, id))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteImage
+//TODO выделить в слой сервиса
 func DeleteImage(id string) error {
 	err := ImageRepo.DeleteImage(id)
 	if err != nil {
 		return err
 	}
 
-	err = os.RemoveAll(filepath.Join(dirPath, id))
+	err = TileRepo.DeleteImage(id)
 	if err != nil {
 		return err
 	}
@@ -115,16 +118,37 @@ func DeleteImage(id string) error {
 	return nil
 }
 
+////
+
+// TileMaxSize определяет максимальный размер тайла по ширине и высоте.
+// Необходимо проинициализировать перед использованием функций текущего pkg
+// TODO выделить в структуру Tiler, и фукнцию NewTiler(tileMaxSize). Тогда сделать все фукнции методами Tiler
+// Это не нужно хранить в TiledImgRepo, так как репо предназначен для хранения самой модели TiledImage.
+var TileMaxSize int
+
+func Encode(img image.Image) ([]byte, error) {
+	buffer := bytes.Buffer{}
+	err := bmp.Encode(&buffer, img)
+	if err != nil {
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
+}
+
+// ImageRepo TODO не использовать глобальную переменную.
+// Выделить сущность FileSystemTileRepository, она будет принимать в конструкторе ImRepo. Нет, репозитории не должны зависеть друг от друга.
+var ImageRepo TiledImageRepository
+
 // CreateImage создает RGBA изображение формата BMP, возвращает модель изображения.
-// Если ширина/высота изображения больше TileMaxSize, то изображение разделяется на тайлы.
+// TODO Это объединяющая фукнция, для нее нужны TiledImageRepo и FileSystemTileRepository, перенести фукнцию в более верхний слой (уровень Service)
 func CreateImage(width, height int) (*TiledImage, error) {
 	img := ImageRepo.CreateImage(width, height)
 
 	for _, t := range img.Tiles {
 		i := image.NewRGBA(t)
 
-		// TODO использовать зависимость Tiler
-		err := SaveTile(img.Id, i)
+		err := TileRepo.SaveTile(img.Id, i)
 		if err != nil {
 			return nil, err
 		}

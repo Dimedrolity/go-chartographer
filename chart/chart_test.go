@@ -19,7 +19,7 @@ import (
 // TODO дописать тест. Получается интеграционный тест, так как происходит запись на диск
 func TestCreateImage(t *testing.T) {
 	Convey("Создание тайлов и запись тайлов на диск", t, func() {
-		err := store.SetImagesDir("testdata")
+		_, err := store.NewFileSystemTileRepo("testdata")
 		So(err, ShouldBeNil)
 
 		store.ImageRepo = store.New()
@@ -48,7 +48,7 @@ func TestNewRGBA(t *testing.T) {
 		)
 
 		store.TileMaxSize = 1000
-		err := store.SetImagesDir("testdata")
+		_, err := store.NewFileSystemTileRepo("testdata")
 		So(err, ShouldBeNil)
 
 		// Позитивные тесты

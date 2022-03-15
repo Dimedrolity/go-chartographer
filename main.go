@@ -11,10 +11,12 @@ import (
 
 func main() {
 	pathToImages := os.Args[1]
-	err := store.SetImagesDir(pathToImages)
+
+	tileRepo, err := store.NewFileSystemTileRepo(pathToImages)
 	if err != nil {
 		log.Fatal(err)
 	}
+	store.TileRepo = tileRepo
 
 	store.TileMaxSize = 1000
 	store.ImageRepo = store.New()
