@@ -1,4 +1,4 @@
-// Package chart содержит бизнес логику обработки изображений
+// Package chart является уровнем сервиса, содержит бизнес логику обработки изображений.
 package chart
 
 import (
@@ -34,9 +34,15 @@ func NewRgbaBmp(width, height int) (*store.TiledImage, error) {
 		}
 	}
 
-	img, err := store.CreateImage(width, height)
-	if err != nil {
-		return nil, err
+	img := store.ImageRepo.CreateImage(width, height)
+
+	for _, t := range img.Tiles {
+		i := image.NewRGBA(t)
+
+		err := store.TileRepo.SaveTile(img.Id, i)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return img, nil

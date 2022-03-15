@@ -139,20 +139,3 @@ func Encode(img image.Image) ([]byte, error) {
 // ImageRepo TODO не использовать глобальную переменную.
 // Выделить сущность FileSystemTileRepository, она будет принимать в конструкторе ImRepo. Нет, репозитории не должны зависеть друг от друга.
 var ImageRepo TiledImageRepository
-
-// CreateImage создает RGBA изображение формата BMP, возвращает модель изображения.
-// TODO Это объединяющая фукнция, для нее нужны TiledImageRepo и FileSystemTileRepository, перенести фукнцию в более верхний слой (уровень Service)
-func CreateImage(width, height int) (*TiledImage, error) {
-	img := ImageRepo.CreateImage(width, height)
-
-	for _, t := range img.Tiles {
-		i := image.NewRGBA(t)
-
-		err := TileRepo.SaveTile(img.Id, i)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return img, nil
-}

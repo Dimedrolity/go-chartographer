@@ -16,27 +16,21 @@ import (
 // -----------
 // NewRGBA
 // -----------
-// TODO дописать тест. Получается интеграционный тест, так как происходит запись на диск
-func TestCreateImage(t *testing.T) {
-	Convey("Создание тайлов и запись тайлов на диск", t, func() {
-		tileRepo, err := store.NewFileSystemTileRepo("testdata")
-		So(err, ShouldBeNil)
-		store.TileRepo = tileRepo
 
-		store.ImageRepo = store.New()
-
-		const tileSize = 10
-		store.TileMaxSize = tileSize
-		_, err = chart.NewRgbaBmp(25, 25)
-
-		// проверка, что созданы изображения-тайлы нужных размеров
-
-		So(err, ShouldBeNil)
-	})
+// TestTileRepository - заглушка
+type TestTileRepository struct {
 }
 
-// TODO не нужно записывать на диск при выполнении теста.
-// Необходимо сделать ОС зависимостью и передавать стаб.
+func (r *TestTileRepository) GetTile(string, int, int) (image.Image, error) {
+	return nil, nil
+}
+func (r *TestTileRepository) SaveTile(string, image.Image) error {
+	return nil
+}
+func (r *TestTileRepository) DeleteImage(string) error {
+	return nil
+}
+
 func TestNewRGBA(t *testing.T) {
 	store.ImageRepo = store.New()
 
@@ -49,8 +43,7 @@ func TestNewRGBA(t *testing.T) {
 		)
 
 		store.TileMaxSize = 1000
-		tileRepo, err := store.NewFileSystemTileRepo("testdata")
-		So(err, ShouldBeNil)
+		tileRepo := &TestTileRepository{}
 		store.TileRepo = tileRepo
 
 		// Позитивные тесты
@@ -67,7 +60,7 @@ func TestNewRGBA(t *testing.T) {
 		})
 		Convey("MaxSize", func() {
 			// TODO вернуть maxWidth вместо 1. Временное решение, пока OS используется для хранения тайлов
-			testSize(1, maxHeight)
+			testSize(maxWidth, maxHeight)
 		})
 
 		// Негативные тесты

@@ -11,7 +11,6 @@ import (
 
 func main() {
 	pathToImages := os.Args[1]
-
 	tileRepo, err := store.NewFileSystemTileRepo(pathToImages)
 	if err != nil {
 		log.Fatal(err)
