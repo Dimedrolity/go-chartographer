@@ -1,7 +1,7 @@
 package tiledimage
 
 type Repository interface {
-	CreateImage(width, height int) *Image
-	GetImage(id string) (*Image, error)
-	DeleteImage(id string) error
+	Add(img *Image)
+	Get(id string) (*Image, error)
+	Delete(id string) error
 }

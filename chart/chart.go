@@ -7,6 +7,7 @@ import (
 	"chartographer-go/tiledimage"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"image"
 	"image/color"
 )
@@ -40,7 +41,19 @@ func NewRgbaBmp(width, height int) (*tiledimage.Image, error) {
 		}
 	}
 
-	img := ImageRepo.CreateImage(width, height)
+	tiles := tile.CreateTiles(width, height, tile.MaxSize)
+
+	img := &tiledimage.Image{
+		Config: image.Config{
+			ColorModel: color.RGBAModel,
+			Width:      width,
+			Height:     height,
+		},
+		Id:          uuid.NewString(),
+		TileMaxSize: tile.MaxSize,
+		Tiles:       tiles,
+	}
+	ImageRepo.Add(img)
 
 	for _, t := range img.Tiles {
 		i := image.NewRGBA(t)
@@ -55,7 +68,7 @@ func NewRgbaBmp(width, height int) (*tiledimage.Image, error) {
 }
 
 func DeleteImage(id string) error {
-	err := ImageRepo.DeleteImage(id)
+	err := ImageRepo.Delete(id)
 	if err != nil {
 		return err
 	}

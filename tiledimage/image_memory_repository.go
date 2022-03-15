@@ -1,11 +1,7 @@
 package tiledimage
 
 import (
-	"chartographer-go/tile"
 	"errors"
-	"github.com/google/uuid"
-	"image"
-	"image/color"
 	"sync"
 )
 
@@ -24,42 +20,23 @@ func NewInMemoryImageRepo() *InMemoryImageRepo {
 
 var ErrNotExist = errors.New("изображение не найдено")
 
-func (r *InMemoryImageRepo) CreateImage(width, height int) *Image {
+func (r *InMemoryImageRepo) Add(img *Image) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return r.createImage(width, height)
+	r.add(img)
 }
 
-func (r *InMemoryImageRepo) createImage(width, height int) *Image {
-	id := uuid.NewString()
-	// TODO использовать зависимость Tiler
-	// TileMaxSize будет доступен через Tiler.TileMaxSize. Передавать его в CreateTiles не нужно.
-	tiles := tile.CreateTiles(width, height, tile.MaxSize)
-
-	// TODO принимать структуру Image единственным параметром
-
-	img := &Image{
-		Config: image.Config{
-			ColorModel: color.RGBAModel,
-			Width:      width,
-			Height:     height,
-		},
-		Id:          id,
-		TileMaxSize: tile.MaxSize, // TileMaxSize будет доступен через Tiler.TileMaxSize
-		Tiles:       tiles,
-	}
-	r.store[id] = img
-
-	return r.store[id]
+func (r *InMemoryImageRepo) add(img *Image) {
+	r.store[img.Id] = img
 }
 
-func (r *InMemoryImageRepo) GetImage(id string) (*Image, error) {
+func (r *InMemoryImageRepo) Get(id string) (*Image, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return r.getImage(id)
+	return r.get(id)
 }
 
-func (r *InMemoryImageRepo) getImage(id string) (*Image, error) {
+func (r *InMemoryImageRepo) get(id string) (*Image, error) {
 	img, ok := r.store[id]
 	if !ok {
 		return nil, ErrNotExist
@@ -67,13 +44,13 @@ func (r *InMemoryImageRepo) getImage(id string) (*Image, error) {
 	return img, nil
 }
 
-func (r *InMemoryImageRepo) DeleteImage(id string) error {
+func (r *InMemoryImageRepo) Delete(id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return r.deleteImage(id)
+	return r.delete(id)
 }
 
-func (r *InMemoryImageRepo) deleteImage(id string) error {
+func (r *InMemoryImageRepo) delete(id string) error {
 	_, ok := r.store[id]
 	if !ok {
 		return ErrNotExist

@@ -16,6 +16,8 @@ func min(a, b int) int {
 // MaxSize определяет максимальный размер тайла по ширине и высоте.
 // Необходимо проинициализировать перед использованием функций текущего pkg
 // TODO выделить в структуру Tiler, и фукнцию NewTiler(tileMaxSize). Тогда сделать все фукнции методами Tiler
+// TileMaxSize будет доступен через Tiler.TileMaxSize. Передавать его в CreateTiles не нужно.
+// Или оставить функцию CreateTiles как есть и инициализировать MaxSize в сервисе ChartService?
 var MaxSize int
 
 // CreateTiles делит прямоугольник указанного размера (width и height) на несколько тайлов (прямоугольников)

@@ -123,7 +123,7 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 
 	id := chi.URLParam(req, "id")
 
-	img, err := chart.ImageRepo.GetImage(id)
+	img, err := chart.ImageRepo.Get(id)
 	if err != nil {
 		if errors.Is(err, tiledimage.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
