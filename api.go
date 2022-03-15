@@ -2,7 +2,7 @@ package main
 
 import (
 	"chartographer-go/chart"
-	"chartographer-go/store"
+	"chartographer-go/tiledimage"
 	"errors"
 	"golang.org/x/image/bmp"
 	"net/http"
@@ -125,7 +125,7 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 
 	img, err := chart.ImageRepo.GetImage(id)
 	if err != nil {
-		if errors.Is(err, store.ErrNotExist) {
+		if errors.Is(err, tiledimage.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -155,7 +155,7 @@ func deleteImage(w http.ResponseWriter, req *http.Request) {
 
 	err := chart.DeleteImage(id)
 	if err != nil {
-		if errors.Is(err, store.ErrNotExist) {
+		if errors.Is(err, tiledimage.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

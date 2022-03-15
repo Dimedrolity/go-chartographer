@@ -3,6 +3,7 @@ package chart_test
 import (
 	"chartographer-go/store"
 	"chartographer-go/tile"
+	"chartographer-go/tiledimage"
 	"errors"
 	"image"
 	"image/color"
@@ -33,7 +34,7 @@ func (r *TestTileRepository) DeleteImage(string) error {
 
 func TestNewRGBA(t *testing.T) {
 	// TODO использовать стаб
-	chart.ImageRepo = store.NewInMemoryImageRepo()
+	chart.ImageRepo = tiledimage.NewInMemoryImageRepo()
 
 	Convey("init", t, func() {
 		const (

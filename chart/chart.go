@@ -4,6 +4,7 @@ package chart
 import (
 	"chartographer-go/store"
 	"chartographer-go/tile"
+	"chartographer-go/tiledimage"
 	"errors"
 	"fmt"
 	"image"
@@ -12,7 +13,7 @@ import (
 
 // ImageRepo
 //TODO не использовать глобальные переменную. Выделить структуру сервиса и принимать репо в конструкторе (NewInMemoryImageRepo)
-var ImageRepo store.TiledImageRepository
+var ImageRepo tiledimage.Repository
 var TileRepo store.TileRepository
 
 type MutableImage interface {
@@ -30,7 +31,7 @@ const (
 // NewRgbaBmp разделяет размеры изображения на тайлы, создает image.RGBA изображения в соответствии с тайлами,
 // записывает изображения на диск в формате BMP.
 // Возможна ошибка типа *SizeError
-func NewRgbaBmp(width, height int) (*store.TiledImage, error) {
+func NewRgbaBmp(width, height int) (*tiledimage.Image, error) {
 	if width < minWidth || width > maxWidth ||
 		height < minHeight || height > maxHeight {
 		return nil, &SizeError{
@@ -77,7 +78,7 @@ const (
 // GetFragment возвращает фрагмент изображения id, начиная с координат изобржаения (x; y) по ширине width и высоте height.
 // Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).
 // Возможны ошибки SizeError, ErrNotOverlaps и типа *os.PathError, например os.ErrNotExist.
-func GetFragment(imgConfig *store.TiledImage, x, y, width, height int) (image.Image, error) {
+func GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Image, error) {
 	if width < fragmentMinWidth || width > fragmentMaxWidth ||
 		height < fragmentMinHeight || height > fragmentMaxHeight {
 		return nil, &SizeError{
