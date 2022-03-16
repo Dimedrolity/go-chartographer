@@ -44,59 +44,47 @@ func createImage(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-//func setFragment(w http.ResponseWriter, req *http.Request) {
-//	queryValues := req.URL.Query()
-//	x, err := strconv.Atoi(queryValues.Get("x"))
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusBadRequest)
-//		return
-//	}
-//	y, err := strconv.Atoi(queryValues.Get("y"))
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusBadRequest)
-//		return
-//	}
-//	width, err := strconv.Atoi(queryValues.Get("width"))
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusBadRequest)
-//		return
-//	}
-//	height, err := strconv.Atoi(queryValues.Get("height"))
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusBadRequest)
-//		return
-//	}
-//
-//	fragment, err := bmp.Decode(req.Body)
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusBadRequest)
-//		return
-//	}
-//
-//	id := chi.URLParam(req, "id")
-//
-//	img, err := chart.GetImage(id)
-//	if err != nil {
-//		if errors.Is(err, os.ErrNotExist) {
-//			http.Error(w, err.Error(), http.StatusNotFound)
-//		} else {
-//			http.Error(w, err.Error(), http.StatusInternalServerError)
-//		}
-//		return
-//	}
-//
-//	err = chart.SetFragment(img, fragment, x, y, width, height)
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusBadRequest)
-//		return
-//	}
-//
-//	err = chart.SaveImage(id, img)
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusInternalServerError)
-//		return
-//	}
-//}
+func setFragment(w http.ResponseWriter, req *http.Request) {
+	queryValues := req.URL.Query()
+	x, err := strconv.Atoi(queryValues.Get("x"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	y, err := strconv.Atoi(queryValues.Get("y"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	width, err := strconv.Atoi(queryValues.Get("width"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	height, err := strconv.Atoi(queryValues.Get("height"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	id := chi.URLParam(req, "id")
+
+	fragment, err := bmp.Decode(req.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = chart.SetFragment(id, fragment, x, y, width, height)
+	if err != nil {
+		if errors.Is(err, tiledimage.ErrNotExist) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+}
 
 func fragment(w http.ResponseWriter, req *http.Request) {
 	queryValues := req.URL.Query()

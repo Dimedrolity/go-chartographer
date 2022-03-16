@@ -29,7 +29,7 @@ func main() {
 		r.Post("/", createImage)
 
 		r.Route("/{id}", func(r chi.Router) {
-			//r.Post("/", setFragment)
+			r.Post("/", setFragment)
 			r.Get("/", fragment)
 			r.Delete("/", deleteImage)
 		})
