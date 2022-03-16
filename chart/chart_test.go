@@ -581,7 +581,7 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 		So(!rect.Overlaps(img.Bounds()), ShouldBeTrue)
 
 		err := chart.SetFragment(id, fragment, x, y, fragmentWidth, fragmentHeight)
-		So(err, ShouldNotBeNil)
+		So(errors.Is(err, chart.ErrNotOverlaps), ShouldBeTrue)
 
 		for x := 0; x < imgWidth; x++ {
 			for y := 0; y < imgHeight; y++ {
