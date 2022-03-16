@@ -12,7 +12,7 @@ import (
 // TileRepository
 // наверно не должен работать с image.Image, чтобы в репозитории не было кодирования/декодирования.
 type TileRepository interface {
-	SaveTile(id string, img image.Image) error
+	SaveTile(id string, x int, y int, img image.Image) error
 	GetTile(id string, x, y int) (image.Image, error)
 	DeleteImage(id string) error
 }
@@ -36,6 +36,7 @@ func NewFileSystemTileRepo(dirPath string) (*FileSystemTileRepository, error) {
 }
 
 // GetTile считывает с диска изображение-тайл с координатами (x; y) изображения id и декодирует в формат BMP.
+// У возвращаемого image.Image Bounds().Min равен (0; 0).
 // Возможны ошибки типа *os.PathError, например os.ErrNotExist.
 func (r *FileSystemTileRepository) GetTile(id string, x, y int) (image.Image, error) {
 	filename := filepath.Join(r.dirPath, id, strconv.Itoa(y), strconv.Itoa(x)+".bmp")
@@ -67,7 +68,7 @@ func (r *FileSystemTileRepository) GetTile(id string, x, y int) (image.Image, er
 // 23a8cc52-8997-4adb-8a09-918c29aa10c4
 // 	+---- 10
 //		+---- 0.bmp
-func (r *FileSystemTileRepository) SaveTile(id string, img image.Image) error {
+func (r *FileSystemTileRepository) SaveTile(id string, x int, y int, img image.Image) error {
 	// TODO можно было бы обойтись без буфера, Create файл и bmp.Encode(файл)
 	// 	file, err := os.OpenFile(filepath.Join(dir, x+".bmp"), os.O_WRONLY|os.O_CREATE, 0777)
 	encode, err := Encode(img)
@@ -75,15 +76,13 @@ func (r *FileSystemTileRepository) SaveTile(id string, img image.Image) error {
 		return err
 	}
 
-	y := strconv.Itoa(img.Bounds().Min.Y)
-	dir := filepath.Join(r.dirPath, id, y)
+	dir := filepath.Join(r.dirPath, id, strconv.Itoa(y))
 	err = os.MkdirAll(dir, 0777)
 	if err != nil {
 		return err
 	}
 
-	x := strconv.Itoa(img.Bounds().Min.X)
-	err = os.WriteFile(filepath.Join(dir, x+".bmp"), encode, 0777)
+	err = os.WriteFile(filepath.Join(dir, strconv.Itoa(x)+".bmp"), encode, 0777)
 
 	if err != nil {
 		return err

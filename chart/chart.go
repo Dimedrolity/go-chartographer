@@ -6,6 +6,7 @@ import (
 	"chartographer-go/tile"
 	"chartographer-go/tiledimage"
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"image"
 	"image/color"
@@ -58,7 +59,7 @@ func NewRgbaBmp(width, height int) (*tiledimage.Image, error) {
 	for _, t := range img.Tiles {
 		i := NewOpaqueRGBA(t)
 
-		err := TileRepo.SaveTile(img.Id, i)
+		err := TileRepo.SaveTile(img.Id, t.Min.X, t.Min.Y, i)
 		if err != nil {
 			return nil, err
 		}
@@ -122,18 +123,22 @@ func GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Im
 
 	overlapped := tile.FilterOverlappedTiles(imgConfig.Tiles, fragmentRect)
 
-	img := image.NewRGBA(fragmentRect)
+	fragment := image.NewRGBA(fragmentRect)
 
 	for _, t := range overlapped {
 		tileImg, err := TileRepo.GetTile(imgConfig.Id, t.Min.X, t.Min.Y)
 		if err != nil {
 			return nil, err
 		}
+		// TODO refactor&comment,
+		realRect := tileImg.Bounds().Add(t.Min)
 
-		tile.DrawIntersection(img, tileImg, fragmentRect)
+		intersect := realRect.Bounds().Intersect(fragmentRect)
+
+		draw.Draw(fragment, intersect, tileImg, intersect.Min.Sub(t.Min), draw.Src)
 	}
 
-	return img, nil
+	return fragment, nil
 }
 
 // SetFragment измененяет пиксели изображения id пикселями фрагмента fragment, начиная с координат изобржаения (x;y) по ширине width и высоте height.
@@ -141,20 +146,26 @@ func GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Im
 // Примечание:
 // если фрагмент частично выходит за границы изображения, то часть фрагмента вне изображения игнорируется.
 func SetFragment(tiledImageId string, fragment image.Image, x, y, width, height int) error {
+	if fragment.Bounds().Min != image.Pt(0, 0) {
+		return errors.New("фрагмент должен иметь начальные координаты (0;0). " +
+			fmt.Sprintf("получено %v.", fragment.Bounds().Min))
+	}
+
 	img, err := ImageRepo.Get(tiledImageId)
 	if err != nil {
 		return err
 	}
 
 	imgRect := image.Rect(0, 0, img.Width, img.Height)
-	fragmentRect := image.Rect(x, y, x+width, y+height)
-	if !imgRect.Overlaps(fragmentRect) {
+	paramsRect := image.Rect(x, y, x+width, y+height)
+
+	if !imgRect.Overlaps(paramsRect) {
 		return ErrNotOverlaps
 	}
 
-	tiles := img.Tiles
+	intersect := paramsRect.Intersect(imgRect)
 
-	overlapped := tile.FilterOverlappedTiles(tiles, fragmentRect)
+	overlapped := tile.FilterOverlappedTiles(img.Tiles, intersect)
 
 	for _, t := range overlapped {
 		tileImg, err := TileRepo.GetTile(img.Id, t.Min.X, t.Min.Y)
@@ -167,10 +178,13 @@ func SetFragment(tiledImageId string, fragment image.Image, x, y, width, height 
 			return errors.New("изображение должно реализовывать draw.Image")
 		}
 
-		intersect := mutableImage.Bounds().Intersect(fragmentRect)
-		draw.Draw(mutableImage, intersect, fragment, fragment.Bounds().Min, draw.Src)
+		// TODO refactor&comment,
 
-		err = TileRepo.SaveTile(tiledImageId, mutableImage)
+		tileIntersect := t.Bounds().Intersect(intersect)
+		// параметр sp - точка (0; 0) и равен fragment.Bounds().Min всегда
+		draw.Draw(mutableImage, tileIntersect.Sub(t.Min), fragment, fragment.Bounds().Min, draw.Src)
+
+		err = TileRepo.SaveTile(img.Id, t.Min.X, t.Min.Y, mutableImage)
 		if err != nil {
 			return err
 		}

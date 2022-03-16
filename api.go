@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"strconv"
 
-	//"golang.org/x/image/bmp"
-
 	"github.com/go-chi/chi/v5"
 )
 
