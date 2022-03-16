@@ -56,7 +56,7 @@ func NewRgbaBmp(width, height int) (*tiledimage.Image, error) {
 	ImageRepo.Add(img)
 
 	for _, t := range img.Tiles {
-		i := image.NewRGBA(t)
+		i := NewOpaqueRGBA(t)
 
 		err := TileRepo.SaveTile(img.Id, i)
 		if err != nil {
@@ -65,6 +65,20 @@ func NewRgbaBmp(width, height int) (*tiledimage.Image, error) {
 	}
 
 	return img, nil
+}
+
+// NewOpaqueRGBA создает image.RGBA и устанавливает alpha-канал максимальным значением.
+// Таким образом, изображение в дальнейшем будет кодироваться без учета альфа канала (24-бит на пиксель).
+func NewOpaqueRGBA(r image.Rectangle) image.Image {
+	img := image.NewRGBA(r)
+
+	for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
+		for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {
+			img.Set(x, y, color.RGBA{R: 0, G: 0, B: 0, A: 0xFF})
+		}
+	}
+
+	return img
 }
 
 func DeleteImage(id string) error {
