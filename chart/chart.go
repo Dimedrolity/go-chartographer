@@ -100,6 +100,7 @@ const (
 // GetFragment возвращает фрагмент изображения id, начиная с координат изобржаения (x; y) по ширине width и высоте height.
 // Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).
 // Возможны ошибки SizeError, ErrNotOverlaps и типа *os.PathError, например os.ErrNotExist.
+// TODO удалить, использовать GF2
 func GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Image, error) {
 	if width < fragmentMinWidth || width > fragmentMaxWidth ||
 		height < fragmentMinHeight || height > fragmentMaxHeight {
@@ -185,4 +186,41 @@ func SetFragment(tiledImageId string, fragment image.Image) error {
 	}
 
 	return nil
+}
+
+// GetFragment2 возвращает фрагмент изображения id, начиная с координат изобржаения (x; y) по ширине width и высоте height.
+// Возвращаемое изображение будет иметь начальные координаты (x; y).
+// Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).
+// Возможны ошибки SizeError, ErrNotOverlaps и типа *os.PathError, например os.ErrNotExist.
+func GetFragment2(imgConfig *tiledimage.Image, x, y, width, height int) (image.Image, error) {
+	if width < fragmentMinWidth || width > fragmentMaxWidth ||
+		height < fragmentMinHeight || height > fragmentMaxHeight {
+		return nil, &SizeError{
+			minWidth: fragmentMinWidth, width: width, maxWidth: fragmentMaxWidth,
+			minHeight: fragmentMinHeight, height: height, maxHeight: fragmentMaxHeight,
+		}
+	}
+
+	imgRect := image.Rect(0, 0, imgConfig.Width, imgConfig.Height)
+	fragmentRect := image.Rect(x, y, x+width, y+height)
+	if !imgRect.Overlaps(fragmentRect) {
+		return nil, ErrNotOverlaps
+	}
+
+	overlapped := tile.FilterOverlappedTiles(imgConfig.Tiles, fragmentRect)
+
+	fragment := image.NewRGBA(fragmentRect)
+
+	for _, t := range overlapped {
+		tileImg, err := TileRepo.GetTile(imgConfig.Id, t.Min.X, t.Min.Y)
+		if err != nil {
+			return nil, err
+		}
+
+		intersect := t.Intersect(fragmentRect)
+
+		draw.Draw(fragment, intersect, tileImg, intersect.Min, draw.Src)
+	}
+
+	return fragment, nil
 }
