@@ -57,6 +57,18 @@ func (r *TestImageRepo) Delete(id string) error {
 	return nil
 }
 
+type TestTileRepositoryEmpty struct{}
+
+func (t TestTileRepositoryEmpty) SaveTile(string, int, int, image.Image) error {
+	return nil
+}
+func (t TestTileRepositoryEmpty) GetTile(string, int, int) (image.Image, error) {
+	return nil, nil
+}
+func (t TestTileRepositoryEmpty) DeleteImage(string) error {
+	return nil
+}
+
 func TestNewRGBA(t *testing.T) {
 	chart.ImageRepo = &TestImageRepo{images: make(map[string]*tiledimage.Image)}
 
@@ -69,7 +81,7 @@ func TestNewRGBA(t *testing.T) {
 		)
 
 		tile.MaxSize = 1000
-		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		tileRepo := &TestTileRepositoryEmpty{}
 		chart.TileRepo = tileRepo
 
 		// Позитивные тесты
@@ -82,10 +94,10 @@ func TestNewRGBA(t *testing.T) {
 			So(img.Height, ShouldEqual, height)
 		}
 		Convey("MinSize", func() {
-			testSize(minWidth, minHeight)
+			testSize(minWidth, maxHeight)
 		})
 		Convey("MaxSize", func() {
-			testSize(maxWidth, maxHeight)
+			testSize(maxWidth, minHeight)
 		})
 
 		// Негативные тесты
