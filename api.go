@@ -121,7 +121,7 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	fragment, err := chart.GetFragment(img, x, y, width, height)
+	fragment, err := chart.GetFragment2(img, x, y, width, height)
 	var errSize *chart.SizeError
 	if err != nil {
 		if errors.As(err, &errSize) || errors.Is(err, chart.ErrNotOverlaps) {
