@@ -1,7 +1,7 @@
 default: clean test build run
 
 test:
-	go test
+	go test ./...
 
 build:
 	go build -o build/app
