@@ -474,8 +474,8 @@ func TestCreateTiles(t *testing.T) {
 	})
 }
 
-//SetFragment2 с фрагментом, затрагивающим 2 тайла.
-// НОВАЯ ВЕРСИЯ. SetFragment2
+//SetFragment с фрагментом, затрагивающим 2 тайла.
+// НОВАЯ ВЕРСИЯ. SetFragment
 func TestSetFragment2_In_TwoTiles(t *testing.T) {
 	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения "+
 		"и фрагмент затрагивает 2 тайла.\n"+
@@ -546,7 +546,7 @@ func TestSetFragment2_In_TwoTiles(t *testing.T) {
 		imgRect := image.Rect(0, 0, imgWidth, imgHeight)
 		So(fragment.Bounds().In(imgRect), ShouldBeTrue)
 
-		err := chart.SetFragment2(id, fragment)
+		err := chart.SetFragment(id, fragment)
 		So(err, ShouldBeNil)
 
 		const (
@@ -613,7 +613,7 @@ func TestSetFragment2_In(t *testing.T) {
 		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
 		So(fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
 
-		err := chart.SetFragment2(id, fragment)
+		err := chart.SetFragment(id, fragment)
 		So(err, ShouldBeNil)
 
 		const (
@@ -685,7 +685,7 @@ func TestSetFragment2_NotOverlaps(t *testing.T) {
 		// Убеждаемся, что прямоугольники не пересекаются
 		So(!fragment.Bounds().Overlaps(img.Bounds()), ShouldBeTrue)
 
-		err := chart.SetFragment2(id, fragment)
+		err := chart.SetFragment(id, fragment)
 		So(errors.Is(err, chart.ErrNotOverlaps), ShouldBeTrue)
 
 		for x := 0; x < imgWidth; x++ {
@@ -750,7 +750,7 @@ func TestSetFragment2_PartIntersect(t *testing.T) {
 		// Убеждаемся, что прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения
 		So(fragment.Bounds().Overlaps(img.Bounds()) && !fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
 
-		err := chart.SetFragment2(id, fragment)
+		err := chart.SetFragment(id, fragment)
 		So(err, ShouldBeNil)
 
 		for x := 0; x < imgWidth; x++ {
@@ -820,7 +820,7 @@ func TestSetFragment2_In_NotFirstTile(t *testing.T) {
 		imgRect := image.Rect(0, 0, imgWidth, imgHeight)
 		So(fragment.Bounds().In(imgRect), ShouldBeTrue)
 
-		err := chart.SetFragment2(id, fragment)
+		err := chart.SetFragment(id, fragment)
 		So(err, ShouldBeNil)
 
 		So(img.At(x, y), ShouldResemble, red)

@@ -76,7 +76,7 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 	}
 	store.ShiftRect(fragment, x, y)
 
-	err = chart.SetFragment2(id, fragment)
+	err = chart.SetFragment(id, fragment)
 	if err != nil {
 		if errors.Is(err, tiledimage.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)

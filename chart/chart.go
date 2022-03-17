@@ -17,11 +17,6 @@ import (
 var ImageRepo tiledimage.Repository
 var TileRepo store.TileRepository
 
-type MutableImage interface {
-	image.Image
-	Set(x, y int, c color.Color)
-}
-
 const (
 	minWidth  = 1
 	minHeight = 1
@@ -140,7 +135,7 @@ func GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Im
 	return fragment, nil
 }
 
-// SetFragment2 измененяет пиксели изображения id пикселями фрагмента fragment,
+// SetFragment измененяет пиксели изображения id пикселями фрагмента fragment,
 // накладывая прямогольник фрагмента - fragment.Bounds() - на изображение.
 // Изображение имеет начальные координаты (0;0), фрагмент может иметь начальные координаты отличные от (0;0).
 //
@@ -148,7 +143,7 @@ func GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Im
 //
 // Примечание:
 // если фрагмент частично выходит за границы изображения, то часть фрагмента вне изображения игнорируется.
-func SetFragment2(tiledImageId string, fragment image.Image) error {
+func SetFragment(tiledImageId string, fragment image.Image) error {
 	img, err := ImageRepo.Get(tiledImageId)
 	if err != nil {
 		return err
