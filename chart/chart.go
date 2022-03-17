@@ -6,7 +6,6 @@ import (
 	"chartographer-go/tile"
 	"chartographer-go/tiledimage"
 	"errors"
-	"fmt"
 	"github.com/google/uuid"
 	"image"
 	"image/color"
@@ -140,62 +139,6 @@ func GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Im
 
 	return fragment, nil
 }
-
-// SetFragment измененяет пиксели изображения id пикселями фрагмента fragment, начиная с координат изобржаения (x;y) по ширине width и высоте height.
-// Меняется существующий массив байт изображения, это производительнее чем создавать абсолютно новое изображение.
-// Примечание:
-// если фрагмент частично выходит за границы изображения, то часть фрагмента вне изображения игнорируется.
-// TODO удалить, так как теперь SetFragment2. Переименовать SF2 -> SF
-func SetFragment(tiledImageId string, fragment image.Image, x, y, width, height int) error {
-	if fragment.Bounds().Min != image.Pt(0, 0) {
-		return errors.New("фрагмент должен иметь начальные координаты (0;0). " +
-			fmt.Sprintf("получено %v.", fragment.Bounds().Min))
-	}
-
-	img, err := ImageRepo.Get(tiledImageId)
-	if err != nil {
-		return err
-	}
-
-	imgRect := image.Rect(0, 0, img.Width, img.Height)
-	paramsRect := image.Rect(x, y, x+width, y+height)
-
-	if !imgRect.Overlaps(paramsRect) {
-		return ErrNotOverlaps
-	}
-
-	intersect := paramsRect.Intersect(imgRect)
-
-	overlapped := tile.FilterOverlappedTiles(img.Tiles, intersect)
-
-	for _, t := range overlapped {
-		tileImg, err := TileRepo.GetTile(img.Id, t.Min.X, t.Min.Y)
-		if err != nil {
-			return err
-		}
-
-		mutableImage, ok := tileImg.(draw.Image)
-		if !ok {
-			return errors.New("изображение должно реализовывать draw.Image")
-		}
-
-		// TODO refactor&comment,
-
-		tileIntersect := t.Bounds().Intersect(intersect)
-		// параметр sp - точка (0; 0) и равен fragment.Bounds().Min всегда
-		// TODO коммет, зачем Sub(t.Min)
-		draw.Draw(mutableImage, tileIntersect.Sub(t.Min), fragment, fragment.Bounds().Min, draw.Src)
-
-		err = TileRepo.SaveTile(img.Id, t.Min.X, t.Min.Y, mutableImage)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// Новая версия.
 
 // SetFragment2 измененяет пиксели изображения id пикселями фрагмента fragment,
 // накладывая прямогольник фрагмента - fragment.Bounds() - на изображение.
