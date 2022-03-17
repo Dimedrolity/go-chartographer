@@ -426,143 +426,11 @@ func TestFragment_Size(t *testing.T) {
 	})
 }
 
+// TODO тесты GetFragment с фрагментом, затрагивающим 2 тайла
+
 // -----------
 // SetFragment
 // -----------
-// TODO тесты GetFragment с фрагментом, затрагивающим 2 тайла
-
-func TestCreateTiles(t *testing.T) {
-	Convey("Проверка того, что центральные тайлы будут максимального размера, а крайние не максимального", t, func() {
-		const (
-			width       = 25
-			height      = 25
-			maxTileSize = 10
-		)
-
-		tiles := tile.CreateTiles(width, height, maxTileSize)
-
-		So(tiles, ShouldHaveLength, 9)
-		// 1-я строка
-		So(tiles[0].Min, ShouldResemble, image.Pt(0, 0))
-		So(tiles[0].Max, ShouldResemble, image.Pt(10, 10))
-
-		So(tiles[1].Min, ShouldResemble, image.Pt(10, 0))
-		So(tiles[1].Max, ShouldResemble, image.Pt(20, 10))
-
-		So(tiles[2].Min, ShouldResemble, image.Pt(20, 0))
-		So(tiles[2].Max, ShouldResemble, image.Pt(25, 10))
-
-		// 2-я строка
-		So(tiles[3].Min, ShouldResemble, image.Pt(0, 10))
-		So(tiles[3].Max, ShouldResemble, image.Pt(10, 20))
-
-		So(tiles[4].Min, ShouldResemble, image.Pt(10, 10))
-		So(tiles[4].Max, ShouldResemble, image.Pt(20, 20))
-
-		So(tiles[5].Min, ShouldResemble, image.Pt(20, 10))
-		So(tiles[5].Max, ShouldResemble, image.Pt(25, 20))
-
-		// 3-я строка
-		So(tiles[6].Min, ShouldResemble, image.Pt(0, 20))
-		So(tiles[6].Max, ShouldResemble, image.Pt(10, 25))
-
-		So(tiles[7].Min, ShouldResemble, image.Pt(10, 20))
-		So(tiles[7].Max, ShouldResemble, image.Pt(20, 25))
-
-		So(tiles[8].Min, ShouldResemble, image.Pt(20, 20))
-		So(tiles[8].Max, ShouldResemble, image.Pt(25, 25))
-	})
-}
-
-//SetFragment с фрагментом, затрагивающим 2 тайла.
-// НОВАЯ ВЕРСИЯ. SetFragment
-func TestSetFragment2_In_TwoTiles(t *testing.T) {
-	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения "+
-		"и фрагмент затрагивает 2 тайла.\n"+
-		"После вызова функции SetFragment красные пиксели фрагмента должны появиться в изображении", t, func() {
-		imageRepo := &TestImageRepo{images: make(map[string]*tiledimage.Image)}
-		chart.ImageRepo = imageRepo
-
-		tile.MaxSize = 10
-
-		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
-		chart.TileRepo = tileRepo
-
-		const (
-			tile1X      = 0
-			tile1Y      = 0
-			tile1Width  = 10
-			tile1Height = 10
-		)
-
-		const (
-			tile2X      = 10
-			tile2Y      = 0
-			tile2Width  = 5
-			tile2Height = 10
-		)
-
-		t1 := image.NewRGBA(image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height))
-		t2 := image.NewRGBA(image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height))
-
-		id := "0"
-		_ = tileRepo.SaveTile(id, tile1X, tile1Y, t1) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
-		_ = tileRepo.SaveTile(id, tile2X, tile2Y, t2) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
-
-		const (
-			imgWidth  = 15
-			imgHeight = 15
-		)
-
-		tiledImg := &tiledimage.Image{
-			Id: id,
-			Config: image.Config{
-				Width:  imgWidth,
-				Height: imgHeight,
-			},
-			TileMaxSize: tile.MaxSize,
-			Tiles: []image.Rectangle{
-				image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height),
-				image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height),
-			},
-		}
-		imageRepo.Add(tiledImg)
-
-		const (
-			x = 9
-			y = 0
-		)
-		const (
-			fragmentWidth  = 2
-			fragmentHeight = 1
-		)
-		fragment := image.NewRGBA(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight))
-		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
-		green := color.RGBA{R: 0, G: 255, B: 0, A: 255}
-		fragment.SetRGBA(x, y, red)
-		fragment.SetRGBA(x+1, y, green)
-
-		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
-		imgRect := image.Rect(0, 0, imgWidth, imgHeight)
-		So(fragment.Bounds().In(imgRect), ShouldBeTrue)
-
-		err := chart.SetFragment(id, fragment)
-		So(err, ShouldBeNil)
-
-		const (
-			imgRedX = 9
-			imgRedY = 0
-		)
-		const (
-			imgGreenX = 10
-			imgGreenY = 0
-		)
-		So(t1.At(imgRedX, imgRedY), ShouldResemble, red)
-		So(t2.At(imgGreenX, imgGreenY), ShouldResemble, green)
-	})
-}
-
-// старые тесты в новой версии
 func TestSetFragment2_In(t *testing.T) {
 	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения.\n"+
 		"После вызова функции SetFragment красный пиксель фрагмента должен появиться в изображении", t, func() {
@@ -824,5 +692,134 @@ func TestSetFragment2_In_NotFirstTile(t *testing.T) {
 		So(err, ShouldBeNil)
 
 		So(img.At(x, y), ShouldResemble, red)
+	})
+}
+
+func TestSetFragment2_In_TwoTiles(t *testing.T) {
+	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения "+
+		"и фрагмент затрагивает 2 тайла.\n"+
+		"После вызова функции SetFragment красные пиксели фрагмента должны появиться в изображении", t, func() {
+		imageRepo := &TestImageRepo{images: make(map[string]*tiledimage.Image)}
+		chart.ImageRepo = imageRepo
+
+		tile.MaxSize = 10
+
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		chart.TileRepo = tileRepo
+
+		const (
+			tile1X      = 0
+			tile1Y      = 0
+			tile1Width  = 10
+			tile1Height = 10
+		)
+
+		const (
+			tile2X      = 10
+			tile2Y      = 0
+			tile2Width  = 5
+			tile2Height = 10
+		)
+
+		t1 := image.NewRGBA(image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height))
+		t2 := image.NewRGBA(image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height))
+
+		id := "0"
+		_ = tileRepo.SaveTile(id, tile1X, tile1Y, t1) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+		_ = tileRepo.SaveTile(id, tile2X, tile2Y, t2) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+
+		const (
+			imgWidth  = 15
+			imgHeight = 15
+		)
+
+		tiledImg := &tiledimage.Image{
+			Id: id,
+			Config: image.Config{
+				Width:  imgWidth,
+				Height: imgHeight,
+			},
+			TileMaxSize: tile.MaxSize,
+			Tiles: []image.Rectangle{
+				image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height),
+				image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height),
+			},
+		}
+		imageRepo.Add(tiledImg)
+
+		const (
+			x = 9
+			y = 0
+		)
+		const (
+			fragmentWidth  = 2
+			fragmentHeight = 1
+		)
+		fragment := image.NewRGBA(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight))
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		green := color.RGBA{R: 0, G: 255, B: 0, A: 255}
+		fragment.SetRGBA(x, y, red)
+		fragment.SetRGBA(x+1, y, green)
+
+		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
+		imgRect := image.Rect(0, 0, imgWidth, imgHeight)
+		So(fragment.Bounds().In(imgRect), ShouldBeTrue)
+
+		err := chart.SetFragment(id, fragment)
+		So(err, ShouldBeNil)
+
+		const (
+			imgRedX = 9
+			imgRedY = 0
+		)
+		const (
+			imgGreenX = 10
+			imgGreenY = 0
+		)
+		So(t1.At(imgRedX, imgRedY), ShouldResemble, red)
+		So(t2.At(imgGreenX, imgGreenY), ShouldResemble, green)
+	})
+}
+
+func TestCreateTiles(t *testing.T) {
+	Convey("Проверка того, что центральные тайлы будут максимального размера, а крайние не максимального", t, func() {
+		const (
+			width       = 25
+			height      = 25
+			maxTileSize = 10
+		)
+
+		tiles := tile.CreateTiles(width, height, maxTileSize)
+
+		So(tiles, ShouldHaveLength, 9)
+		// 1-я строка
+		So(tiles[0].Min, ShouldResemble, image.Pt(0, 0))
+		So(tiles[0].Max, ShouldResemble, image.Pt(10, 10))
+
+		So(tiles[1].Min, ShouldResemble, image.Pt(10, 0))
+		So(tiles[1].Max, ShouldResemble, image.Pt(20, 10))
+
+		So(tiles[2].Min, ShouldResemble, image.Pt(20, 0))
+		So(tiles[2].Max, ShouldResemble, image.Pt(25, 10))
+
+		// 2-я строка
+		So(tiles[3].Min, ShouldResemble, image.Pt(0, 10))
+		So(tiles[3].Max, ShouldResemble, image.Pt(10, 20))
+
+		So(tiles[4].Min, ShouldResemble, image.Pt(10, 10))
+		So(tiles[4].Max, ShouldResemble, image.Pt(20, 20))
+
+		So(tiles[5].Min, ShouldResemble, image.Pt(20, 10))
+		So(tiles[5].Max, ShouldResemble, image.Pt(25, 20))
+
+		// 3-я строка
+		So(tiles[6].Min, ShouldResemble, image.Pt(0, 20))
+		So(tiles[6].Max, ShouldResemble, image.Pt(10, 25))
+
+		So(tiles[7].Min, ShouldResemble, image.Pt(10, 20))
+		So(tiles[7].Max, ShouldResemble, image.Pt(20, 25))
+
+		So(tiles[8].Min, ShouldResemble, image.Pt(20, 20))
+		So(tiles[8].Max, ShouldResemble, image.Pt(25, 25))
 	})
 }
