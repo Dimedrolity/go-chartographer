@@ -18,15 +18,22 @@ import (
 //
 
 // TestTileRepository - заглушка (stub)
+type tileKey struct {
+	x, y int
+}
 type TestTileRepository struct {
-	images map[string]image.Image
+	images map[string]map[tileKey]image.Image
 }
 
-func (r *TestTileRepository) GetTile(id string, _ int, _ int) (image.Image, error) {
-	return r.images[id], nil
+func (r *TestTileRepository) GetTile(id string, x int, y int) (image.Image, error) {
+	return r.images[id][tileKey{x: x, y: y}], nil
 }
-func (r *TestTileRepository) SaveTile(id string, _ int, _ int, img image.Image) error {
-	r.images[id] = img
+func (r *TestTileRepository) SaveTile(id string, x int, y int, img image.Image) error {
+	_, ok := r.images[id]
+	if !ok {
+		r.images[id] = make(map[tileKey]image.Image)
+	}
+	r.images[id][tileKey{x: x, y: y}] = img
 	return nil
 }
 func (r *TestTileRepository) DeleteImage(id string) error {
@@ -62,7 +69,7 @@ func TestNewRGBA(t *testing.T) {
 		)
 
 		tile.MaxSize = 1000
-		tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		// Позитивные тесты
@@ -116,7 +123,7 @@ func TestFragment_In(t *testing.T) {
 
 		tile.MaxSize = 1000
 
-		tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const imgSize = 2
@@ -170,7 +177,7 @@ func TestFragment_PartIntersect(t *testing.T) {
 
 		tile.MaxSize = 1000
 
-		tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -237,7 +244,7 @@ func TestFragment_NotOverlaps(t *testing.T) {
 
 		tile.MaxSize = 1000
 
-		tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -290,7 +297,7 @@ func TestFragment_In_NotFirstTile(t *testing.T) {
 
 		tile.MaxSize = 10
 
-		tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -357,7 +364,7 @@ func TestFragment_Size(t *testing.T) {
 
 	tile.MaxSize = 1000
 
-	tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+	tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
 	chart.TileRepo = tileRepo
 
 	emptyImg := image.NewRGBA(image.Rect(0, 0, 1, 1))
@@ -432,7 +439,7 @@ func TestSetFragment_In(t *testing.T) {
 
 		tile.MaxSize = 1000
 
-		tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -537,7 +544,7 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 
 		tile.MaxSize = 1000
 
-		tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -600,7 +607,7 @@ func TestSetFragment_PartIntersect(t *testing.T) {
 
 		tile.MaxSize = 1000
 
-		tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -671,7 +678,7 @@ func TestSetFragment_In_NotFirstTile(t *testing.T) {
 
 		tile.MaxSize = 10
 
-		tileRepo := &TestTileRepository{images: make(map[string]image.Image)}
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -706,12 +713,8 @@ func TestSetFragment_In_NotFirstTile(t *testing.T) {
 			fragmentHeight = 1
 		)
 		fragment := image.NewRGBA(image.Rect(0, 0, fragmentWidth, fragmentHeight))
-		const (
-			fragmentRedX = 0
-			fragmentRedY = 0
-		)
 		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
-		fragment.SetRGBA(fragmentRedX, fragmentRedY, red)
+		fragment.SetRGBA(0, 0, red)
 
 		const (
 			x = tileX
@@ -730,6 +733,95 @@ func TestSetFragment_In_NotFirstTile(t *testing.T) {
 			imgRedY = 0
 		)
 		So(img.At(imgRedX, imgRedY), ShouldResemble, red)
+	})
+}
+
+//SetFragment с фрагментом, затрагивающим 2 тайла
+// НЕ работает. Работает с новой версией - SetFragment2
+func TestSetFragment_In_TwoTiles(t *testing.T) {
+	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения "+
+		"и фрагмент затрагивает 2 тайла.\n"+
+		"После вызова функции SetFragment красные пиксели фрагмента должны появиться в изображении", t, func() {
+		imageRepo := &TestImageRepo{images: make(map[string]*tiledimage.Image)}
+		chart.ImageRepo = imageRepo
+
+		tile.MaxSize = 10
+
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		chart.TileRepo = tileRepo
+
+		const (
+			tile1X      = 0
+			tile1Y      = 0
+			tile1Width  = 10
+			tile1Height = 10
+		)
+
+		const (
+			tile2X      = 10
+			tile2Y      = 0
+			tile2Width  = 5
+			tile2Height = 10
+		)
+
+		t1 := image.NewRGBA(image.Rect(0, 0, tile1Width, tile1Height))
+		t2 := image.NewRGBA(image.Rect(0, 0, tile2Width, tile2Height))
+
+		id := "0"
+		_ = tileRepo.SaveTile(id, tile1X, tile1Y, t1) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+		_ = tileRepo.SaveTile(id, tile2X, tile2Y, t2) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+
+		const (
+			imgWidth  = 15
+			imgHeight = 15
+		)
+
+		tiledImg := &tiledimage.Image{
+			Id: id,
+			Config: image.Config{
+				Width:  imgWidth,
+				Height: imgHeight,
+			},
+			TileMaxSize: tile.MaxSize,
+			Tiles: []image.Rectangle{
+				image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height),
+				image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height),
+			},
+		}
+		imageRepo.Add(tiledImg)
+
+		const (
+			fragmentWidth  = 2
+			fragmentHeight = 1
+		)
+		fragment := image.NewRGBA(image.Rect(0, 0, fragmentWidth, fragmentHeight))
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		green := color.RGBA{R: 0, G: 255, B: 0, A: 255}
+		fragment.SetRGBA(0, 0, red)
+		fragment.SetRGBA(1, 0, green)
+
+		const (
+			x = 9
+			y = 0
+		)
+		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
+		rect := image.Rect(x, y, x+fragmentWidth, y+fragmentHeight)
+		imgRect := image.Rect(0, 0, imgWidth, imgHeight)
+		So(rect.In(imgRect), ShouldBeTrue)
+
+		err := chart.SetFragment(id, fragment, x, y, fragmentWidth, fragmentHeight)
+		So(err, ShouldBeNil)
+
+		const (
+			imgRedX = 9
+			imgRedY = 0
+		)
+		const (
+			imgGreenX = 10
+			imgGreenY = 0
+		)
+		So(t1.At(imgRedX, imgRedY), ShouldResemble, red)
+		So(t2.At(imgGreenX, imgGreenY), ShouldResemble, green)
 	})
 }
 
@@ -773,5 +865,358 @@ func TestCreateTiles(t *testing.T) {
 
 		So(tiles[8].Min, ShouldResemble, image.Pt(20, 20))
 		So(tiles[8].Max, ShouldResemble, image.Pt(25, 25))
+	})
+}
+
+//SetFragment2 с фрагментом, затрагивающим 2 тайла.
+// НОВАЯ ВЕРСИЯ. SetFragment2
+func TestSetFragment2_In_TwoTiles(t *testing.T) {
+	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения "+
+		"и фрагмент затрагивает 2 тайла.\n"+
+		"После вызова функции SetFragment красные пиксели фрагмента должны появиться в изображении", t, func() {
+		imageRepo := &TestImageRepo{images: make(map[string]*tiledimage.Image)}
+		chart.ImageRepo = imageRepo
+
+		tile.MaxSize = 10
+
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		chart.TileRepo = tileRepo
+
+		const (
+			tile1X      = 0
+			tile1Y      = 0
+			tile1Width  = 10
+			tile1Height = 10
+		)
+
+		const (
+			tile2X      = 10
+			tile2Y      = 0
+			tile2Width  = 5
+			tile2Height = 10
+		)
+
+		t1 := image.NewRGBA(image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height))
+		t2 := image.NewRGBA(image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height))
+
+		id := "0"
+		_ = tileRepo.SaveTile(id, tile1X, tile1Y, t1) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+		_ = tileRepo.SaveTile(id, tile2X, tile2Y, t2) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+
+		const (
+			imgWidth  = 15
+			imgHeight = 15
+		)
+
+		tiledImg := &tiledimage.Image{
+			Id: id,
+			Config: image.Config{
+				Width:  imgWidth,
+				Height: imgHeight,
+			},
+			TileMaxSize: tile.MaxSize,
+			Tiles: []image.Rectangle{
+				image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height),
+				image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height),
+			},
+		}
+		imageRepo.Add(tiledImg)
+
+		const (
+			x = 9
+			y = 0
+		)
+		const (
+			fragmentWidth  = 2
+			fragmentHeight = 1
+		)
+		fragment := image.NewRGBA(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight))
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		green := color.RGBA{R: 0, G: 255, B: 0, A: 255}
+		fragment.SetRGBA(x, y, red)
+		fragment.SetRGBA(x+1, y, green)
+
+		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
+		imgRect := image.Rect(0, 0, imgWidth, imgHeight)
+		So(fragment.Bounds().In(imgRect), ShouldBeTrue)
+
+		err := chart.SetFragment2(id, fragment)
+		So(err, ShouldBeNil)
+
+		const (
+			imgRedX = 9
+			imgRedY = 0
+		)
+		const (
+			imgGreenX = 10
+			imgGreenY = 0
+		)
+		So(t1.At(imgRedX, imgRedY), ShouldResemble, red)
+		So(t2.At(imgGreenX, imgGreenY), ShouldResemble, green)
+	})
+}
+
+// старые тесты в новой версии
+func TestSetFragment2_In(t *testing.T) {
+	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения.\n"+
+		"После вызова функции SetFragment красный пиксель фрагмента должен появиться в изображении", t, func() {
+		imageRepo := &TestImageRepo{images: make(map[string]*tiledimage.Image)}
+		chart.ImageRepo = imageRepo
+
+		tile.MaxSize = 1000
+
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		chart.TileRepo = tileRepo
+
+		const (
+			imgWidth  = 2
+			imgHeight = 2
+		)
+		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+
+		id := "0"
+		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+
+		tiledImg := &tiledimage.Image{
+			Id: id,
+			Config: image.Config{
+				Width:  img.Bounds().Dx(),
+				Height: img.Bounds().Dy(),
+			},
+			TileMaxSize: tile.MaxSize,
+			Tiles:       []image.Rectangle{img.Bounds()},
+		}
+		imageRepo.Add(tiledImg)
+
+		const (
+			x = 1
+			y = 0
+		)
+		const (
+			fragmentWidth  = 1
+			fragmentHeight = 1
+		)
+		fragment := image.NewRGBA(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight))
+		const (
+			fragmentRedX = x
+			fragmentRedY = y
+		)
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		fragment.SetRGBA(fragmentRedX, fragmentRedY, red)
+
+		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
+		So(fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
+
+		err := chart.SetFragment2(id, fragment)
+		So(err, ShouldBeNil)
+
+		const (
+			imgRedX = x
+			imgRedY = y
+		)
+		for x := 0; x < imgWidth; x++ {
+			for y := 0; y < imgHeight; y++ {
+				c := color.RGBA{}
+				if x == imgRedX && y == imgRedY {
+					c = red
+				}
+
+				So(img.At(x, y), ShouldResemble, c)
+			}
+		}
+	})
+}
+
+func TestSetFragment2_NotOverlaps(t *testing.T) {
+	Convey("SetFragment когда прямоугольники не пересекаются\n"+
+		"После вызова функции SetFragment красный пиксель фрагмента не должен появиться в изображении, "+
+		"так как прямоугольники не пересекаются", t, func() {
+		imageRepo := &TestImageRepo{images: make(map[string]*tiledimage.Image)}
+		chart.ImageRepo = imageRepo
+
+		tile.MaxSize = 1000
+
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		chart.TileRepo = tileRepo
+
+		const (
+			imgWidth  = 2
+			imgHeight = 2
+		)
+		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+
+		id := "0"
+		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+
+		tiledImg := &tiledimage.Image{
+			Id: id,
+			Config: image.Config{
+				Width:  img.Bounds().Dx(),
+				Height: img.Bounds().Dy(),
+			},
+			TileMaxSize: tile.MaxSize,
+			Tiles:       []image.Rectangle{img.Bounds()},
+		}
+		imageRepo.Add(tiledImg)
+
+		const (
+			x = 3
+			y = 3
+		)
+		const (
+			fragmentWidth  = 1
+			fragmentHeight = 1
+		)
+		fragment := image.NewRGBA(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight))
+
+		const (
+			fragmentRedX = x
+			fragmentRedY = y
+		)
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		fragment.SetRGBA(fragmentRedX, fragmentRedY, red)
+
+		// Убеждаемся, что прямоугольники не пересекаются
+		So(!fragment.Bounds().Overlaps(img.Bounds()), ShouldBeTrue)
+
+		err := chart.SetFragment2(id, fragment)
+		So(errors.Is(err, chart.ErrNotOverlaps), ShouldBeTrue)
+
+		for x := 0; x < imgWidth; x++ {
+			for y := 0; y < imgHeight; y++ {
+				c := color.RGBA{}
+				So(img.At(x, y), ShouldResemble, c)
+			}
+		}
+	})
+}
+
+func TestSetFragment2_PartIntersect(t *testing.T) {
+	Convey("SetFragment когда прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения\n"+
+		"После вызова функции SetFragment красный пиксель фрагмента должен появиться в изображении", t, func() {
+		imageRepo := &TestImageRepo{images: make(map[string]*tiledimage.Image)}
+		chart.ImageRepo = imageRepo
+
+		tile.MaxSize = 1000
+
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		chart.TileRepo = tileRepo
+
+		const (
+			imgWidth  = 2
+			imgHeight = 2
+		)
+		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+
+		id := "0"
+		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+
+		tiledImg := &tiledimage.Image{
+			Id: id,
+			Config: image.Config{
+				Width:  img.Bounds().Dx(),
+				Height: img.Bounds().Dy(),
+			},
+			TileMaxSize: tile.MaxSize,
+			Tiles:       []image.Rectangle{img.Bounds()},
+		}
+		imageRepo.Add(tiledImg)
+
+		const (
+			x              = 1
+			y              = 1
+			fragmentWidth  = 2
+			fragmentHeight = 2
+		)
+		fragment := image.NewRGBA(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight))
+
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		for x := x; x < fragmentWidth; x++ {
+			for y := y; y < fragmentHeight; y++ {
+				fragment.SetRGBA(x, y, red)
+			}
+		}
+
+		const (
+			imgRedX = 1
+			imgRedY = 1
+		)
+		// Убеждаемся, что прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения
+		So(fragment.Bounds().Overlaps(img.Bounds()) && !fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
+
+		err := chart.SetFragment2(id, fragment)
+		So(err, ShouldBeNil)
+
+		for x := 0; x < imgWidth; x++ {
+			for y := 0; y < imgHeight; y++ {
+				c := color.RGBA{}
+				if x == imgRedX && y == imgRedY {
+					c = red
+				}
+
+				So(img.At(x, y), ShouldResemble, c)
+			}
+		}
+	})
+}
+
+func TestSetFragment2_In_NotFirstTile(t *testing.T) {
+	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения "+
+		"и параметры x,y,width,height относятся не к первому тайлу\n"+
+		"После вызова функции SetFragment красный пиксель фрагмента должен появиться в изображении", t, func() {
+		imageRepo := &TestImageRepo{images: make(map[string]*tiledimage.Image)}
+		chart.ImageRepo = imageRepo
+
+		tile.MaxSize = 10
+
+		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		chart.TileRepo = tileRepo
+
+		const (
+			tileX      = 10
+			tileY      = 0
+			tileWidth  = 5
+			tileHeight = 10
+		)
+		img := image.NewRGBA(image.Rect(tileX, tileY, tileX+tileWidth, tileY+tileHeight))
+
+		id := "0"
+		_ = tileRepo.SaveTile(id, tileX, tileY, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+
+		const (
+			imgWidth  = 15
+			imgHeight = 15
+		)
+		tiledImg := &tiledimage.Image{
+			Id: id,
+			Config: image.Config{
+				Width:  imgWidth,
+				Height: imgHeight,
+			},
+			TileMaxSize: tile.MaxSize,
+			Tiles:       []image.Rectangle{img.Bounds()},
+		}
+		imageRepo.Add(tiledImg)
+
+		const (
+			x = tileX
+			y = tileY
+		)
+		const (
+			fragmentWidth  = 1
+			fragmentHeight = 1
+		)
+		fragment := image.NewRGBA(image.Rect(x, y, x+fragmentWidth, y+fragmentHeight))
+		red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		fragment.SetRGBA(x, y, red)
+
+		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
+		imgRect := image.Rect(0, 0, imgWidth, imgHeight)
+		So(fragment.Bounds().In(imgRect), ShouldBeTrue)
+
+		err := chart.SetFragment2(id, fragment)
+		So(err, ShouldBeNil)
+
+		So(img.At(x, y), ShouldResemble, red)
 	})
 }

@@ -182,6 +182,7 @@ func SetFragment(tiledImageId string, fragment image.Image, x, y, width, height 
 
 		tileIntersect := t.Bounds().Intersect(intersect)
 		// параметр sp - точка (0; 0) и равен fragment.Bounds().Min всегда
+		// TODO коммет, зачем Sub(t.Min)
 		draw.Draw(mutableImage, tileIntersect.Sub(t.Min), fragment, fragment.Bounds().Min, draw.Src)
 
 		err = TileRepo.SaveTile(img.Id, t.Min.X, t.Min.Y, mutableImage)
@@ -192,3 +193,59 @@ func SetFragment(tiledImageId string, fragment image.Image, x, y, width, height 
 
 	return nil
 }
+
+// Новая версия.
+
+// SetFragment2 измененяет пиксели изображения id пикселями фрагмента fragment,
+// накладывая прямогольник фрагмента - fragment.Bounds() - на изображение.
+// Изображение имеет начальные координаты (0;0), фрагмент может иметь начальные координаты отличные от (0;0).
+//
+// Меняется существующий массив байт изображения, это производительнее чем создавать абсолютно новое изображение.
+//
+// Примечание:
+// если фрагмент частично выходит за границы изображения, то часть фрагмента вне изображения игнорируется.
+func SetFragment2(tiledImageId string, fragment image.Image) error {
+	img, err := ImageRepo.Get(tiledImageId)
+	if err != nil {
+		return err
+	}
+
+	imgRect := image.Rect(0, 0, img.Width, img.Height)
+
+	if !imgRect.Overlaps(fragment.Bounds()) {
+		return ErrNotOverlaps
+	}
+
+	intersect := fragment.Bounds().Intersect(imgRect)
+
+	overlapped := tile.FilterOverlappedTiles(img.Tiles, intersect)
+
+	for _, t := range overlapped {
+		tileImg, err := TileRepo.GetTile(img.Id, t.Min.X, t.Min.Y)
+		if err != nil {
+			return err
+		}
+
+		mutableImage, ok := tileImg.(draw.Image)
+		if !ok {
+			return errors.New("изображение должно реализовывать draw.Image")
+		}
+
+		// TODO refactor&comment,
+		tileIntersect := t.Bounds().Intersect(intersect)
+
+		// sp не фрагмент, а пересечение фрагмента с t.
+		// Нельзя передавать всегда один и тот же sp.
+		fragIntersect := t.Bounds().Intersect(fragment.Bounds())
+		draw.Draw(mutableImage, tileIntersect, fragment, fragIntersect.Bounds().Min, draw.Src)
+
+		err = TileRepo.SaveTile(img.Id, t.Min.X, t.Min.Y, mutableImage)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// нужен Адаптер для смены Rect на x,y? кажется самое адекватное решение. NewRGBA(x...) и Draw(...)
