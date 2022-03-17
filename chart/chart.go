@@ -149,11 +149,11 @@ const (
 	fragmentMaxHeight = 5_000
 )
 
-// GetFragment2 возвращает фрагмент изображения id, начиная с координат изобржаения (x; y) по ширине width и высоте height.
+// GetFragment возвращает фрагмент изображения id, начиная с координат изобржаения (x; y) по ширине width и высоте height.
 // Возвращаемое изображение будет иметь начальные координаты (x; y).
 // Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).
 // Возможны ошибки SizeError, ErrNotOverlaps и типа *os.PathError, например os.ErrNotExist.
-func GetFragment2(imgConfig *tiledimage.Image, x, y, width, height int) (image.Image, error) {
+func GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Image, error) {
 	if width < fragmentMinWidth || width > fragmentMaxWidth ||
 		height < fragmentMinHeight || height > fragmentMaxHeight {
 		return nil, &SizeError{
