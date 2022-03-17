@@ -39,12 +39,9 @@ func NewRgbaBmp(width, height int) (*tiledimage.Image, error) {
 	tiles := tile.CreateTiles(width, height, tile.MaxSize)
 
 	img := &tiledimage.Image{
-		Config: image.Config{
-			ColorModel: color.RGBAModel,
-			Width:      width,
-			Height:     height,
-		},
 		Id:          uuid.NewString(),
+		Width:       width,
+		Height:      height,
 		TileMaxSize: tile.MaxSize,
 		Tiles:       tiles,
 	}
