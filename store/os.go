@@ -61,6 +61,7 @@ func (r *FileSystemTileRepository) GetTile(id string, x, y int) (image.Image, er
 		return nil, err
 	}
 
+	ShiftRect(img, x, y)
 	return img, nil
 }
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"chartographer-go/chart"
+	"chartographer-go/store"
 	"chartographer-go/tiledimage"
 	"errors"
 	"golang.org/x/image/bmp"
@@ -54,26 +55,28 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	width, err := strconv.Atoi(queryValues.Get("width"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	height, err := strconv.Atoi(queryValues.Get("height"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	//width, err := strconv.Atoi(queryValues.Get("width"))
+	//if err != nil {
+	//	http.Error(w, err.Error(), http.StatusBadRequest)
+	//	return
+	//}
+	//height, err := strconv.Atoi(queryValues.Get("height"))
+	//if err != nil {
+	//	http.Error(w, err.Error(), http.StatusBadRequest)
+	//	return
+	//}
 
 	id := chi.URLParam(req, "id")
 
+	// TODO не декодировать сразу, сначала проверить, что есть пересечение img и width height
 	fragment, err := bmp.Decode(req.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	store.ShiftRect(fragment, x, y)
 
-	err = chart.SetFragment(id, fragment, x, y, width, height)
+	err = chart.SetFragment2(id, fragment)
 	if err != nil {
 		if errors.Is(err, tiledimage.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)

@@ -145,6 +145,7 @@ func GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Im
 // Меняется существующий массив байт изображения, это производительнее чем создавать абсолютно новое изображение.
 // Примечание:
 // если фрагмент частично выходит за границы изображения, то часть фрагмента вне изображения игнорируется.
+// TODO удалить, так как теперь SetFragment2. Переименовать SF2 -> SF
 func SetFragment(tiledImageId string, fragment image.Image, x, y, width, height int) error {
 	if fragment.Bounds().Min != image.Pt(0, 0) {
 		return errors.New("фрагмент должен иметь начальные координаты (0;0). " +
@@ -247,5 +248,3 @@ func SetFragment2(tiledImageId string, fragment image.Image) error {
 
 	return nil
 }
-
-// нужен Адаптер для смены Rect на x,y? кажется самое адекватное решение. NewRGBA(x...) и Draw(...)
