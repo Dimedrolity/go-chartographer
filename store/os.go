@@ -2,11 +2,11 @@ package store
 
 import (
 	"bytes"
+	"fmt"
 	"golang.org/x/image/bmp"
 	"image"
 	"os"
 	"path/filepath"
-	"strconv"
 )
 
 // TileRepository
@@ -40,13 +40,22 @@ func NewFileSystemTileRepo(dirPath string) (*FileSystemTileRepository, error) {
 	return repo, nil
 }
 
+func (r *FileSystemTileRepository) imgDirPath(id string) string {
+	return filepath.Join(r.dirPath, id)
+}
+func tileFilename(x, y int) string {
+	return fmt.Sprintf("%d;%d.bmp", y, x)
+}
+func (r *FileSystemTileRepository) tilePath(id string, x, y int) string {
+	return filepath.Join(r.imgDirPath(id), tileFilename(x, y))
+}
+
 // GetTile считывает с диска изображение-тайл с координатами (x; y) изображения id и декодирует в формат BMP.
 // У возвращаемого image.Image Bounds().Min равен (0; 0).
 // Возможны ошибки типа *os.PathError, например os.ErrNotExist.
 func (r *FileSystemTileRepository) GetTile(id string, x, y int) (image.Image, error) {
-	filename := filepath.Join(r.dirPath, id, strconv.Itoa(y), strconv.Itoa(x)+".bmp")
-
-	file, err := os.Open(filename)
+	path := r.tilePath(id, x, y)
+	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
@@ -82,14 +91,14 @@ func (r *FileSystemTileRepository) SaveTile(id string, x int, y int, img image.I
 		return err
 	}
 
-	dir := filepath.Join(r.dirPath, id, strconv.Itoa(y))
+	dir := r.imgDirPath(id)
 	err = os.MkdirAll(dir, 0777)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(filepath.Join(dir, strconv.Itoa(x)+".bmp"), encode, 0777)
-
+	path := r.tilePath(id, x, y)
+	err = os.WriteFile(path, encode, 0777)
 	if err != nil {
 		return err
 	}
