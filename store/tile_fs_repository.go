@@ -9,19 +9,6 @@ import (
 	"path/filepath"
 )
 
-// TileRepository
-// наверно не должен работать с image.Image, чтобы в репозитории не было кодирования/декодирования.
-type TileRepository interface {
-	// SaveTile
-	//по новой идее, x y не нужно передавать, будет вычисляться по imb.b.min
-	SaveTile(id string, x int, y int, img image.Image) error
-	// GetTile
-	// У возвращаемого image.Image Bounds().Min равен (0; 0).
-	// TODO возвращать байты, Репо не должно кодировать и декодировать
-	GetTile(id string, x, y int) (image.Image, error)
-	DeleteImage(id string) error
-}
-
 // FileSystemTileRepository - хранит изображения-тайлы в файлах на диске.
 type FileSystemTileRepository struct {
 	dirPath string
@@ -106,7 +93,9 @@ func (r *FileSystemTileRepository) SaveTile(id string, x int, y int, img image.I
 	return nil
 }
 
+// DeleteImage удаляет изображение с диска.
 func (r *FileSystemTileRepository) DeleteImage(id string) error {
+	// If the path does not exist, RemoveAll returns nil (no error).
 	err := os.RemoveAll(filepath.Join(r.dirPath, id))
 	if err != nil {
 		return err
