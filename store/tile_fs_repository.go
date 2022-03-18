@@ -31,7 +31,7 @@ func (r *FileSystemTileRepository) imgDirPath(id string) string {
 	return filepath.Join(r.dirPath, id)
 }
 func tileFilename(x, y int) string {
-	return fmt.Sprintf("%d;%d.bmp", y, x)
+	return fmt.Sprintf("Y=%d; X=%d.bmp", y, x)
 }
 func (r *FileSystemTileRepository) tilePath(id string, x, y int) string {
 	return filepath.Join(r.imgDirPath(id), tileFilename(x, y))
