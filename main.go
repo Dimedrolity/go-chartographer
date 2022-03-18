@@ -1,41 +1,32 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"chartographer-go/chart"
 	"chartographer-go/store"
 	"chartographer-go/tiledimage"
-	"log"
-	"net/http"
-	"os"
-
-	"github.com/go-chi/chi/v5"
 )
 
 func main() {
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func run() error {
 	pathToImages := os.Args[1]
 	tileRepo, err := store.NewFileSystemTileRepo(pathToImages)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-
-	imageRepo := tiledimage.NewInMemoryImageRepo()
 	tileMaxSize := 1000
-
+	imageRepo := tiledimage.NewInMemoryImageRepo()
 	chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+	// TODO вынести хост и порт в .env
+	config := NewConfig("8080")
+	server := NewServer(config, chartService)
 
-	ChartService = chartService
-
-	router := chi.NewRouter()
-
-	router.Route("/chartas", func(r chi.Router) {
-		r.Post("/", createImage)
-
-		r.Route("/{id}", func(r chi.Router) {
-			r.Post("/", setFragment)
-			r.Get("/", fragment)
-			r.Delete("/", deleteImage)
-		})
-	})
-
-	log.Fatal(http.ListenAndServe(":8080", router))
+	return server.Run()
 }

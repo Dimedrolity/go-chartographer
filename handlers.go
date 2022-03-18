@@ -1,21 +1,19 @@
 package main
 
 import (
-	"chartographer-go/chart"
-	"chartographer-go/store"
-	"chartographer-go/tiledimage"
 	"errors"
-	"golang.org/x/image/bmp"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"golang.org/x/image/bmp"
+
+	"chartographer-go/chart"
+	"chartographer-go/store"
+	"chartographer-go/tiledimage"
 )
 
-// ChartService - global var. TODO избавиться, сделать сервис зависимостью server
-var ChartService *chart.ChartographerService
-
-func createImage(w http.ResponseWriter, req *http.Request) {
+func (s *Server) createImage(w http.ResponseWriter, req *http.Request) {
 	queryValues := req.URL.Query()
 	width, err := strconv.Atoi(queryValues.Get("width"))
 	if err != nil {
@@ -28,7 +26,7 @@ func createImage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	img, err := ChartService.NewRgbaBmp(width, height)
+	img, err := s.chartService.NewRgbaBmp(width, height)
 	var errSize *chart.SizeError
 	if err != nil {
 		if errors.As(err, &errSize) {
@@ -46,7 +44,7 @@ func createImage(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func setFragment(w http.ResponseWriter, req *http.Request) {
+func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 	queryValues := req.URL.Query()
 	x, err := strconv.Atoi(queryValues.Get("x"))
 	if err != nil {
@@ -79,7 +77,7 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 	}
 	store.ShiftRect(fragment, x, y)
 
-	err = ChartService.SetFragment(id, fragment)
+	err = s.chartService.SetFragment(id, fragment)
 	if err != nil {
 		if errors.Is(err, tiledimage.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -90,7 +88,7 @@ func setFragment(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func fragment(w http.ResponseWriter, req *http.Request) {
+func (s *Server) fragment(w http.ResponseWriter, req *http.Request) {
 	queryValues := req.URL.Query()
 	x, err := strconv.Atoi(queryValues.Get("x"))
 	if err != nil {
@@ -115,7 +113,7 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 
 	id := chi.URLParam(req, "id")
 
-	img, err := ChartService.GetTiledImage(id)
+	img, err := s.chartService.GetTiledImage(id)
 	if err != nil {
 		if errors.Is(err, tiledimage.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -124,7 +122,7 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	fragment, err := ChartService.GetFragment(img, x, y, width, height)
+	fragment, err := s.chartService.GetFragment(img, x, y, width, height)
 	var errSize *chart.SizeError
 	if err != nil {
 		if errors.As(err, &errSize) || errors.Is(err, chart.ErrNotOverlaps) {
@@ -142,10 +140,10 @@ func fragment(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func deleteImage(w http.ResponseWriter, req *http.Request) {
+func (s *Server) deleteImage(w http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")
 
-	err := ChartService.DeleteImage(id)
+	err := s.chartService.DeleteImage(id)
 	if err != nil {
 		if errors.Is(err, tiledimage.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
