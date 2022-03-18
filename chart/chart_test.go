@@ -17,18 +17,18 @@ import (
 // Создание изображения
 //
 
-// TestTileRepository - заглушка (stub)
+// TestTileRepo - заглушка (stub)
 type tileKey struct {
 	x, y int
 }
-type TestTileRepository struct {
+type TestTileRepo struct {
 	images map[string]map[tileKey]image.Image
 }
 
-func (r *TestTileRepository) GetTile(id string, x int, y int) (image.Image, error) {
+func (r *TestTileRepo) GetTile(id string, x int, y int) (image.Image, error) {
 	return r.images[id][tileKey{x: x, y: y}], nil
 }
-func (r *TestTileRepository) SaveTile(id string, x int, y int, img image.Image) error {
+func (r *TestTileRepo) SaveTile(id string, x int, y int, img image.Image) error {
 	_, ok := r.images[id]
 	if !ok {
 		r.images[id] = make(map[tileKey]image.Image)
@@ -36,7 +36,7 @@ func (r *TestTileRepository) SaveTile(id string, x int, y int, img image.Image) 
 	r.images[id][tileKey{x: x, y: y}] = img
 	return nil
 }
-func (r *TestTileRepository) DeleteImage(id string) error {
+func (r *TestTileRepo) DeleteImage(id string) error {
 	delete(r.images, id)
 	return nil
 }
@@ -135,7 +135,7 @@ func TestGetFragment_In(t *testing.T) {
 
 		tile.MaxSize = 1000
 
-		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const imgSize = 2
@@ -187,7 +187,7 @@ func TestGetFragment_PartIntersect(t *testing.T) {
 
 		tile.MaxSize = 1000
 
-		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -252,7 +252,7 @@ func TestGetFragment_NotOverlaps(t *testing.T) {
 
 		tile.MaxSize = 1000
 
-		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -304,7 +304,7 @@ func TestGetFragment_In_NotFirstTile(t *testing.T) {
 
 		tile.MaxSize = 10
 
-		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -372,7 +372,7 @@ func TestGetFragment_In_TwoTiles(t *testing.T) {
 
 		tile.MaxSize = 10
 
-		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -451,7 +451,7 @@ func TestGetFragment_Size(t *testing.T) {
 
 	tile.MaxSize = 1000
 
-	tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+	tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 	chart.TileRepo = tileRepo
 
 	emptyImg := image.NewRGBA(image.Rect(0, 0, 1, 1))
@@ -522,7 +522,7 @@ func TestSetFragment_In(t *testing.T) {
 
 		tile.MaxSize = 1000
 
-		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -591,7 +591,7 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 
 		tile.MaxSize = 1000
 
-		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -652,7 +652,7 @@ func TestSetFragment_PartIntersect(t *testing.T) {
 
 		tile.MaxSize = 1000
 
-		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -720,7 +720,7 @@ func TestSetFragment_In_NotFirstTile(t *testing.T) {
 
 		tile.MaxSize = 10
 
-		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -779,7 +779,7 @@ func TestSetFragment_In_TwoTiles(t *testing.T) {
 
 		tile.MaxSize = 10
 
-		tileRepo := &TestTileRepository{images: make(map[string]map[tileKey]image.Image)}
+		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		chart.TileRepo = tileRepo
 
 		const (
@@ -852,6 +852,44 @@ func TestSetFragment_In_TwoTiles(t *testing.T) {
 		)
 		So(t1.At(imgRedX, imgRedY), ShouldResemble, red)
 		So(t2.At(imgGreenX, imgGreenY), ShouldResemble, green)
+	})
+}
+
+//
+// Удаление изображения
+//
+
+func TestDeleteImage(t *testing.T) {
+	Convey("Должно удалить все данные изображения", t, func() {
+		imageRepo := &TestImageRepo{images: make(map[string]*tiledimage.Image)}
+		chart.ImageRepo = imageRepo
+
+		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
+		chart.TileRepo = tileRepo
+
+		id := "0"
+		tiledImg := &tiledimage.Image{
+			Id: id,
+		}
+		imageRepo.Add(tiledImg)
+
+		img := image.NewRGBA(image.Rect(0, 0, 1, 1))
+		_ = tileRepo.SaveTile(id, 0, 0, img)
+
+		getImg, _ := imageRepo.Get(id)
+		So(getImg, ShouldNotBeNil)
+
+		getTile, _ := tileRepo.GetTile(id, 0, 0)
+		So(getTile, ShouldNotBeNil)
+
+		err := chart.DeleteImage(id)
+		So(err, ShouldBeNil)
+
+		getImg, _ = imageRepo.Get(id)
+		So(getImg, ShouldBeNil)
+
+		getTile, _ = tileRepo.GetTile(id, 0, 0)
+		So(getTile, ShouldBeNil)
 	})
 }
 
