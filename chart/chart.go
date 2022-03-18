@@ -1,4 +1,4 @@
-// Package chart является уровнем сервиса, содержит бизнес логику обработки изображений.
+// Package chart - слой сервиса приложения.
 package chart
 
 import (
@@ -12,10 +12,16 @@ import (
 	"image/draw"
 )
 
-// ImageRepo
-//TODO не использовать глобальные переменную. Выделить структуру сервиса и принимать репо в конструкторе (NewInMemoryImageRepo)
-var ImageRepo tiledimage.Repository
-var TileRepo store.TileRepository
+// ChartographerService - содержит бизнес логику обработки изображений.
+type ChartographerService struct {
+	imageRepo   tiledimage.Repository
+	tileRepo    store.TileRepository
+	tileMaxSize int
+}
+
+func NewChartographerService(imageRepo tiledimage.Repository, tileRepo store.TileRepository, tileMaxSize int) *ChartographerService {
+	return &ChartographerService{imageRepo: imageRepo, tileRepo: tileRepo, tileMaxSize: tileMaxSize}
+}
 
 const (
 	minWidth  = 1
@@ -27,7 +33,7 @@ const (
 // NewRgbaBmp разделяет размеры изображения на тайлы, создает image.RGBA изображения в соответствии с тайлами,
 // записывает изображения на диск в формате BMP.
 // Возможна ошибка типа *SizeError
-func NewRgbaBmp(width, height int) (*tiledimage.Image, error) {
+func (cs *ChartographerService) NewRgbaBmp(width, height int) (*tiledimage.Image, error) {
 	if width < minWidth || width > maxWidth ||
 		height < minHeight || height > maxHeight {
 		return nil, &SizeError{
@@ -36,7 +42,7 @@ func NewRgbaBmp(width, height int) (*tiledimage.Image, error) {
 		}
 	}
 
-	tiles := tile.CreateTiles(width, height, tile.MaxSize)
+	tiles := tile.CreateTiles(width, height, cs.tileMaxSize)
 
 	img := &tiledimage.Image{
 		Id:          uuid.NewString(),
@@ -45,12 +51,12 @@ func NewRgbaBmp(width, height int) (*tiledimage.Image, error) {
 		TileMaxSize: tile.MaxSize,
 		Tiles:       tiles,
 	}
-	ImageRepo.Add(img)
+	cs.imageRepo.Add(img)
 
 	for _, t := range img.Tiles {
-		i := NewOpaqueRGBA(t)
+		i := newOpaqueRGBA(t)
 
-		err := TileRepo.SaveTile(img.Id, t.Min.X, t.Min.Y, i)
+		err := cs.tileRepo.SaveTile(img.Id, t.Min.X, t.Min.Y, i)
 		if err != nil {
 			return nil, err
 		}
@@ -59,9 +65,9 @@ func NewRgbaBmp(width, height int) (*tiledimage.Image, error) {
 	return img, nil
 }
 
-// NewOpaqueRGBA создает image.RGBA и устанавливает alpha-канал максимальным значением.
+// newOpaqueRGBA создает image.RGBA и устанавливает alpha-канал максимальным значением.
 // Таким образом, изображение в дальнейшем будет кодироваться без учета альфа канала (24-бит на пиксель).
-func NewOpaqueRGBA(r image.Rectangle) image.Image {
+func newOpaqueRGBA(r image.Rectangle) image.Image {
 	img := image.NewRGBA(r)
 
 	for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
@@ -73,13 +79,13 @@ func NewOpaqueRGBA(r image.Rectangle) image.Image {
 	return img
 }
 
-func DeleteImage(id string) error {
-	err := ImageRepo.Delete(id)
+func (cs *ChartographerService) DeleteImage(id string) error {
+	err := cs.imageRepo.Delete(id)
 	if err != nil {
 		return err
 	}
 
-	err = TileRepo.DeleteImage(id)
+	err = cs.tileRepo.DeleteImage(id)
 	if err != nil {
 		return err
 	}
@@ -95,8 +101,8 @@ func DeleteImage(id string) error {
 //
 // Примечание:
 // если фрагмент частично выходит за границы изображения, то часть фрагмента вне изображения игнорируется.
-func SetFragment(tiledImageId string, fragment image.Image) error {
-	img, err := ImageRepo.Get(tiledImageId)
+func (cs *ChartographerService) SetFragment(tiledImageId string, fragment image.Image) error {
+	img, err := cs.imageRepo.Get(tiledImageId)
 	if err != nil {
 		return err
 	}
@@ -112,7 +118,7 @@ func SetFragment(tiledImageId string, fragment image.Image) error {
 	overlapped := tile.FilterOverlappedTiles(img.Tiles, intersect)
 
 	for _, t := range overlapped {
-		tileImg, err := TileRepo.GetTile(img.Id, t.Min.X, t.Min.Y)
+		tileImg, err := cs.tileRepo.GetTile(img.Id, t.Min.X, t.Min.Y)
 		if err != nil {
 			return err
 		}
@@ -130,7 +136,7 @@ func SetFragment(tiledImageId string, fragment image.Image) error {
 		fragIntersect := t.Bounds().Intersect(fragment.Bounds())
 		draw.Draw(mutableImage, tileIntersect, fragment, fragIntersect.Bounds().Min, draw.Src)
 
-		err = TileRepo.SaveTile(img.Id, t.Min.X, t.Min.Y, mutableImage)
+		err = cs.tileRepo.SaveTile(img.Id, t.Min.X, t.Min.Y, mutableImage)
 		if err != nil {
 			return err
 		}
@@ -150,7 +156,7 @@ const (
 // Возвращаемое изображение будет иметь начальные координаты (x; y).
 // Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).
 // Возможны ошибки SizeError, ErrNotOverlaps и типа *os.PathError, например os.ErrNotExist.
-func GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Image, error) {
+func (cs *ChartographerService) GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Image, error) {
 	if width < fragmentMinWidth || width > fragmentMaxWidth ||
 		height < fragmentMinHeight || height > fragmentMaxHeight {
 		return nil, &SizeError{
@@ -170,7 +176,7 @@ func GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Im
 	fragment := image.NewRGBA(fragmentRect)
 
 	for _, t := range overlapped {
-		tileImg, err := TileRepo.GetTile(imgConfig.Id, t.Min.X, t.Min.Y)
+		tileImg, err := cs.tileRepo.GetTile(imgConfig.Id, t.Min.X, t.Min.Y)
 		if err != nil {
 			return nil, err
 		}
@@ -181,4 +187,8 @@ func GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Im
 	}
 
 	return fragment, nil
+}
+
+func (cs *ChartographerService) GetTiledImage(id string) (*tiledimage.Image, error) {
+	return cs.imageRepo.Get(id)
 }
