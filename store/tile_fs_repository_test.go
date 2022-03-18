@@ -13,7 +13,7 @@ import (
 
 // TestFileSystemTileRepo - интеграционные тесты, так как происходит взаимодействие с файловой системой.
 
-func TestFileSystemTileRepo_SaveGet(t *testing.T) {
+func TestFileSystemTileRepo_SuccessGet(t *testing.T) {
 	Convey("Проверка сохранения изображений на диске и получения изображения."+
 		"Проверяются также координаты изображения, должны соответствовать исходынм.", t, func() {
 		tileRepo, err := store.NewFileSystemTileRepo(t.TempDir())
@@ -39,7 +39,7 @@ func TestFileSystemTileRepo_SaveGet(t *testing.T) {
 	})
 }
 
-func TestFileSystemTileRepo_SaveDeleteGet(t *testing.T) {
+func TestFileSystemTileRepo_SuccessDelete(t *testing.T) {
 	Convey("После создания и удаления файла вызов фукнции получения должен вернуть ошибку.", t, func() {
 		tileRepo, err := store.NewFileSystemTileRepo(t.TempDir())
 		So(err, ShouldBeNil)
@@ -51,9 +51,13 @@ func TestFileSystemTileRepo_SaveDeleteGet(t *testing.T) {
 			height = 1
 		)
 		img := image.NewRGBA(image.Rect(x, y, x+width, y+height))
+		img.Set(x, y, color.RGBA{A: 0xFF}) // так как в GetTile вызывается ShiftRect, который работает только с RGBA
 
 		id := "0"
 		err = tileRepo.SaveTile(id, x, y, img)
+		So(err, ShouldBeNil)
+
+		_, err = tileRepo.GetTile(id, x, y)
 		So(err, ShouldBeNil)
 
 		err = tileRepo.DeleteImage(id)
@@ -64,7 +68,7 @@ func TestFileSystemTileRepo_SaveDeleteGet(t *testing.T) {
 	})
 }
 
-func TestFileSystemTileRepo_Get(t *testing.T) {
+func TestFileSystemTileRepo_ErrorGet(t *testing.T) {
 	Convey("При запросе не существующего файла должна быть ошибка.", t, func() {
 		tileRepo, err := store.NewFileSystemTileRepo(t.TempDir())
 		So(err, ShouldBeNil)
@@ -74,7 +78,7 @@ func TestFileSystemTileRepo_Get(t *testing.T) {
 	})
 }
 
-func TestFileSystemTileRepo_Delete(t *testing.T) {
+func TestFileSystemTileRepo_ErrorDelete(t *testing.T) {
 	Convey("При удалении не сущствующего файла не должно быть ошибки", t, func() {
 		tileRepo, err := store.NewFileSystemTileRepo(t.TempDir())
 		So(err, ShouldBeNil)
