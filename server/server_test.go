@@ -15,7 +15,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-// TODO может быть подключить библиотеку для создания стабов в рантайме? типа FakeItEasy на C#
+// Может быть подключить библиотеку для создания стабов в рантайме? типа FakeItEasy на C#
 // Сейчас для каждого теста руками создана стаб-структура
 
 // region Создание изображения
@@ -177,9 +177,82 @@ func TestCreate_Success(t *testing.T) {
 
 //endregion
 
-// region
-// TODO Удаление изображения
-//
+// region Удаление изображения
+
+type TestChartServiceDeleteMethodNotFound struct{}
+
+func (t TestChartServiceDeleteMethodNotFound) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceDeleteMethodNotFound) DeleteImage(string) error {
+	return tiledimage.ErrNotExist
+}
+func (t TestChartServiceDeleteMethodNotFound) SetFragment(string, image.Image) error {
+	panic("implement me")
+}
+
+func (t TestChartServiceDeleteMethodNotFound) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceDeleteMethodNotFound) GetTiledImage(string) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+
+func TestDelete_NotFound(t *testing.T) {
+	srv := server.NewServer(&server.Config{}, &TestChartServiceDeleteMethodNotFound{})
+
+	tmpl, _ := template.New("right request").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}&height={{.Height}}")
+
+	Convey("", t, func() {
+		b := bytes.Buffer{}
+		err := tmpl.Execute(&b, &Fragment{Id: "0", X: 0, Y: 0, Width: 1, Height: 1})
+		So(err, ShouldBeNil)
+		url := b.String()
+		req := httptest.NewRequest("DELETE", url, nil)
+		w := httptest.NewRecorder()
+
+		srv.ServeHTTP(w, req)
+
+		So(w.Code, ShouldEqual, http.StatusNotFound)
+	})
+}
+
+type TestChartServiceDeleteMethodSuccess struct{}
+
+func (t TestChartServiceDeleteMethodSuccess) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceDeleteMethodSuccess) DeleteImage(string) error {
+	return nil
+}
+func (t TestChartServiceDeleteMethodSuccess) SetFragment(string, image.Image) error {
+	panic("implement me")
+}
+func (t TestChartServiceDeleteMethodSuccess) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceDeleteMethodSuccess) GetTiledImage(string) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+
+func TestDelete_Success(t *testing.T) {
+	srv := server.NewServer(&server.Config{}, &TestChartServiceDeleteMethodSuccess{})
+
+	tmpl, _ := template.New("right request").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}&height={{.Height}}")
+
+	Convey("", t, func() {
+		b := bytes.Buffer{}
+		err := tmpl.Execute(&b, &Fragment{Id: "0", X: 0, Y: 0, Width: 1, Height: 1})
+		So(err, ShouldBeNil)
+		url := b.String()
+		req := httptest.NewRequest("DELETE", url, nil)
+		w := httptest.NewRecorder()
+
+		srv.ServeHTTP(w, req)
+
+		So(w.Code, ShouldEqual, http.StatusOK)
+	})
+}
 
 //endregion
 
@@ -361,7 +434,6 @@ func TestGet_NotOverlaps(t *testing.T) {
 	})
 }
 
-// todo 200
 type TestChartServiceGetMethodSuccess struct{}
 
 func (t TestChartServiceGetMethodSuccess) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
