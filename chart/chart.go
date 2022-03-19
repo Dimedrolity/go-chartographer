@@ -16,8 +16,8 @@ type Service interface {
 	AddImage(width, height int) (*tiledimage.Image, error)
 	GetImage(id string) (*tiledimage.Image, error)
 	DeleteImage(id string) error
-	SetFragment(tiledImageId string, fragment image.Image) error
-	GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Image, error)
+	SetFragment(img *tiledimage.Image, fragment image.Image) error
+	GetFragment(img *tiledimage.Image, x, y, width, height int) (image.Image, error)
 }
 
 // ChartographerService - содержит бизнес логику обработки image.RGBA изображений.
@@ -109,12 +109,7 @@ func (cs *ChartographerService) DeleteImage(id string) error {
 //
 // Примечание:
 // если фрагмент частично выходит за границы изображения, то часть фрагмента вне изображения игнорируется.
-func (cs *ChartographerService) SetFragment(tiledImageId string, fragment image.Image) error {
-	img, err := cs.imageRepo.Get(tiledImageId)
-	if err != nil {
-		return err
-	}
-
+func (cs *ChartographerService) SetFragment(img *tiledimage.Image, fragment image.Image) error {
 	imgRect := image.Rect(0, 0, img.Width, img.Height)
 
 	if !imgRect.Overlaps(fragment.Bounds()) {
@@ -164,7 +159,7 @@ const (
 // Возвращаемое изображение будет иметь начальные координаты (x; y).
 // Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).
 // Возможны ошибки SizeError, ErrNotOverlaps и типа *os.PathError, например os.ErrNotExist.
-func (cs *ChartographerService) GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Image, error) {
+func (cs *ChartographerService) GetFragment(img *tiledimage.Image, x, y, width, height int) (image.Image, error) {
 	if width < fragmentMinWidth || width > fragmentMaxWidth ||
 		height < fragmentMinHeight || height > fragmentMaxHeight {
 		return nil, &SizeError{
@@ -173,18 +168,18 @@ func (cs *ChartographerService) GetFragment(imgConfig *tiledimage.Image, x, y, w
 		}
 	}
 
-	imgRect := image.Rect(0, 0, imgConfig.Width, imgConfig.Height)
+	imgRect := image.Rect(0, 0, img.Width, img.Height)
 	fragmentRect := image.Rect(x, y, x+width, y+height)
 	if !imgRect.Overlaps(fragmentRect) {
 		return nil, ErrNotOverlaps
 	}
 
-	overlapped := tileutils.FilterOverlappedTiles(imgConfig.Tiles, fragmentRect)
+	overlapped := tileutils.FilterOverlappedTiles(img.Tiles, fragmentRect)
 
 	fragment := image.NewRGBA(fragmentRect)
 
 	for _, t := range overlapped {
-		tileImg, err := cs.tileRepo.GetTile(imgConfig.Id, t.Min.X, t.Min.Y)
+		tileImg, err := cs.tileRepo.GetTile(img.Id, t.Min.X, t.Min.Y)
 		if err != nil {
 			return nil, err
 		}

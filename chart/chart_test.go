@@ -512,7 +512,6 @@ func TestSetFragment_In(t *testing.T) {
 			Height: img.Bounds().Dy(),
 			Tiles:  []image.Rectangle{img.Bounds()},
 		}
-		imageRepo.Add(tiledImg)
 
 		const (
 			x = 1
@@ -533,7 +532,7 @@ func TestSetFragment_In(t *testing.T) {
 		// Убеждаемся, что прямоугольник фрагмента полностью лежит в прямоугольнике изображения
 		So(fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
 
-		err := chartService.SetFragment(id, fragment)
+		err := chartService.SetFragment(tiledImg, fragment)
 		So(err, ShouldBeNil)
 
 		const (
@@ -577,7 +576,6 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 			Height: img.Bounds().Dy(),
 			Tiles:  []image.Rectangle{img.Bounds()},
 		}
-		imageRepo.Add(tiledImg)
 
 		const (
 			x = 3
@@ -599,7 +597,7 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 		// Убеждаемся, что прямоугольники не пересекаются
 		So(!fragment.Bounds().Overlaps(img.Bounds()), ShouldBeTrue)
 
-		err := chartService.SetFragment(id, fragment)
+		err := chartService.SetFragment(tiledImg, fragment)
 		So(errors.Is(err, chart.ErrNotOverlaps), ShouldBeTrue)
 
 		for x := 0; x < imgWidth; x++ {
@@ -634,7 +632,6 @@ func TestSetFragment_PartIntersect(t *testing.T) {
 			Height: img.Bounds().Dy(),
 			Tiles:  []image.Rectangle{img.Bounds()},
 		}
-		imageRepo.Add(tiledImg)
 
 		const (
 			x              = 1
@@ -658,7 +655,7 @@ func TestSetFragment_PartIntersect(t *testing.T) {
 		// Убеждаемся, что прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения
 		So(fragment.Bounds().Overlaps(img.Bounds()) && !fragment.Bounds().In(img.Bounds()), ShouldBeTrue)
 
-		err := chartService.SetFragment(id, fragment)
+		err := chartService.SetFragment(tiledImg, fragment)
 		So(err, ShouldBeNil)
 
 		for x := 0; x < imgWidth; x++ {
@@ -704,7 +701,6 @@ func TestSetFragment_In_NotFirstTile(t *testing.T) {
 			Height: imgHeight,
 			Tiles:  []image.Rectangle{img.Bounds()},
 		}
-		imageRepo.Add(tiledImg)
 
 		const (
 			x = tileX
@@ -722,7 +718,7 @@ func TestSetFragment_In_NotFirstTile(t *testing.T) {
 		imgRect := image.Rect(0, 0, imgWidth, imgHeight)
 		So(fragment.Bounds().In(imgRect), ShouldBeTrue)
 
-		err := chartService.SetFragment(id, fragment)
+		err := chartService.SetFragment(tiledImg, fragment)
 		So(err, ShouldBeNil)
 
 		So(img.At(x, y), ShouldResemble, red)
@@ -774,7 +770,6 @@ func TestSetFragment_In_TwoTiles(t *testing.T) {
 				image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height),
 			},
 		}
-		imageRepo.Add(tiledImg)
 
 		const (
 			x = 9
@@ -794,7 +789,7 @@ func TestSetFragment_In_TwoTiles(t *testing.T) {
 		imgRect := image.Rect(0, 0, imgWidth, imgHeight)
 		So(fragment.Bounds().In(imgRect), ShouldBeTrue)
 
-		err := chartService.SetFragment(id, fragment)
+		err := chartService.SetFragment(tiledImg, fragment)
 		So(err, ShouldBeNil)
 
 		const (

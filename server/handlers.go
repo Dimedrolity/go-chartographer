@@ -93,7 +93,7 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 
 	id := chi.URLParam(req, "id")
 
-	_, err = s.chartService.GetImage(id)
+	img, err := s.chartService.GetImage(id)
 	if err != nil {
 		if errors.Is(err, tiledimage.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -102,8 +102,6 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 		}
 		return
 	}
-
-	// TODO педавать в Set(img) вместо id.
 
 	// TODO не декодировать сразу, сначала проверить, что есть пересечение img и width height
 	// TODO вынести декодирование в сервис, иначе приходится в тестах создавать реальный BMP
@@ -114,7 +112,7 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 	}
 	imagetile.ShiftRect(fragment, x, y)
 
-	err = s.chartService.SetFragment(id, fragment)
+	err = s.chartService.SetFragment(img, fragment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
