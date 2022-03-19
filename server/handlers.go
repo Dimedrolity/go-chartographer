@@ -114,23 +114,22 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
-	queryValues := req.URL.Query()
-	x, err := strconv.Atoi(queryValues.Get("x"))
+	x, err := getQueryParamInt(req, "x")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	y, err := strconv.Atoi(queryValues.Get("y"))
+	y, err := getQueryParamInt(req, "y")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	width, err := strconv.Atoi(queryValues.Get("width"))
+	width, err := getQueryParamInt(req, "width")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	height, err := strconv.Atoi(queryValues.Get("height"))
+	height, err := getQueryParamInt(req, "height")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -145,6 +144,7 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
+		return
 	}
 
 	fragment, err := s.chartService.GetFragment(img, x, y, width, height)

@@ -15,31 +15,33 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+// TODO может быть подключить библиотеку для создания стабов в рантайме? типа FakeItEasy на C#
+// Сейчас для каждого теста руками создана стаб-структура
+
 //
 // Создание изображения
 //
 
-type TestChartServiceSizeErr struct{}
+type TestChartServiceAllPanic struct{}
 
-func (t TestChartServiceSizeErr) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
-	return nil, &chart.SizeError{}
-}
-func (t TestChartServiceSizeErr) DeleteImage(string) error {
+func (t TestChartServiceAllPanic) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
 	panic("implement me")
 }
-func (t TestChartServiceSizeErr) SetFragment(string, image.Image) error {
-	return tiledimage.ErrNotExist
+func (t TestChartServiceAllPanic) DeleteImage(string) error {
+	panic("implement me")
 }
-
-func (t TestChartServiceSizeErr) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
-	return nil, &chart.SizeError{}
+func (t TestChartServiceAllPanic) SetFragment(string, image.Image) error {
+	panic("implement me")
 }
-func (t TestChartServiceSizeErr) GetTiledImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceAllPanic) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceAllPanic) GetTiledImage(string) (*tiledimage.Image, error) {
 	panic("implement me")
 }
 
 func TestCreate_WrongSize(t *testing.T) {
-	srv := server.NewServer(&server.Config{}, &TestChartServiceSizeErr{})
+	srv := server.NewServer(&server.Config{}, &TestChartServiceAllPanic{})
 
 	type Size struct {
 		Width, Height interface{}
@@ -82,37 +84,78 @@ func TestCreate_WrongSize(t *testing.T) {
 		testWrongSize(tmpl, &Size{Width: 1, Height: "a"})
 	})
 
+}
+
+type TestChartServiceCreateMethodSizeErr struct{}
+
+func (t TestChartServiceCreateMethodSizeErr) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
+	return nil, &chart.SizeError{}
+}
+func (t TestChartServiceCreateMethodSizeErr) DeleteImage(string) error {
+	panic("implement me")
+}
+func (t TestChartServiceCreateMethodSizeErr) SetFragment(string, image.Image) error {
+	panic("implement me")
+}
+
+func (t TestChartServiceCreateMethodSizeErr) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceCreateMethodSizeErr) GetTiledImage(string) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+
+func TestCreate_SizeErr(t *testing.T) {
+	srv := server.NewServer(&server.Config{}, &TestChartServiceCreateMethodSizeErr{})
+
+	type Size struct {
+		Width, Height interface{}
+	}
+	tmpl, _ := template.New("right request").Parse("/chartas/?width={{.Width}}&height={{.Height}}")
+
+	testWrongSize := func(tmpl *template.Template, size *Size) {
+		b := bytes.Buffer{}
+		err := tmpl.Execute(&b, size)
+		So(err, ShouldBeNil)
+		url := b.String()
+		req := httptest.NewRequest("POST", url, nil)
+		w := httptest.NewRecorder()
+
+		srv.ServeHTTP(w, req)
+
+		So(w.Code, ShouldEqual, http.StatusBadRequest)
+	}
+
 	Convey("negative size", t, func() {
 		// сервис-stub вернет SizeError
 		testWrongSize(tmpl, &Size{Width: 0, Height: 0}) // 0, чтобы пройти проверки на числа
 	})
 }
 
-type TestChartService struct{}
+type TestChartServiceCreateMethodSuccess struct{}
 
 const id = "new"
 
-func (t TestChartService) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
+func (t TestChartServiceCreateMethodSuccess) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
 	return &tiledimage.Image{
 		Id: id,
 	}, nil
 }
-func (t TestChartService) DeleteImage(string) error {
+func (t TestChartServiceCreateMethodSuccess) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartService) SetFragment(string, image.Image) error {
-	return nil
+func (t TestChartServiceCreateMethodSuccess) SetFragment(string, image.Image) error {
+	panic("implement me")
 }
-
-func (t TestChartService) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
-	return nil, nil
+func (t TestChartServiceCreateMethodSuccess) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+	panic("implement me")
 }
-func (t TestChartService) GetTiledImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceCreateMethodSuccess) GetTiledImage(string) (*tiledimage.Image, error) {
 	panic("implement me")
 }
 
 func TestCreate_Success(t *testing.T) {
-	srv := server.NewServer(&server.Config{}, &TestChartService{})
+	srv := server.NewServer(&server.Config{}, &TestChartServiceCreateMethodSuccess{})
 
 	type Size struct {
 		Width, Height interface{}
@@ -139,19 +182,253 @@ func TestCreate_Success(t *testing.T) {
 //
 
 //
-// TODO Получение фрагмента изображения
+// Получение фрагмента изображения
 //
+
+func TestGet_WrongParams(t *testing.T) {
+	srv := server.NewServer(&server.Config{}, &TestChartServiceAllPanic{})
+
+	tmpl, _ := template.New("right request").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}&height={{.Height}}")
+
+	testWrongSize := func(tmpl *template.Template, frag *Fragment) {
+		b := bytes.Buffer{}
+		err := tmpl.Execute(&b, frag)
+		So(err, ShouldBeNil)
+		url := b.String()
+		req := httptest.NewRequest("GET", url, nil)
+		w := httptest.NewRecorder()
+
+		srv.ServeHTTP(w, req)
+
+		So(w.Code, ShouldEqual, http.StatusBadRequest)
+	}
+
+	Convey("no X", t, func() {
+		tmplNoX, _ := template.New("no X").Parse("/chartas/{{.Id}}/?y={{.Y}}&width={{.Width}}&height={{.Height}}")
+		testWrongSize(tmplNoX, &Fragment{Y: 0, Width: 1, Height: 1})
+	})
+	Convey("no Y", t, func() {
+		tmplNoY, _ := template.New("no Y").Parse("/chartas/{{.Id}}/?x={{.X}}&&width={{.Width}}")
+		testWrongSize(tmplNoY, &Fragment{X: 0, Width: 1, Height: 1})
+	})
+	Convey("no width", t, func() {
+		tmplNoWidth, _ := template.New("no width").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&&height={{.Height}}")
+		testWrongSize(tmplNoWidth, &Fragment{X: 0, Y: 0, Height: 1})
+	})
+	Convey("no height", t, func() {
+		tmplNoHeight, _ := template.New("no height").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}")
+		testWrongSize(tmplNoHeight, &Fragment{X: 0, Y: 0, Width: 1})
+	})
+
+	Convey("empty X", t, func() {
+		testWrongSize(tmpl, &Fragment{X: "", Y: 0, Width: 1, Height: 1})
+	})
+	Convey("empty Y", t, func() {
+		testWrongSize(tmpl, &Fragment{X: 0, Y: "", Width: 1, Height: 1})
+	})
+	Convey("empty width", t, func() {
+		testWrongSize(tmpl, &Fragment{X: 0, Y: 0, Width: "", Height: 1})
+	})
+	Convey("empty height", t, func() {
+		testWrongSize(tmpl, &Fragment{X: 0, Y: 0, Width: 1, Height: ""})
+	})
+
+	Convey("string X", t, func() {
+		testWrongSize(tmpl, &Fragment{X: "a", Y: 0, Width: 1, Height: 1})
+	})
+	Convey("string Y", t, func() {
+		testWrongSize(tmpl, &Fragment{X: 0, Y: "a", Width: 1, Height: 1})
+	})
+	Convey("string width", t, func() {
+		testWrongSize(tmpl, &Fragment{X: 0, Y: 0, Width: "a", Height: 1})
+	})
+	Convey("string height", t, func() {
+		testWrongSize(tmpl, &Fragment{X: 0, Y: 0, Width: 1, Height: "a"})
+	})
+}
+
+type TestChartServiceGetMethodNotFound struct{}
+
+func (t TestChartServiceGetMethodNotFound) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceGetMethodNotFound) DeleteImage(string) error {
+	panic("implement me")
+}
+func (t TestChartServiceGetMethodNotFound) SetFragment(string, image.Image) error {
+	panic("implement me")
+}
+
+func (t TestChartServiceGetMethodNotFound) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+	return nil, nil
+}
+func (t TestChartServiceGetMethodNotFound) GetTiledImage(string) (*tiledimage.Image, error) {
+	return nil, tiledimage.ErrNotExist
+}
+
+func TestGet_NotFound(t *testing.T) {
+	srv := server.NewServer(&server.Config{}, &TestChartServiceGetMethodNotFound{})
+
+	tmpl, _ := template.New("right request").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}&height={{.Height}}")
+
+	Convey("", t, func() {
+		b := bytes.Buffer{}
+		err := tmpl.Execute(&b, &Fragment{Id: "0", X: 0, Y: 0, Width: 1, Height: 1})
+		So(err, ShouldBeNil)
+		url := b.String()
+		req := httptest.NewRequest("GET", url, nil)
+		w := httptest.NewRecorder()
+
+		srv.ServeHTTP(w, req)
+
+		So(w.Code, ShouldEqual, http.StatusNotFound)
+	})
+}
+
+type TestChartServiceGetMethodSizeError struct{}
+
+func (t TestChartServiceGetMethodSizeError) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
+	//return nil, &chart.SizeError{}
+	panic("implement me")
+
+}
+func (t TestChartServiceGetMethodSizeError) DeleteImage(string) error {
+	panic("implement me")
+}
+func (t TestChartServiceGetMethodSizeError) SetFragment(string, image.Image) error {
+	panic("implement me")
+}
+
+func (t TestChartServiceGetMethodSizeError) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+	return nil, &chart.SizeError{}
+}
+func (t TestChartServiceGetMethodSizeError) GetTiledImage(string) (*tiledimage.Image, error) {
+	return nil, nil
+}
+
+func TestGet_SizeErr(t *testing.T) {
+	srv := server.NewServer(&server.Config{}, &TestChartServiceGetMethodSizeError{})
+
+	tmpl, _ := template.New("right request").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}&height={{.Height}}")
+
+	Convey("", t, func() {
+		b := bytes.Buffer{}
+		err := tmpl.Execute(&b, &Fragment{Id: "0", X: 0, Y: 0, Width: 1, Height: 1})
+		So(err, ShouldBeNil)
+		url := b.String()
+		req := httptest.NewRequest("GET", url, nil)
+		w := httptest.NewRecorder()
+
+		srv.ServeHTTP(w, req)
+
+		So(w.Code, ShouldEqual, http.StatusBadRequest)
+	})
+}
+
+type TestChartServiceGetMethodNotOverlaps struct{}
+
+func (t TestChartServiceGetMethodNotOverlaps) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceGetMethodNotOverlaps) DeleteImage(string) error {
+	panic("implement me")
+}
+func (t TestChartServiceGetMethodNotOverlaps) SetFragment(string, image.Image) error {
+	panic("implement me")
+}
+func (t TestChartServiceGetMethodNotOverlaps) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+	return nil, chart.ErrNotOverlaps
+}
+func (t TestChartServiceGetMethodNotOverlaps) GetTiledImage(string) (*tiledimage.Image, error) {
+	return nil, nil
+}
+
+func TestGet_NotOverlaps(t *testing.T) {
+	srv := server.NewServer(&server.Config{}, &TestChartServiceGetMethodNotOverlaps{})
+
+	tmpl, _ := template.New("right request").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}&height={{.Height}}")
+
+	Convey("", t, func() {
+		b := bytes.Buffer{}
+		err := tmpl.Execute(&b, &Fragment{Id: "0", X: 0, Y: 0, Width: 1, Height: 1})
+		So(err, ShouldBeNil)
+		url := b.String()
+		req := httptest.NewRequest("GET", url, nil)
+		w := httptest.NewRecorder()
+
+		srv.ServeHTTP(w, req)
+
+		So(w.Code, ShouldEqual, http.StatusBadRequest)
+	})
+}
+
+// todo 200
+type TestChartServiceGetMethodSuccess struct{}
+
+func (t TestChartServiceGetMethodSuccess) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceGetMethodSuccess) DeleteImage(string) error {
+	panic("implement me")
+}
+func (t TestChartServiceGetMethodSuccess) SetFragment(string, image.Image) error {
+	panic("implement me")
+}
+func (t TestChartServiceGetMethodSuccess) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+	return image.Image(image.Rectangle{}), nil
+}
+func (t TestChartServiceGetMethodSuccess) GetTiledImage(string) (*tiledimage.Image, error) {
+	return nil, nil
+}
+
+func TestGet_Success(t *testing.T) {
+	srv := server.NewServer(&server.Config{}, &TestChartServiceGetMethodSuccess{})
+
+	tmpl, _ := template.New("right request").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}&height={{.Height}}")
+
+	Convey("", t, func() {
+		b := bytes.Buffer{}
+		err := tmpl.Execute(&b, &Fragment{Id: "0", X: 0, Y: 0, Width: 1, Height: 1})
+		So(err, ShouldBeNil)
+		url := b.String()
+		req := httptest.NewRequest("GET", url, nil)
+		w := httptest.NewRecorder()
+
+		srv.ServeHTTP(w, req)
+
+		So(w.Code, ShouldEqual, http.StatusOK)
+	})
+}
 
 //
 // Установка фрагмента изображения
 //
+
 type Fragment struct {
 	Id                  string
 	X, Y, Width, Height interface{}
 }
 
+type TestChartServiceSetMethodWrongSize struct{}
+
+func (t TestChartServiceSetMethodWrongSize) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceSetMethodWrongSize) DeleteImage(string) error {
+	panic("implement me")
+}
+func (t TestChartServiceSetMethodWrongSize) SetFragment(string, image.Image) error {
+	return nil
+}
+func (t TestChartServiceSetMethodWrongSize) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceSetMethodWrongSize) GetTiledImage(string) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+
 func TestSet_WrongSize(t *testing.T) {
-	srv := server.NewServer(&server.Config{}, &TestChartServiceSizeErr{})
+	srv := server.NewServer(&server.Config{}, &TestChartServiceSetMethodWrongSize{})
 
 	tmpl, _ := template.New("right request").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}&height={{.Height}}")
 
@@ -217,8 +494,26 @@ func TestSet_WrongSize(t *testing.T) {
 	})
 }
 
+type TestChartServiceSetMethodNotFound struct{}
+
+func (t TestChartServiceSetMethodNotFound) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceSetMethodNotFound) DeleteImage(string) error {
+	panic("implement me")
+}
+func (t TestChartServiceSetMethodNotFound) SetFragment(string, image.Image) error {
+	return tiledimage.ErrNotExist
+}
+func (t TestChartServiceSetMethodNotFound) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceSetMethodNotFound) GetTiledImage(string) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+
 func TestSet_NotFound(t *testing.T) {
-	srv := server.NewServer(&server.Config{}, &TestChartServiceSizeErr{})
+	srv := server.NewServer(&server.Config{}, &TestChartServiceSetMethodNotFound{})
 
 	tmpl, _ := template.New("right request").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}&height={{.Height}}")
 
@@ -239,8 +534,26 @@ func TestSet_NotFound(t *testing.T) {
 	})
 }
 
+type TestChartServiceSetMethodSuccess struct{}
+
+func (t TestChartServiceSetMethodSuccess) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
+	return nil, nil
+}
+func (t TestChartServiceSetMethodSuccess) DeleteImage(string) error {
+	panic("implement me")
+}
+func (t TestChartServiceSetMethodSuccess) SetFragment(string, image.Image) error {
+	return nil
+}
+func (t TestChartServiceSetMethodSuccess) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceSetMethodSuccess) GetTiledImage(string) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+
 func TestSet_Success(t *testing.T) {
-	srv := server.NewServer(&server.Config{}, &TestChartService{})
+	srv := server.NewServer(&server.Config{}, &TestChartServiceSetMethodSuccess{})
 
 	tmpl, _ := template.New("right request").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}&height={{.Height}}")
 
