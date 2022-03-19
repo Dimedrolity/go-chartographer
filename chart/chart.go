@@ -117,11 +117,8 @@ func (cs *ChartographerService) SetFragment(img *tiledimage.Image, fragment imag
 		return ErrNotOverlaps
 	}
 
-	for _, t := range img.Tiles {
-		if !t.Overlaps(fragment.Bounds()) {
-			continue
-		}
-
+	overlapped := tileutils.OverlappedTiles(img.Tiles, fragment.Bounds())
+	for _, t := range overlapped {
 		tileImg, err := cs.tileRepo.GetTile(img.Id, t.Min.X, t.Min.Y)
 		if err != nil {
 			return err
@@ -131,7 +128,7 @@ func (cs *ChartographerService) SetFragment(img *tiledimage.Image, fragment imag
 			return errors.New("изображение должно реализовывать draw.Image")
 		}
 
-		intersect := t.Bounds().Intersect(fragment.Bounds())
+		intersect := t.Intersect(fragment.Bounds())
 		draw.Draw(mutableTile, intersect, fragment, intersect.Bounds().Min, draw.Src)
 
 		err = cs.tileRepo.SaveTile(img.Id, t.Min.X, t.Min.Y, mutableTile)
@@ -169,9 +166,8 @@ func (cs *ChartographerService) GetFragment(img *tiledimage.Image, x, y, width, 
 		return nil, ErrNotOverlaps
 	}
 
-	overlapped := tileutils.OverlappedTiles(img.Tiles, fragmentRect)
-
 	fragment := image.NewRGBA(fragmentRect)
+	overlapped := tileutils.OverlappedTiles(img.Tiles, fragment.Bounds())
 
 	for _, t := range overlapped {
 		tileImg, err := cs.tileRepo.GetTile(img.Id, t.Min.X, t.Min.Y)
@@ -179,8 +175,7 @@ func (cs *ChartographerService) GetFragment(img *tiledimage.Image, x, y, width, 
 			return nil, err
 		}
 
-		intersect := t.Intersect(fragmentRect)
-
+		intersect := t.Intersect(fragment.Bounds())
 		draw.Draw(fragment, intersect, tileImg, intersect.Min, draw.Src)
 	}
 
