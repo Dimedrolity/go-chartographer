@@ -495,7 +495,7 @@ func (t TestChartServiceSetMethodWrongSize) GetFragment(*tiledimage.Image, int, 
 	panic("implement me")
 }
 func (t TestChartServiceSetMethodWrongSize) GetImage(string) (*tiledimage.Image, error) {
-	panic("implement me")
+	return nil, nil
 }
 
 func TestSet_WrongSize(t *testing.T) {
@@ -558,11 +558,6 @@ func TestSet_WrongSize(t *testing.T) {
 	Convey("string height", t, func() {
 		testWrongSize(tmpl, &Fragment{X: 0, Y: 0, Width: 1, Height: "a"})
 	})
-
-	Convey("empty body", t, func() {
-		// ошибка будет из-за пустого тела, должно быть тело с BMP
-		testWrongSize(tmpl, &Fragment{X: 0, Y: 0, Width: 0, Height: 0}) // 0, чтобы пройти проверки на числа
-	})
 }
 
 type TestChartServiceSetMethodNotFound struct{}
@@ -574,13 +569,13 @@ func (t TestChartServiceSetMethodNotFound) DeleteImage(string) error {
 	panic("implement me")
 }
 func (t TestChartServiceSetMethodNotFound) SetFragment(string, image.Image) error {
-	return tiledimage.ErrNotExist
+	panic("implement me")
 }
 func (t TestChartServiceSetMethodNotFound) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
 	panic("implement me")
 }
 func (t TestChartServiceSetMethodNotFound) GetImage(string) (*tiledimage.Image, error) {
-	panic("implement me")
+	return nil, tiledimage.ErrNotExist
 }
 
 func TestSet_NotFound(t *testing.T) {
@@ -620,7 +615,7 @@ func (t TestChartServiceSetMethodSuccess) GetFragment(*tiledimage.Image, int, in
 	panic("implement me")
 }
 func (t TestChartServiceSetMethodSuccess) GetImage(string) (*tiledimage.Image, error) {
-	panic("implement me")
+	return nil, nil
 }
 
 func TestSet_Success(t *testing.T) {

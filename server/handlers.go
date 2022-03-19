@@ -93,6 +93,18 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 
 	id := chi.URLParam(req, "id")
 
+	_, err = s.chartService.GetImage(id)
+	if err != nil {
+		if errors.Is(err, tiledimage.ErrNotExist) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// TODO педавать в Set(img) вместо id.
+
 	// TODO не декодировать сразу, сначала проверить, что есть пересечение img и width height
 	// TODO вынести декодирование в сервис, иначе приходится в тестах создавать реальный BMP
 	fragment, err := bmp.Decode(req.Body)
@@ -104,11 +116,7 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 
 	err = s.chartService.SetFragment(id, fragment)
 	if err != nil {
-		if errors.Is(err, tiledimage.ErrNotExist) {
-			http.Error(w, err.Error(), http.StatusNotFound)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
