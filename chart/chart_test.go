@@ -86,7 +86,7 @@ func TestNewRGBA(t *testing.T) {
 		// Позитивные тесты
 
 		testSize := func(width, height int) {
-			img, err := chartService.NewRgbaBmp(width, height)
+			img, err := chartService.AddImage(width, height)
 			So(err, ShouldBeNil)
 
 			So(img.Width, ShouldEqual, width)
@@ -104,19 +104,19 @@ func TestNewRGBA(t *testing.T) {
 		var errSize *chart.SizeError
 
 		Convey("test minWidth-1", func() {
-			_, err := chartService.NewRgbaBmp(minWidth-1, 1)
+			_, err := chartService.AddImage(minWidth-1, 1)
 			So(errors.As(err, &errSize), ShouldBeTrue)
 		})
 		Convey("test minHeight-1", func() {
-			_, err := chartService.NewRgbaBmp(1, minHeight-1)
+			_, err := chartService.AddImage(1, minHeight-1)
 			So(errors.As(err, &errSize), ShouldBeTrue)
 		})
 		Convey("test maxWidth+1", func() {
-			_, err := chartService.NewRgbaBmp(maxWidth+1, 1)
+			_, err := chartService.AddImage(maxWidth+1, 1)
 			So(errors.As(err, &errSize), ShouldBeTrue)
 		})
 		Convey("test maxHeight+1", func() {
-			_, err := chartService.NewRgbaBmp(1, maxHeight+1)
+			_, err := chartService.AddImage(1, maxHeight+1)
 			So(errors.As(err, &errSize), ShouldBeTrue)
 		})
 	})

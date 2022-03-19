@@ -13,14 +13,14 @@ import (
 )
 
 type Service interface {
-	NewRgbaBmp(width, height int) (*tiledimage.Image, error)
+	AddImage(width, height int) (*tiledimage.Image, error)
+	GetImage(id string) (*tiledimage.Image, error)
 	DeleteImage(id string) error
 	SetFragment(tiledImageId string, fragment image.Image) error
 	GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Image, error)
-	GetTiledImage(id string) (*tiledimage.Image, error)
 }
 
-// ChartographerService - содержит бизнес логику обработки изображений.
+// ChartographerService - содержит бизнес логику обработки image.RGBA изображений.
 type ChartographerService struct {
 	imageRepo   tiledimage.Repository
 	tileRepo    imagetile.TileRepository
@@ -38,10 +38,10 @@ const (
 	maxHeight = 50_000
 )
 
-// NewRgbaBmp разделяет размеры изображения на тайлы, создает image.RGBA изображения в соответствии с тайлами,
-// записывает изображения на диск в формате BMP.
+// AddImage разделяет размеры изображения на тайлы, создает image.RGBA изображения в соответствии с тайлами,
+// сохраняет тайлы с помощью репозитория тайлов.
 // Возможна ошибка типа *SizeError
-func (cs *ChartographerService) NewRgbaBmp(width, height int) (*tiledimage.Image, error) {
+func (cs *ChartographerService) AddImage(width, height int) (*tiledimage.Image, error) {
 	if width < minWidth || width > maxWidth ||
 		height < minHeight || height > maxHeight {
 		return nil, &SizeError{
@@ -197,6 +197,6 @@ func (cs *ChartographerService) GetFragment(imgConfig *tiledimage.Image, x, y, w
 	return fragment, nil
 }
 
-func (cs *ChartographerService) GetTiledImage(id string) (*tiledimage.Image, error) {
+func (cs *ChartographerService) GetImage(id string) (*tiledimage.Image, error) {
 	return cs.imageRepo.Get(id)
 }

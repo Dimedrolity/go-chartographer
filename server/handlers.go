@@ -49,7 +49,7 @@ func (s *Server) createImage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	img, err := s.chartService.NewRgbaBmp(width, height)
+	img, err := s.chartService.AddImage(width, height)
 	var errSize *chart.SizeError
 	if err != nil {
 		if errors.As(err, &errSize) {
@@ -137,7 +137,7 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 
 	id := chi.URLParam(req, "id")
 
-	img, err := s.chartService.GetTiledImage(id)
+	img, err := s.chartService.GetImage(id)
 	if err != nil {
 		if errors.Is(err, tiledimage.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -158,6 +158,7 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// TODO нормально ли использовать bmp в хендлере?
 	err = bmp.Encode(w, fragment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

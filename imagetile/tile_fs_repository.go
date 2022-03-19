@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-// FileSystemTileRepository - хранит изображения-тайлы в файлах на диске.
+// FileSystemTileRepository - хранилище изображений-тайлов формата BMP в файлах на диске.
 type FileSystemTileRepository struct {
 	dirPath string
 }
