@@ -158,11 +158,10 @@ func TestGetFragment_In(t *testing.T) {
 		So(fragmentRect.In(img.Bounds()), ShouldBeTrue)
 
 		tiledImg := &tiledimage.Image{
-			Id:          id,
-			Width:       img.Bounds().Dx(),
-			Height:      img.Bounds().Dy(),
-			TileMaxSize: tile.MaxSize,
-			Tiles:       []image.Rectangle{img.Bounds()},
+			Id:     id,
+			Width:  img.Bounds().Dx(),
+			Height: img.Bounds().Dy(),
+			Tiles:  []image.Rectangle{img.Bounds()},
 		}
 		fragment, err := chartService.GetFragment(tiledImg, x, y, fragmentWidth, fragmentHeight)
 		So(err, ShouldBeNil)
@@ -206,11 +205,10 @@ func TestGetFragment_PartIntersect(t *testing.T) {
 		)
 
 		tiledImg := &tiledimage.Image{
-			Id:          id,
-			Width:       img.Bounds().Dx(),
-			Height:      img.Bounds().Dy(),
-			TileMaxSize: tile.MaxSize,
-			Tiles:       []image.Rectangle{img.Bounds()},
+			Id:     id,
+			Width:  img.Bounds().Dx(),
+			Height: img.Bounds().Dy(),
+			Tiles:  []image.Rectangle{img.Bounds()},
 		}
 
 		// Убеждаемся, что прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения
@@ -276,8 +274,7 @@ func TestGetFragment_NotOverlaps(t *testing.T) {
 			Width:  img.Bounds().Dx(),
 			Height: img.Bounds().Dy(),
 
-			TileMaxSize: tile.MaxSize,
-			Tiles:       []image.Rectangle{img.Bounds()},
+			Tiles: []image.Rectangle{img.Bounds()},
 		}
 		_, err := chartService.GetFragment(tiledImg, x, y, fragmentWidth, fragmentHeight)
 
@@ -317,11 +314,10 @@ func TestGetFragment_In_NotFirstTile(t *testing.T) {
 			imgHeight = 15
 		)
 		tiledImg := &tiledimage.Image{
-			Id:          id,
-			Width:       imgWidth,
-			Height:      imgHeight,
-			TileMaxSize: tile.MaxSize,
-			Tiles:       []image.Rectangle{image.Rect(tileX, tileY, tileX+tileWidth, tileY+tileHeight)},
+			Id:     id,
+			Width:  imgWidth,
+			Height: imgHeight,
+			Tiles:  []image.Rectangle{image.Rect(tileX, tileY, tileX+tileWidth, tileY+tileHeight)},
 		}
 
 		const (
@@ -398,10 +394,9 @@ func TestGetFragment_In_TwoTiles(t *testing.T) {
 		)
 
 		tiledImg := &tiledimage.Image{
-			Id:          id,
-			Width:       imgWidth,
-			Height:      imgHeight,
-			TileMaxSize: tile.MaxSize,
+			Id:     id,
+			Width:  imgWidth,
+			Height: imgHeight,
 			Tiles: []image.Rectangle{
 				image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height),
 				image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height),
@@ -440,11 +435,10 @@ func TestGetFragment_Size(t *testing.T) {
 	_ = tileRepo.SaveTile(id, 0, 0, emptyImg) // чтобы getTile, вызываемый в chart.GetFragment, возвращал стаб
 
 	tiledEmptyImg := &tiledimage.Image{
-		Id:          id,
-		Width:       emptyImg.Bounds().Dx(),
-		Height:      emptyImg.Bounds().Dy(),
-		TileMaxSize: tile.MaxSize,
-		Tiles:       []image.Rectangle{emptyImg.Bounds()},
+		Id:     id,
+		Width:  emptyImg.Bounds().Dx(),
+		Height: emptyImg.Bounds().Dy(),
+		Tiles:  []image.Rectangle{emptyImg.Bounds()},
 	}
 
 	const (
@@ -513,11 +507,10 @@ func TestSetFragment_In(t *testing.T) {
 		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
 		tiledImg := &tiledimage.Image{
-			Id:          id,
-			Width:       img.Bounds().Dx(),
-			Height:      img.Bounds().Dy(),
-			TileMaxSize: tile.MaxSize,
-			Tiles:       []image.Rectangle{img.Bounds()},
+			Id:     id,
+			Width:  img.Bounds().Dx(),
+			Height: img.Bounds().Dy(),
+			Tiles:  []image.Rectangle{img.Bounds()},
 		}
 		imageRepo.Add(tiledImg)
 
@@ -579,11 +572,10 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
 		tiledImg := &tiledimage.Image{
-			Id:          id,
-			Width:       img.Bounds().Dx(),
-			Height:      img.Bounds().Dy(),
-			TileMaxSize: tile.MaxSize,
-			Tiles:       []image.Rectangle{img.Bounds()},
+			Id:     id,
+			Width:  img.Bounds().Dx(),
+			Height: img.Bounds().Dy(),
+			Tiles:  []image.Rectangle{img.Bounds()},
 		}
 		imageRepo.Add(tiledImg)
 
@@ -637,11 +629,10 @@ func TestSetFragment_PartIntersect(t *testing.T) {
 		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
 		tiledImg := &tiledimage.Image{
-			Id:          id,
-			Width:       img.Bounds().Dx(),
-			Height:      img.Bounds().Dy(),
-			TileMaxSize: tile.MaxSize,
-			Tiles:       []image.Rectangle{img.Bounds()},
+			Id:     id,
+			Width:  img.Bounds().Dx(),
+			Height: img.Bounds().Dy(),
+			Tiles:  []image.Rectangle{img.Bounds()},
 		}
 		imageRepo.Add(tiledImg)
 
@@ -708,11 +699,10 @@ func TestSetFragment_In_NotFirstTile(t *testing.T) {
 			imgHeight = 15
 		)
 		tiledImg := &tiledimage.Image{
-			Id:          id,
-			Width:       imgWidth,
-			Height:      imgHeight,
-			TileMaxSize: tile.MaxSize,
-			Tiles:       []image.Rectangle{img.Bounds()},
+			Id:     id,
+			Width:  imgWidth,
+			Height: imgHeight,
+			Tiles:  []image.Rectangle{img.Bounds()},
 		}
 		imageRepo.Add(tiledImg)
 
@@ -776,10 +766,9 @@ func TestSetFragment_In_TwoTiles(t *testing.T) {
 		)
 
 		tiledImg := &tiledimage.Image{
-			Id:          id,
-			Width:       imgWidth,
-			Height:      imgHeight,
-			TileMaxSize: tile.MaxSize,
+			Id:     id,
+			Width:  imgWidth,
+			Height: imgHeight,
 			Tiles: []image.Rectangle{
 				image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height),
 				image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height),

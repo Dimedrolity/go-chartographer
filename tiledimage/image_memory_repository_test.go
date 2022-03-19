@@ -1,7 +1,6 @@
 package tiledimage_test
 
 import (
-	"chartographer-go/tile"
 	"chartographer-go/tiledimage"
 	"errors"
 
@@ -26,11 +25,10 @@ func TestFileSystemTileRepo_SuccessGet(t *testing.T) {
 			height = 1
 		)
 		tiledImg := &tiledimage.Image{
-			Id:          id,
-			Width:       width,
-			Height:      height,
-			TileMaxSize: tile.MaxSize,
-			Tiles:       []image.Rectangle{},
+			Id:     id,
+			Width:  width,
+			Height: height,
+			Tiles:  []image.Rectangle{},
 		}
 
 		imageRepo.Add(tiledImg)
@@ -51,11 +49,10 @@ func TestFileSystemTileRepo_SuccessDelete(t *testing.T) {
 			height = 1
 		)
 		tiledImg := &tiledimage.Image{
-			Id:          id,
-			Width:       width,
-			Height:      height,
-			TileMaxSize: tile.MaxSize,
-			Tiles:       []image.Rectangle{},
+			Id:     id,
+			Width:  width,
+			Height: height,
+			Tiles:  []image.Rectangle{},
 		}
 
 		imageRepo.Add(tiledImg)

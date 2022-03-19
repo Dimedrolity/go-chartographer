@@ -24,7 +24,7 @@ type Service interface {
 type ChartographerService struct {
 	imageRepo   tiledimage.Repository
 	tileRepo    store.TileRepository
-	tileMaxSize int
+	tileMaxSize int // Определяет максимальный размер тайла по ширине и высоте.
 }
 
 func NewChartographerService(imageRepo tiledimage.Repository, tileRepo store.TileRepository, tileMaxSize int) *ChartographerService {
@@ -56,7 +56,7 @@ func (cs *ChartographerService) NewRgbaBmp(width, height int) (*tiledimage.Image
 		Id:          uuid.NewString(),
 		Width:       width,
 		Height:      height,
-		TileMaxSize: tile.MaxSize,
+		TileMaxSize: cs.tileMaxSize,
 		Tiles:       tiles,
 	}
 	cs.imageRepo.Add(img)
