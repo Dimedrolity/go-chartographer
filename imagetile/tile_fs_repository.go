@@ -62,14 +62,7 @@ func (r *FileSystemTileRepository) GetTile(id string, x, y int) (image.Image, er
 }
 
 // SaveTile декодирует тайл-изображение в формат BMP и сохраняет на диск.
-// По id создается папка на диске для тайлов изображения,
-// каждый тайл хранится в папке начальной координаты Y, файл именуется координатой X.
-//
-// Пример структуры файлов для изображения с id="3a8cc52-8997-4adb-8a09-918c29aa10c4" и координатами тайла (0; 10):
-//
-// 23a8cc52-8997-4adb-8a09-918c29aa10c4
-// 	+---- 10
-//		+---- 0.bmp
+// По id создается папка на диске для тайлов изображения, каждый тайл именуется по координатам "Y=<y>; X=<x>.bmp".
 func (r *FileSystemTileRepository) SaveTile(id string, x int, y int, img image.Image) error {
 	// TODO можно было бы обойтись без буфера, Create файл и bmp.Encode(файл)
 	// 	file, err := os.OpenFile(filepath.Join(dir, x+".bmp"), os.O_WRONLY|os.O_CREATE, 0777)
