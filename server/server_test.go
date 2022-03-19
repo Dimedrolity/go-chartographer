@@ -18,9 +18,7 @@ import (
 // TODO может быть подключить библиотеку для создания стабов в рантайме? типа FakeItEasy на C#
 // Сейчас для каждого теста руками создана стаб-структура
 
-//
-// Создание изображения
-//
+// region Создание изображения
 
 type TestChartServiceAllPanic struct{}
 
@@ -177,13 +175,15 @@ func TestCreate_Success(t *testing.T) {
 	})
 }
 
-//
+//endregion
+
+// region
 // TODO Удаление изображения
 //
 
-//
-// Получение фрагмента изображения
-//
+//endregion
+
+//region Получение фрагмента изображения
 
 func TestGet_WrongParams(t *testing.T) {
 	srv := server.NewServer(&server.Config{}, &TestChartServiceAllPanic{})
@@ -288,7 +288,6 @@ func TestGet_NotFound(t *testing.T) {
 type TestChartServiceGetMethodSizeError struct{}
 
 func (t TestChartServiceGetMethodSizeError) NewRgbaBmp(int, int) (*tiledimage.Image, error) {
-	//return nil, &chart.SizeError{}
 	panic("implement me")
 
 }
@@ -400,9 +399,9 @@ func TestGet_Success(t *testing.T) {
 	})
 }
 
-//
-// Установка фрагмента изображения
-//
+//endregion
+
+//region Установка фрагмента изображения
 
 type Fragment struct {
 	Id                  string
@@ -573,3 +572,5 @@ func TestSet_Success(t *testing.T) {
 		So(w.Code, ShouldEqual, http.StatusOK)
 	})
 }
+
+//endregion
