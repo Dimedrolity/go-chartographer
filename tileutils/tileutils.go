@@ -29,7 +29,6 @@ func CreateTiles(width, height, tileMaxSize int) []image.Rectangle {
 }
 
 // OverlappedTiles возвращает только те тайлы, которые пересекаются с фрагментом.
-// TODO тест
 func OverlappedTiles(imgTiles []image.Rectangle, fragment image.Rectangle) []image.Rectangle {
 	overlapped := make([]image.Rectangle, 0, len(imgTiles))
 	for _, tile := range imgTiles {
