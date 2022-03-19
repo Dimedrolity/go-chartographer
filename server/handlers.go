@@ -114,7 +114,11 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 
 	err = s.chartService.SetFragment(img, fragment)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		if errors.Is(err, chart.ErrNotOverlaps) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 }

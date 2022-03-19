@@ -62,7 +62,7 @@ func (r *FileSystemTileRepository) GetTile(id string, x, y int) (image.Image, er
 }
 
 // SaveTile декодирует тайл-изображение в формат BMP и сохраняет на диск.
-// По id создается папка на диске для тайлов изображения, каждый тайл именуется по координатам "Y=<y>; X=<x>.bmp".
+// По id создается папка на диске для тайлов изображения, для каждого тайла создается файл и именуется по координатам "Y=<y>; X=<x>.bmp".
 func (r *FileSystemTileRepository) SaveTile(id string, x int, y int, img image.Image) error {
 	// TODO можно было бы обойтись без буфера, Create файл и bmp.Encode(файл)
 	// 	file, err := os.OpenFile(filepath.Join(dir, x+".bmp"), os.O_WRONLY|os.O_CREATE, 0777)

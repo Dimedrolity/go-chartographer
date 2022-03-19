@@ -600,6 +600,46 @@ func TestSet_NotFound(t *testing.T) {
 	})
 }
 
+type TestChartServiceSetMethodNotOverlaps struct{}
+
+func (t TestChartServiceSetMethodNotOverlaps) AddImage(int, int) (*tiledimage.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceSetMethodNotOverlaps) DeleteImage(string) error {
+	panic("implement me")
+}
+func (t TestChartServiceSetMethodNotOverlaps) SetFragment(*tiledimage.Image, image.Image) error {
+	return chart.ErrNotOverlaps
+}
+func (t TestChartServiceSetMethodNotOverlaps) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+	panic("implement me")
+}
+func (t TestChartServiceSetMethodNotOverlaps) GetImage(string) (*tiledimage.Image, error) {
+	return nil, nil
+}
+
+func TestSet_NotOverlaps(t *testing.T) {
+	srv := server.NewServer(&server.Config{}, &TestChartServiceSetMethodNotOverlaps{})
+
+	tmpl, _ := template.New("right request").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}&height={{.Height}}")
+
+	Convey("", t, func() {
+		b := bytes.Buffer{}
+		err := tmpl.Execute(&b, &Fragment{Id: "0", X: 0, Y: 0, Width: 1, Height: 1})
+		So(err, ShouldBeNil)
+		url := b.String()
+		img := image.Image(image.Rect(0, 0, 1, 1))
+		imgBuffer := bytes.Buffer{}
+		_ = bmp.Encode(&imgBuffer, img)
+		req := httptest.NewRequest("POST", url, &imgBuffer)
+		w := httptest.NewRecorder()
+
+		srv.ServeHTTP(w, req)
+
+		So(w.Code, ShouldEqual, http.StatusBadRequest)
+	})
+}
+
 type TestChartServiceSetMethodSuccess struct{}
 
 func (t TestChartServiceSetMethodSuccess) AddImage(int, int) (*tiledimage.Image, error) {

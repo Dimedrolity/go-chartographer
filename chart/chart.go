@@ -109,6 +109,7 @@ func (cs *ChartographerService) DeleteImage(id string) error {
 //
 // Примечание:
 // если фрагмент частично выходит за границы изображения, то часть фрагмента вне изображения игнорируется.
+// Возможна ошибка ErrNotOverlaps и другие.
 func (cs *ChartographerService) SetFragment(img *tiledimage.Image, fragment image.Image) error {
 	imgRect := image.Rect(0, 0, img.Width, img.Height)
 
@@ -158,7 +159,7 @@ const (
 // GetFragment возвращает фрагмент изображения id, начиная с координат изобржаения (x; y) по ширине width и высоте height.
 // Возвращаемое изображение будет иметь начальные координаты (x; y).
 // Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).
-// Возможны ошибки SizeError, ErrNotOverlaps и типа *os.PathError, например os.ErrNotExist.
+// Возможны ошибки SizeError, ErrNotOverlaps и другие.
 func (cs *ChartographerService) GetFragment(img *tiledimage.Image, x, y, width, height int) (image.Image, error) {
 	if width < fragmentMinWidth || width > fragmentMaxWidth ||
 		height < fragmentMinHeight || height > fragmentMaxHeight {
