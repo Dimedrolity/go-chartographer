@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chartographer-go/server"
 	"log"
 	"os"
 
@@ -25,8 +26,8 @@ func run() error {
 	imageRepo := tiledimage.NewInMemoryImageRepo()
 	chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 	// TODO вынести хост и порт в .env
-	config := NewConfig("8080")
-	server := NewServer(config, chartService)
+	config := server.NewConfig("8080")
+	srv := server.NewServer(config, chartService)
 
-	return server.Run()
+	return srv.Run()
 }

@@ -12,6 +12,14 @@ import (
 	"image/draw"
 )
 
+type Service interface {
+	NewRgbaBmp(width, height int) (*tiledimage.Image, error)
+	DeleteImage(id string) error
+	SetFragment(tiledImageId string, fragment image.Image) error
+	GetFragment(imgConfig *tiledimage.Image, x, y, width, height int) (image.Image, error)
+	GetTiledImage(id string) (*tiledimage.Image, error)
+}
+
 // ChartographerService - содержит бизнес логику обработки изображений.
 type ChartographerService struct {
 	imageRepo   tiledimage.Repository

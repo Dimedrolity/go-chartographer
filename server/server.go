@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"net/http"
@@ -20,10 +20,10 @@ type Server struct {
 	config *Config
 	router *chi.Mux
 
-	chartService *chart.ChartographerService
+	chartService chart.Service
 }
 
-func NewServer(config *Config, chartService *chart.ChartographerService) *Server {
+func NewServer(config *Config, chartService chart.Service) *Server {
 	s := &Server{
 		config:       config,
 		router:       chi.NewRouter(),
