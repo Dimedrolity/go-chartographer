@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"chartographer-go/chart"
-	"chartographer-go/store"
+	"chartographer-go/imagetile"
 	"chartographer-go/tiledimage"
 )
 
@@ -18,7 +18,7 @@ func main() {
 
 func run() error {
 	pathToImages := os.Args[1]
-	tileRepo, err := store.NewFileSystemTileRepo(pathToImages)
+	tileRepo, err := imagetile.NewFileSystemTileRepo(pathToImages)
 	if err != nil {
 		return err
 	}

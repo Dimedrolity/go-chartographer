@@ -2,7 +2,7 @@ package chart
 
 import (
 	"bytes"
-	"chartographer-go/store"
+	"chartographer-go/imagetile"
 	. "github.com/smartystreets/goconvey/convey"
 	"golang.org/x/image/bmp"
 	"image"
@@ -79,7 +79,7 @@ func TestEncodeDecode_RectStartNotZero(t *testing.T) {
 				img.Set(x, y, red)
 			}
 		}
-		encodeBytes, _ := store.Encode(img)
+		encodeBytes, _ := imagetile.Encode(img)
 
 		r := bytes.NewReader(encodeBytes)
 		decodedImg, _ := bmp.Decode(r)

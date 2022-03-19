@@ -1,4 +1,4 @@
-package store
+package imagetile
 
 import (
 	"bytes"

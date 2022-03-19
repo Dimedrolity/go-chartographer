@@ -10,7 +10,7 @@ import (
 	"golang.org/x/image/bmp"
 
 	"chartographer-go/chart"
-	"chartographer-go/store"
+	"chartographer-go/imagetile"
 	"chartographer-go/tiledimage"
 )
 
@@ -100,7 +100,7 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	store.ShiftRect(fragment, x, y)
+	imagetile.ShiftRect(fragment, x, y)
 
 	err = s.chartService.SetFragment(id, fragment)
 	if err != nil {

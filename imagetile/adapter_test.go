@@ -1,7 +1,7 @@
-package store_test
+package imagetile_test
 
 import (
-	"chartographer-go/store"
+	"chartographer-go/imagetile"
 	"image"
 	"image/color"
 	"testing"
@@ -31,7 +31,7 @@ func TestAdapter(t *testing.T) {
 			offsetX = 10
 			offsetY = 20
 		)
-		store.ShiftRect(img, offsetX, offsetY)
+		imagetile.ShiftRect(img, offsetX, offsetY)
 
 		So(img.Bounds().Dx(), ShouldEqual, width)
 		So(img.Bounds().Dy(), ShouldEqual, height)
