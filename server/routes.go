@@ -8,7 +8,7 @@ func (s *Server) setRoutes() {
 
 		r.Route("/{id}", func(r chi.Router) {
 			r.Post("/", s.setFragment)
-			r.Get("/", s.fragment)
+			r.Get("/", s.getFragment)
 			r.Delete("/", s.deleteImage)
 		})
 	})

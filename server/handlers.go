@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -13,14 +14,36 @@ import (
 	"chartographer-go/tiledimage"
 )
 
+func paramError(name string, err error) error {
+	return fmt.Errorf(
+		"некорректный параметр запроса - %v: %w", name, err)
+}
+func getQueryParam(req *http.Request, name string) (string, error) {
+	q := req.URL.Query()
+	if !q.Has(name) || q.Get(name) == "" {
+		return "", paramError(name, errors.New("отсутствует или пустая строка"))
+	}
+	return q.Get(name), nil
+}
+func getQueryParamInt(req *http.Request, name string) (int, error) {
+	s, err := getQueryParam(req, name)
+	if err != nil {
+		return 0, err
+	}
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return 0, paramError(name, err)
+	}
+	return i, nil
+}
+
 func (s *Server) createImage(w http.ResponseWriter, req *http.Request) {
-	queryValues := req.URL.Query()
-	width, err := strconv.Atoi(queryValues.Get("width"))
+	width, err := getQueryParamInt(req, "width")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	height, err := strconv.Atoi(queryValues.Get("height"))
+	height, err := getQueryParamInt(req, "height")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -88,7 +111,7 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *Server) fragment(w http.ResponseWriter, req *http.Request) {
+func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 	queryValues := req.URL.Query()
 	x, err := strconv.Atoi(queryValues.Get("x"))
 	if err != nil {

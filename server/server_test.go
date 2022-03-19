@@ -43,9 +43,9 @@ func TestCreate_WrongSize(t *testing.T) {
 	type Size struct {
 		Width, Height interface{}
 	}
-	tmpl, _ := template.New("test").Parse("/chartas/?width={{.Width}}&height={{.Height}}")
+	tmpl, _ := template.New("right request").Parse("/chartas/?width={{.Width}}&height={{.Height}}")
 
-	testWrongSize := func(size *Size) {
+	testWrongSize := func(tmpl *template.Template, size *Size) {
 		b := bytes.Buffer{}
 		err := tmpl.Execute(&b, size)
 		So(err, ShouldBeNil)
@@ -58,14 +58,32 @@ func TestCreate_WrongSize(t *testing.T) {
 		So(w.Code, ShouldEqual, http.StatusBadRequest)
 	}
 
+	Convey("no width", t, func() {
+		tmplOnlyHeight, _ := template.New("no width").Parse("/chartas/?height={{.Height}}")
+		testWrongSize(tmplOnlyHeight, &Size{Height: 1})
+	})
+	Convey("no height", t, func() {
+		tmplOnlyWidth, _ := template.New("no height").Parse("/chartas/?width={{.Width}}")
+		testWrongSize(tmplOnlyWidth, &Size{Width: 1})
+	})
+
+	Convey("empty width", t, func() {
+		testWrongSize(tmpl, &Size{Width: "", Height: 1})
+	})
+	Convey("empty height", t, func() {
+		testWrongSize(tmpl, &Size{Width: 1, Height: ""})
+	})
+
 	Convey("string width", t, func() {
-		testWrongSize(&Size{Width: "a", Height: 1})
+		testWrongSize(tmpl, &Size{Width: "a", Height: 1})
 	})
 	Convey("string height", t, func() {
-		testWrongSize(&Size{Width: 1, Height: "a"})
+		testWrongSize(tmpl, &Size{Width: 1, Height: "a"})
 	})
+
 	Convey("negative width", t, func() {
-		testWrongSize(&Size{Width: 0, Height: 0}) // 0, чтобы пройти проверки strconv.Atoi
+		// сервис вернет SizeError
+		testWrongSize(tmpl, &Size{Width: 0, Height: 0}) // 0, чтобы пройти проверки на числа
 	})
 }
 
@@ -114,3 +132,15 @@ func TestCreate_Success(t *testing.T) {
 		So(w.Body.String(), ShouldEqual, id)
 	})
 }
+
+//
+// TODO Удаление изображения
+//
+
+//
+// TODO Получение фрагмента изображения
+//
+
+//
+// TODO Установка фрагмента изображения
+//
