@@ -68,31 +68,33 @@ func (s *Server) createImage(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
-	queryValues := req.URL.Query()
-	x, err := strconv.Atoi(queryValues.Get("x"))
+	x, err := getQueryParamInt(req, "x")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	y, err := strconv.Atoi(queryValues.Get("y"))
+	y, err := getQueryParamInt(req, "y")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	//width, err := strconv.Atoi(queryValues.Get("width"))
-	//if err != nil {
-	//	http.Error(w, err.Error(), http.StatusBadRequest)
-	//	return
-	//}
-	//height, err := strconv.Atoi(queryValues.Get("height"))
-	//if err != nil {
-	//	http.Error(w, err.Error(), http.StatusBadRequest)
-	//	return
-	//}
+	// пусть width и height будут обязательными параметрами, несмотря на то, что
+	// размеры можно получить при декодировании изображения в теле запроса
+	_, err = getQueryParamInt(req, "width")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	_, err = getQueryParamInt(req, "height")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	id := chi.URLParam(req, "id")
 
 	// TODO не декодировать сразу, сначала проверить, что есть пересечение img и width height
+	// TODO вынести декодирование в сервис, иначе приходится в тестах создавать реальный BMP
 	fragment, err := bmp.Decode(req.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
