@@ -1,5 +1,5 @@
-// Package tile отвечает за разделение изображение на части (тайлы).
-package tile
+// Package tileutils отвечает за разделение изображение на части (тайлы).
+package tileutils
 
 import (
 	"image"

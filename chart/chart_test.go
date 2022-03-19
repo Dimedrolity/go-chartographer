@@ -1,8 +1,8 @@
 package chart_test
 
 import (
-	"chartographer-go/tile"
 	"chartographer-go/tiledimage"
+	"chartographer-go/tileutils"
 	"errors"
 	"image"
 	"image/color"
@@ -854,7 +854,7 @@ func TestCreateTiles(t *testing.T) {
 			maxTileSize = 10
 		)
 
-		tiles := tile.CreateTiles(width, height, maxTileSize)
+		tiles := tileutils.CreateTiles(width, height, maxTileSize)
 
 		So(tiles, ShouldHaveLength, 9)
 		// 1-я строка

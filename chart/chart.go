@@ -3,8 +3,8 @@ package chart
 
 import (
 	"chartographer-go/store"
-	"chartographer-go/tile"
 	"chartographer-go/tiledimage"
+	"chartographer-go/tileutils"
 	"errors"
 	"github.com/google/uuid"
 	"image"
@@ -50,7 +50,7 @@ func (cs *ChartographerService) NewRgbaBmp(width, height int) (*tiledimage.Image
 		}
 	}
 
-	tiles := tile.CreateTiles(width, height, cs.tileMaxSize)
+	tiles := tileutils.CreateTiles(width, height, cs.tileMaxSize)
 
 	img := &tiledimage.Image{
 		Id:          uuid.NewString(),
@@ -123,7 +123,7 @@ func (cs *ChartographerService) SetFragment(tiledImageId string, fragment image.
 
 	intersect := fragment.Bounds().Intersect(imgRect)
 
-	overlapped := tile.FilterOverlappedTiles(img.Tiles, intersect)
+	overlapped := tileutils.FilterOverlappedTiles(img.Tiles, intersect)
 
 	for _, t := range overlapped {
 		tileImg, err := cs.tileRepo.GetTile(img.Id, t.Min.X, t.Min.Y)
@@ -179,7 +179,7 @@ func (cs *ChartographerService) GetFragment(imgConfig *tiledimage.Image, x, y, w
 		return nil, ErrNotOverlaps
 	}
 
-	overlapped := tile.FilterOverlappedTiles(imgConfig.Tiles, fragmentRect)
+	overlapped := tileutils.FilterOverlappedTiles(imgConfig.Tiles, fragmentRect)
 
 	fragment := image.NewRGBA(fragmentRect)
 
