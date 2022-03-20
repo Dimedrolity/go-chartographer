@@ -6,8 +6,6 @@ WORKDIR /app
 
 COPY . .
 
-RUN go mod download
-
 EXPOSE 8080
 
 CMD make ARGS="./data"
