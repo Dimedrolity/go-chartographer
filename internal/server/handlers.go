@@ -53,9 +53,9 @@ func (s *Server) createImage(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		if errors.As(err, &errSize) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -96,9 +96,9 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		if errors.Is(err, kvstore.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -115,9 +115,9 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		if errors.Is(err, chart.ErrNotOverlaps) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
@@ -150,9 +150,9 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		if errors.Is(err, kvstore.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -161,9 +161,9 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		if errors.As(err, &errSize) || errors.Is(err, chart.ErrNotOverlaps) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -182,9 +182,9 @@ func (s *Server) deleteImage(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		if errors.Is(err, kvstore.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
