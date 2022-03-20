@@ -32,6 +32,7 @@ func (r *InMemoryStore) add(key string, value interface{}) {
 func (r *InMemoryStore) Get(key string) (interface{}, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
 	return r.get(key)
 }
 
@@ -40,18 +41,19 @@ func (r *InMemoryStore) get(key string) (interface{}, error) {
 	if !ok {
 		return nil, ErrNotExist
 	}
+
 	return value, nil
 }
 
 func (r *InMemoryStore) Delete(key string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
 	return r.delete(key)
 }
 
 func (r *InMemoryStore) delete(key string) error {
-	_, ok := r.store[key]
-	if !ok {
+	if _, ok := r.store[key]; !ok {
 		return ErrNotExist
 	}
 

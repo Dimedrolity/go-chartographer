@@ -9,6 +9,7 @@ func min(a, b int) int {
 	if a < b {
 		return a
 	}
+
 	return b
 }
 
@@ -31,10 +32,12 @@ func CreateTiles(width, height, tileMaxSize int) []image.Rectangle {
 // OverlappedTiles возвращает только те тайлы, которые пересекаются с фрагментом.
 func OverlappedTiles(imgTiles []image.Rectangle, fragment image.Rectangle) []image.Rectangle {
 	overlapped := make([]image.Rectangle, 0, len(imgTiles))
+
 	for _, tile := range imgTiles {
 		if tile.Overlaps(fragment) {
 			overlapped = append(overlapped, tile)
 		}
 	}
+
 	return overlapped
 }
