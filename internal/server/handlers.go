@@ -57,7 +57,9 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	// пусть width и height будут обязательными параметрами, несмотря на то, что
-	// размеры можно получить при декодировании изображения в теле запроса
+	// размеры можно получить при декодировании изображения в теле запроса.
+	// Возможная оптимизация - проверить, что есть пересечение img с width и height,
+	// декодировать только в случае пересечения.
 	_, err = getQueryParamInt(req, "width")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -83,7 +85,6 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// TODO не декодировать сразу, сначала проверить, что есть пересечение img и width height
 	b, err := io.ReadAll(req.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

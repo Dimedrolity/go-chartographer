@@ -375,20 +375,19 @@ func TestGetFragment_In_TwoTiles(t *testing.T) {
 		chartService := chart.NewChartographerService(imageRepo, tileRepo, adapter, tileMaxSize)
 
 		const (
-			tile1X      = 0
-			tile1Y      = 0
-			tile1Width  = 10
-			tile1Height = 10
-		)
-		const (
-			tile2X      = 10
-			tile2Y      = 0
-			tile2Width  = 5
-			tile2Height = 10
+			tile1X0 = 0
+			tile1Y0 = 0
+			tile1X1 = 10
+			tile1Y1 = 10
+
+			tile2X0 = 10
+			tile2Y0 = 0
+			tile2X1 = 15
+			tile2Y1 = 10
 		)
 
-		t1 := image.NewRGBA(image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height))
-		t2 := image.NewRGBA(image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height))
+		t1 := image.NewRGBA(image.Rect(tile1X0, tile1Y0, tile1X1, tile1Y1))
+		t2 := image.NewRGBA(image.Rect(tile2X0, tile2Y0, tile2X1, tile2Y1))
 
 		const (
 			redX = 9
@@ -404,8 +403,8 @@ func TestGetFragment_In_TwoTiles(t *testing.T) {
 		t2.SetRGBA(greenX, greenY, green)
 
 		const id = "0"
-		_ = tileRepo.SaveTile(id, tile1X, tile1Y, t1) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
-		_ = tileRepo.SaveTile(id, tile2X, tile2Y, t2) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+		_ = tileRepo.SaveTile(id, tile1X0, tile1Y0, t1) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+		_ = tileRepo.SaveTile(id, tile2X0, tile2Y0, t2) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
 		const (
 			imgWidth  = 15
@@ -417,8 +416,8 @@ func TestGetFragment_In_TwoTiles(t *testing.T) {
 			Width:  imgWidth,
 			Height: imgHeight,
 			Tiles: []image.Rectangle{
-				image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height),
-				image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height),
+				t1.Bounds(),
+				t2.Bounds(),
 			},
 		}
 		imageRepo.Add(id, tiledImg)
@@ -761,26 +760,23 @@ func TestSetFragment_In_TwoTiles(t *testing.T) {
 		chartService := chart.NewChartographerService(imageRepo, tileRepo, adapter, tileMaxSize)
 
 		const (
-			tile1X = 0
-			tile1Y = 0
-			// TODO tile1_x0 _x1
-			tile1Width  = 10
-			tile1Height = 10
+			tile1X0 = 0
+			tile1Y0 = 0
+			tile1X1 = 10
+			tile1Y1 = 10
+
+			tile2X0 = 10
+			tile2Y0 = 0
+			tile2X1 = 15
+			tile2Y1 = 10
 		)
 
-		const (
-			tile2X      = 10
-			tile2Y      = 0
-			tile2Width  = 5
-			tile2Height = 10
-		)
-
-		t1 := image.NewRGBA(image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height))
-		t2 := image.NewRGBA(image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height))
+		t1 := image.NewRGBA(image.Rect(tile1X0, tile1Y0, tile1X1, tile1Y1))
+		t2 := image.NewRGBA(image.Rect(tile2X0, tile2Y0, tile2X1, tile2Y1))
 
 		const id = "0"
-		_ = tileRepo.SaveTile(id, tile1X, tile1Y, t1) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
-		_ = tileRepo.SaveTile(id, tile2X, tile2Y, t2) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+		_ = tileRepo.SaveTile(id, tile1X0, tile1Y0, t1) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
+		_ = tileRepo.SaveTile(id, tile2X0, tile2Y0, t2) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
 		const (
 			imgWidth  = 15
@@ -792,8 +788,8 @@ func TestSetFragment_In_TwoTiles(t *testing.T) {
 			Width:  imgWidth,
 			Height: imgHeight,
 			Tiles: []image.Rectangle{
-				image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height),
-				image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height),
+				t1.Bounds(),
+				t2.Bounds(),
 			},
 		}
 
