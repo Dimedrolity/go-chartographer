@@ -173,6 +173,7 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-Type", "image/bmp")
 }
 
 func (s *Server) deleteImage(w http.ResponseWriter, req *http.Request) {
