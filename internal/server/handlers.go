@@ -1,6 +1,8 @@
 package server
 
 import (
+	"chartographer-go/internal/chart"
+	"chartographer-go/internal/imagetile"
 	"chartographer-go/pkg/kvstore"
 	"errors"
 	"fmt"
@@ -9,9 +11,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"golang.org/x/image/bmp"
-
-	"chartographer-go/chart"
-	"chartographer-go/imagetile"
 )
 
 func paramError(name string, err error) error {

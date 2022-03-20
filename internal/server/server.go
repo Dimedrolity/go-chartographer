@@ -1,11 +1,10 @@
 package server
 
 import (
+	"chartographer-go/internal/chart"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-
-	"chartographer-go/chart"
 )
 
 type Config struct {

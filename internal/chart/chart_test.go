@@ -1,14 +1,13 @@
 package chart_test
 
 import (
+	chart2 "chartographer-go/internal/chart"
 	"errors"
 	"image"
 	"image/color"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
-
-	"chartographer-go/chart"
 )
 
 //
@@ -41,11 +40,11 @@ func (r *TestTileRepo) DeleteImage(id string) error {
 
 //TestImageRepo - заглушка (stub)
 type TestImageRepo struct {
-	images map[string]*chart.TiledImage
+	images map[string]*chart2.TiledImage
 }
 
 func (r *TestImageRepo) Add(key string, value interface{}) {
-	r.images[key] = value.(*chart.TiledImage)
+	r.images[key] = value.(*chart2.TiledImage)
 }
 
 func (r *TestImageRepo) Get(key string) (interface{}, error) {
@@ -69,10 +68,10 @@ func (t TestTileRepositoryEmpty) DeleteImage(string) error {
 }
 
 func TestNewRGBA(t *testing.T) {
-	imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
+	imageRepo := &TestImageRepo{images: make(map[string]*chart2.TiledImage)}
 	tileRepo := &TestTileRepositoryEmpty{}
 	tileMaxSize := 1000
-	chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+	chartService := chart2.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 
 	Convey("init", t, func() {
 		const (
@@ -100,7 +99,7 @@ func TestNewRGBA(t *testing.T) {
 
 		// Негативные тесты
 
-		var errSize *chart.SizeError
+		var errSize *chart2.SizeError
 
 		Convey("test minWidth-1", func() {
 			_, err := chartService.AddImage(minWidth-1, 1)
@@ -128,10 +127,10 @@ func TestNewRGBA(t *testing.T) {
 func TestGetFragment_In(t *testing.T) {
 	Convey("Fragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения.\n"+
 		"После вызова функции Fragment красный пиксель изображения должен появиться в фрагменте", t, func() {
-		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
+		imageRepo := &TestImageRepo{images: make(map[string]*chart2.TiledImage)}
 		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		tileMaxSize := 1000
-		chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+		chartService := chart2.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 
 		const imgSize = 2
 		img := image.NewRGBA(image.Rect(0, 0, imgSize, imgSize))
@@ -156,7 +155,7 @@ func TestGetFragment_In(t *testing.T) {
 		fragmentRect := image.Rect(x, y, x+fragmentWidth, y+fragmentHeight)
 		So(fragmentRect.In(img.Bounds()), ShouldBeTrue)
 
-		tiledImg := &chart.TiledImage{
+		tiledImg := &chart2.TiledImage{
 			Id:     id,
 			Width:  img.Bounds().Dx(),
 			Height: img.Bounds().Dy(),
@@ -176,10 +175,10 @@ func TestGetFragment_In(t *testing.T) {
 func TestGetFragment_PartIntersect(t *testing.T) {
 	Convey("Fragment когда прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения\n"+
 		"После вызова функции Fragment во фрагменте должен появиться один красный пиксель", t, func() {
-		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
+		imageRepo := &TestImageRepo{images: make(map[string]*chart2.TiledImage)}
 		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		tileMaxSize := 1000
-		chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+		chartService := chart2.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 
 		const (
 			imgWidth  = 2
@@ -203,7 +202,7 @@ func TestGetFragment_PartIntersect(t *testing.T) {
 			fragmentHeight = 2
 		)
 
-		tiledImg := &chart.TiledImage{
+		tiledImg := &chart2.TiledImage{
 			Id:     id,
 			Width:  img.Bounds().Dx(),
 			Height: img.Bounds().Dy(),
@@ -237,10 +236,10 @@ func TestGetFragment_PartIntersect(t *testing.T) {
 func TestGetFragment_NotOverlaps(t *testing.T) {
 	Convey("Fragment когда прямоугольники не пересекаются\n"+
 		"Результатом Fragment должно быть полностью черное изображение", t, func() {
-		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
+		imageRepo := &TestImageRepo{images: make(map[string]*chart2.TiledImage)}
 		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		tileMaxSize := 1000
-		chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+		chartService := chart2.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 
 		const (
 			imgWidth  = 2
@@ -268,7 +267,7 @@ func TestGetFragment_NotOverlaps(t *testing.T) {
 		fragmentRect := image.Rect(x, y, x+fragmentWidth, y+fragmentHeight)
 		So(fragmentRect.Overlaps(img.Bounds()), ShouldBeFalse)
 
-		tiledImg := &chart.TiledImage{
+		tiledImg := &chart2.TiledImage{
 			Id:     id,
 			Width:  img.Bounds().Dx(),
 			Height: img.Bounds().Dy(),
@@ -277,7 +276,7 @@ func TestGetFragment_NotOverlaps(t *testing.T) {
 		}
 		_, err := chartService.GetFragment(tiledImg, x, y, fragmentWidth, fragmentHeight)
 
-		So(errors.Is(err, chart.ErrNotOverlaps), ShouldBeTrue)
+		So(errors.Is(err, chart2.ErrNotOverlaps), ShouldBeTrue)
 	})
 }
 
@@ -285,10 +284,10 @@ func TestGetFragment_In_NotFirstTile(t *testing.T) {
 	Convey("когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения "+
 		"и параметры x,y,width,height относятся не к первому тайлу\n"+
 		"После вызова функции GetFragment красный пиксель фрагмента должен появиться в изображении", t, func() {
-		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
+		imageRepo := &TestImageRepo{images: make(map[string]*chart2.TiledImage)}
 		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		tileMaxSize := 10
-		chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+		chartService := chart2.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 
 		const (
 			tileX      = 10
@@ -312,7 +311,7 @@ func TestGetFragment_In_NotFirstTile(t *testing.T) {
 			imgWidth  = 15
 			imgHeight = 15
 		)
-		tiledImg := &chart.TiledImage{
+		tiledImg := &chart2.TiledImage{
 			Id:     id,
 			Width:  imgWidth,
 			Height: imgHeight,
@@ -349,10 +348,10 @@ func TestGetFragment_In_TwoTiles(t *testing.T) {
 	Convey("GetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения "+
 		"и фрагмент затрагивает 2 тайла.\n"+
 		"Результат GetFragment должен иметь пиксели изображения", t, func() {
-		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
+		imageRepo := &TestImageRepo{images: make(map[string]*chart2.TiledImage)}
 		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		tileMaxSize := 10
-		chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+		chartService := chart2.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 
 		const (
 			tile1X      = 0
@@ -392,7 +391,7 @@ func TestGetFragment_In_TwoTiles(t *testing.T) {
 			imgHeight = 15
 		)
 
-		tiledImg := &chart.TiledImage{
+		tiledImg := &chart2.TiledImage{
 			Id:     id,
 			Width:  imgWidth,
 			Height: imgHeight,
@@ -424,16 +423,16 @@ func TestGetFragment_In_TwoTiles(t *testing.T) {
 }
 
 func TestGetFragment_Size(t *testing.T) {
-	imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
+	imageRepo := &TestImageRepo{images: make(map[string]*chart2.TiledImage)}
 	tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 	tileMaxSize := 1000
-	chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+	chartService := chart2.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 
 	emptyImg := image.NewRGBA(image.Rect(0, 0, 1, 1))
 	id := "0"
 	_ = tileRepo.SaveTile(id, 0, 0, emptyImg) // чтобы getTile, вызываемый в chart.GetFragment, возвращал стаб
 
-	tiledEmptyImg := &chart.TiledImage{
+	tiledEmptyImg := &chart2.TiledImage{
 		Id:     id,
 		Width:  emptyImg.Bounds().Dx(),
 		Height: emptyImg.Bounds().Dy(),
@@ -466,7 +465,7 @@ func TestGetFragment_Size(t *testing.T) {
 
 	// Негативные тесты
 
-	var errSize *chart.SizeError
+	var errSize *chart2.SizeError
 	Convey("test minWidth-1", t, func() {
 		_, err := chartService.GetFragment(tiledEmptyImg, 0, 0, fragmentMinWidth-1, 1)
 		So(errors.As(err, &errSize), ShouldBeTrue)
@@ -491,10 +490,10 @@ func TestGetFragment_Size(t *testing.T) {
 func TestSetFragment_In(t *testing.T) {
 	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения.\n"+
 		"После вызова функции SetFragment красный пиксель фрагмента должен появиться в изображении", t, func() {
-		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
+		imageRepo := &TestImageRepo{images: make(map[string]*chart2.TiledImage)}
 		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		tileMaxSize := 1000
-		chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+		chartService := chart2.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 
 		const (
 			imgWidth  = 2
@@ -505,7 +504,7 @@ func TestSetFragment_In(t *testing.T) {
 		id := "0"
 		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
-		tiledImg := &chart.TiledImage{
+		tiledImg := &chart2.TiledImage{
 			Id:     id,
 			Width:  img.Bounds().Dx(),
 			Height: img.Bounds().Dy(),
@@ -555,10 +554,10 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 	Convey("SetFragment когда прямоугольники не пересекаются\n"+
 		"После вызова функции SetFragment красный пиксель фрагмента не должен появиться в изображении, "+
 		"так как прямоугольники не пересекаются", t, func() {
-		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
+		imageRepo := &TestImageRepo{images: make(map[string]*chart2.TiledImage)}
 		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		tileMaxSize := 1000
-		chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+		chartService := chart2.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 
 		const (
 			imgWidth  = 2
@@ -569,7 +568,7 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 		id := "0"
 		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
-		tiledImg := &chart.TiledImage{
+		tiledImg := &chart2.TiledImage{
 			Id:     id,
 			Width:  img.Bounds().Dx(),
 			Height: img.Bounds().Dy(),
@@ -597,7 +596,7 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 		So(!fragment.Bounds().Overlaps(img.Bounds()), ShouldBeTrue)
 
 		err := chartService.SetFragment(tiledImg, fragment)
-		So(errors.Is(err, chart.ErrNotOverlaps), ShouldBeTrue)
+		So(errors.Is(err, chart2.ErrNotOverlaps), ShouldBeTrue)
 
 		for x := 0; x < imgWidth; x++ {
 			for y := 0; y < imgHeight; y++ {
@@ -611,10 +610,10 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 func TestSetFragment_PartIntersect(t *testing.T) {
 	Convey("SetFragment когда прямоугольники пересекаются, но фрагмент частично вне прямоугольника изображения\n"+
 		"После вызова функции SetFragment красный пиксель фрагмента должен появиться в изображении", t, func() {
-		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
+		imageRepo := &TestImageRepo{images: make(map[string]*chart2.TiledImage)}
 		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		tileMaxSize := 1000
-		chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+		chartService := chart2.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 
 		const (
 			imgWidth  = 2
@@ -625,7 +624,7 @@ func TestSetFragment_PartIntersect(t *testing.T) {
 		id := "0"
 		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
-		tiledImg := &chart.TiledImage{
+		tiledImg := &chart2.TiledImage{
 			Id:     id,
 			Width:  img.Bounds().Dx(),
 			Height: img.Bounds().Dy(),
@@ -674,10 +673,10 @@ func TestSetFragment_In_NotFirstTile(t *testing.T) {
 	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения "+
 		"и параметры x,y,width,height относятся не к первому тайлу\n"+
 		"После вызова функции SetFragment красный пиксель фрагмента должен появиться в изображении", t, func() {
-		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
+		imageRepo := &TestImageRepo{images: make(map[string]*chart2.TiledImage)}
 		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		tileMaxSize := 10
-		chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+		chartService := chart2.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 
 		const (
 			tileX      = 10
@@ -694,7 +693,7 @@ func TestSetFragment_In_NotFirstTile(t *testing.T) {
 			imgWidth  = 15
 			imgHeight = 15
 		)
-		tiledImg := &chart.TiledImage{
+		tiledImg := &chart2.TiledImage{
 			Id:     id,
 			Width:  imgWidth,
 			Height: imgHeight,
@@ -728,10 +727,10 @@ func TestSetFragment_In_TwoTiles(t *testing.T) {
 	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения "+
 		"и фрагмент затрагивает 2 тайла.\n"+
 		"После вызова функции SetFragment красные пиксели фрагмента должны появиться в изображении", t, func() {
-		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
+		imageRepo := &TestImageRepo{images: make(map[string]*chart2.TiledImage)}
 		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		tileMaxSize := 10
-		chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+		chartService := chart2.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 
 		const (
 			tile1X = 0
@@ -760,7 +759,7 @@ func TestSetFragment_In_TwoTiles(t *testing.T) {
 			imgHeight = 15
 		)
 
-		tiledImg := &chart.TiledImage{
+		tiledImg := &chart2.TiledImage{
 			Id:     id,
 			Width:  imgWidth,
 			Height: imgHeight,
@@ -810,12 +809,12 @@ func TestSetFragment_In_TwoTiles(t *testing.T) {
 
 func TestDeleteImage(t *testing.T) {
 	Convey("Должно удалить все данные изображения", t, func() {
-		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
+		imageRepo := &TestImageRepo{images: make(map[string]*chart2.TiledImage)}
 		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
-		chartService := chart.NewChartographerService(imageRepo, tileRepo, 0)
+		chartService := chart2.NewChartographerService(imageRepo, tileRepo, 0)
 
 		id := "0"
-		tiledImg := &chart.TiledImage{
+		tiledImg := &chart2.TiledImage{
 			Id: id,
 		}
 		imageRepo.Add(id, tiledImg)
