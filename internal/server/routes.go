@@ -1,8 +1,13 @@
 package server
 
-import "github.com/go-chi/chi/v5"
+import (
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+)
 
 func (s *Server) setRoutes() {
+	s.router.Use(middleware.Logger)
+
 	s.router.Route("/chartas", func(r chi.Router) {
 		r.Post("/", s.createImage)
 
