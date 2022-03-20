@@ -22,9 +22,10 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	bmpService := imagetile.NewBmpService(tileRepo)
 	tileMaxSize := 1000
 	imageRepo := tiledimage.NewInMemoryImageRepo()
-	chartService := chart.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
+	chartService := chart.NewChartographerService(imageRepo, bmpService, tileMaxSize)
 	// TODO вынести хост и порт в .env
 	config := server.NewConfig("8080")
 	srv := server.NewServer(config, chartService)

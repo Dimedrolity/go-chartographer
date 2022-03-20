@@ -3,8 +3,6 @@ package imagetile_test
 import (
 	"chartographer-go/imagetile"
 	"errors"
-	"image"
-	"image/color"
 	"os"
 	"testing"
 
@@ -14,28 +12,24 @@ import (
 // TestFileSystemTileRepo - интеграционные тесты, так как происходит взаимодействие с файловой системой.
 
 func TestFileSystemTileRepo_SuccessGet(t *testing.T) {
-	Convey("Проверка сохранения изображений на диске и получения изображения."+
-		"Проверяются также координаты изображения, должны соответствовать исходынм.", t, func() {
+	Convey("Проверка сохранения изображений на диске и получения изображения.", t, func() {
 		tileRepo, err := imagetile.NewFileSystemTileRepo(t.TempDir())
 		So(err, ShouldBeNil)
 
 		const (
-			x      = 1
-			y      = 1
-			width  = 1
-			height = 1
+			x = 1
+			y = 1
 		)
-		img := image.NewRGBA(image.Rect(x, y, x+width, y+height))
-		img.Set(x, y, color.RGBA{A: 255}) // чтобы в SaveTile Decode сохранил как 24-битное
 
 		id := "0"
+		img := []byte{1, 2, 3, 4, 5}
 		err = tileRepo.SaveTile(id, x, y, img)
 		So(err, ShouldBeNil)
 
 		tile, err := tileRepo.GetTile(id, x, y)
 		So(err, ShouldBeNil)
 
-		So(tile.Bounds(), ShouldResemble, img.Bounds())
+		So(tile, ShouldResemble, img)
 	})
 }
 
@@ -45,15 +39,13 @@ func TestFileSystemTileRepo_SuccessDelete(t *testing.T) {
 		So(err, ShouldBeNil)
 
 		const (
-			x      = 0
-			y      = 0
-			width  = 1
-			height = 1
+			x = 0
+			y = 0
 		)
-		img := image.NewRGBA(image.Rect(x, y, x+width, y+height))
-		img.Set(x, y, color.RGBA{A: 0xFF}) // так как в GetTile вызывается ShiftRect, который работает только с RGBA
 
 		id := "0"
+		img := []byte{1, 2, 3, 4, 5}
+
 		err = tileRepo.SaveTile(id, x, y, img)
 		So(err, ShouldBeNil)
 
@@ -82,6 +74,7 @@ func TestFileSystemTileRepo_ErrorDelete(t *testing.T) {
 	Convey("При удалении не сущствующего файла не должно быть ошибки", t, func() {
 		tileRepo, err := imagetile.NewFileSystemTileRepo(t.TempDir())
 		So(err, ShouldBeNil)
+
 		id := "0"
 
 		err = tileRepo.DeleteImage(id)

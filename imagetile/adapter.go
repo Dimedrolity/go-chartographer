@@ -11,6 +11,6 @@ func ShiftRect(img image.Image, x, y int) {
 	case *image.RGBA:
 		i.Rect = i.Rect.Add(image.Pt(x, y))
 	default:
-		panic("not implemented")
+		panic("color model is not implemented")
 	}
 }

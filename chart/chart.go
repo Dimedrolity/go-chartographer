@@ -20,14 +20,14 @@ type Service interface {
 	GetFragment(img *tiledimage.Image, x, y, width, height int) (image.Image, error)
 }
 
-// ChartographerService - содержит бизнес логику обработки image.RGBA изображений.
+// ChartographerService содержит бизнес логику обработки изображений.
 type ChartographerService struct {
 	imageRepo   tiledimage.Repository
-	tileRepo    imagetile.TileRepository
+	tileRepo    imagetile.Service
 	tileMaxSize int // Определяет максимальный размер тайла по ширине и высоте.
 }
 
-func NewChartographerService(imageRepo tiledimage.Repository, tileRepo imagetile.TileRepository, tileMaxSize int) *ChartographerService {
+func NewChartographerService(imageRepo tiledimage.Repository, tileRepo imagetile.Service, tileMaxSize int) *ChartographerService {
 	return &ChartographerService{imageRepo: imageRepo, tileRepo: tileRepo, tileMaxSize: tileMaxSize}
 }
 
