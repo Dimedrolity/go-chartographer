@@ -24,7 +24,8 @@ func run() error {
 	}
 	bmpService := imagetile.NewBmpService(tileRepo)
 	tileMaxSize := 1000
-	imageRepo := tiledimage.NewInMemoryImageRepo()
+	imageRepo := tiledimage.NewInMemoryRepo()
+	// хорошо бы вписался дженерик при инициализации imageRepo, необходимо указать *chart.TiledImage
 	chartService := chart.NewChartographerService(imageRepo, bmpService, tileMaxSize)
 	// TODO вынести хост и порт в .env
 	config := server.NewConfig("8080")

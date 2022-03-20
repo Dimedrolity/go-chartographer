@@ -22,19 +22,19 @@ import (
 
 type TestChartServiceAllPanic struct{}
 
-func (t TestChartServiceAllPanic) AddImage(int, int) (*tiledimage.Image, error) {
+func (t TestChartServiceAllPanic) AddImage(int, int) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 func (t TestChartServiceAllPanic) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceAllPanic) SetFragment(*tiledimage.Image, image.Image) error {
+func (t TestChartServiceAllPanic) SetFragment(*chart.TiledImage, image.Image) error {
 	panic("implement me")
 }
-func (t TestChartServiceAllPanic) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+func (t TestChartServiceAllPanic) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
 	panic("implement me")
 }
-func (t TestChartServiceAllPanic) GetImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceAllPanic) GetImage(string) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 
@@ -86,20 +86,20 @@ func TestCreate_WrongSize(t *testing.T) {
 
 type TestChartServiceCreateMethodSizeErr struct{}
 
-func (t TestChartServiceCreateMethodSizeErr) AddImage(int, int) (*tiledimage.Image, error) {
+func (t TestChartServiceCreateMethodSizeErr) AddImage(int, int) (*chart.TiledImage, error) {
 	return nil, &chart.SizeError{}
 }
 func (t TestChartServiceCreateMethodSizeErr) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceCreateMethodSizeErr) SetFragment(*tiledimage.Image, image.Image) error {
+func (t TestChartServiceCreateMethodSizeErr) SetFragment(*chart.TiledImage, image.Image) error {
 	panic("implement me")
 }
 
-func (t TestChartServiceCreateMethodSizeErr) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+func (t TestChartServiceCreateMethodSizeErr) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
 	panic("implement me")
 }
-func (t TestChartServiceCreateMethodSizeErr) GetImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceCreateMethodSizeErr) GetImage(string) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 
@@ -134,21 +134,21 @@ type TestChartServiceCreateMethodSuccess struct{}
 
 const id = "new"
 
-func (t TestChartServiceCreateMethodSuccess) AddImage(int, int) (*tiledimage.Image, error) {
-	return &tiledimage.Image{
+func (t TestChartServiceCreateMethodSuccess) AddImage(int, int) (*chart.TiledImage, error) {
+	return &chart.TiledImage{
 		Id: id,
 	}, nil
 }
 func (t TestChartServiceCreateMethodSuccess) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceCreateMethodSuccess) SetFragment(*tiledimage.Image, image.Image) error {
+func (t TestChartServiceCreateMethodSuccess) SetFragment(*chart.TiledImage, image.Image) error {
 	panic("implement me")
 }
-func (t TestChartServiceCreateMethodSuccess) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+func (t TestChartServiceCreateMethodSuccess) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
 	panic("implement me")
 }
-func (t TestChartServiceCreateMethodSuccess) GetImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceCreateMethodSuccess) GetImage(string) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 
@@ -181,20 +181,20 @@ func TestCreate_Success(t *testing.T) {
 
 type TestChartServiceDeleteMethodNotFound struct{}
 
-func (t TestChartServiceDeleteMethodNotFound) AddImage(int, int) (*tiledimage.Image, error) {
+func (t TestChartServiceDeleteMethodNotFound) AddImage(int, int) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 func (t TestChartServiceDeleteMethodNotFound) DeleteImage(string) error {
 	return tiledimage.ErrNotExist
 }
-func (t TestChartServiceDeleteMethodNotFound) SetFragment(*tiledimage.Image, image.Image) error {
+func (t TestChartServiceDeleteMethodNotFound) SetFragment(*chart.TiledImage, image.Image) error {
 	panic("implement me")
 }
 
-func (t TestChartServiceDeleteMethodNotFound) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+func (t TestChartServiceDeleteMethodNotFound) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
 	panic("implement me")
 }
-func (t TestChartServiceDeleteMethodNotFound) GetImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceDeleteMethodNotFound) GetImage(string) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 
@@ -219,19 +219,19 @@ func TestDelete_NotFound(t *testing.T) {
 
 type TestChartServiceDeleteMethodSuccess struct{}
 
-func (t TestChartServiceDeleteMethodSuccess) AddImage(int, int) (*tiledimage.Image, error) {
+func (t TestChartServiceDeleteMethodSuccess) AddImage(int, int) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 func (t TestChartServiceDeleteMethodSuccess) DeleteImage(string) error {
 	return nil
 }
-func (t TestChartServiceDeleteMethodSuccess) SetFragment(*tiledimage.Image, image.Image) error {
+func (t TestChartServiceDeleteMethodSuccess) SetFragment(*chart.TiledImage, image.Image) error {
 	panic("implement me")
 }
-func (t TestChartServiceDeleteMethodSuccess) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+func (t TestChartServiceDeleteMethodSuccess) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
 	panic("implement me")
 }
-func (t TestChartServiceDeleteMethodSuccess) GetImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceDeleteMethodSuccess) GetImage(string) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 
@@ -322,20 +322,20 @@ func TestGet_WrongParams(t *testing.T) {
 
 type TestChartServiceGetMethodNotFound struct{}
 
-func (t TestChartServiceGetMethodNotFound) AddImage(int, int) (*tiledimage.Image, error) {
+func (t TestChartServiceGetMethodNotFound) AddImage(int, int) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 func (t TestChartServiceGetMethodNotFound) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceGetMethodNotFound) SetFragment(*tiledimage.Image, image.Image) error {
+func (t TestChartServiceGetMethodNotFound) SetFragment(*chart.TiledImage, image.Image) error {
 	panic("implement me")
 }
 
-func (t TestChartServiceGetMethodNotFound) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+func (t TestChartServiceGetMethodNotFound) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
 	return nil, nil
 }
-func (t TestChartServiceGetMethodNotFound) GetImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceGetMethodNotFound) GetImage(string) (*chart.TiledImage, error) {
 	return nil, tiledimage.ErrNotExist
 }
 
@@ -360,21 +360,21 @@ func TestGet_NotFound(t *testing.T) {
 
 type TestChartServiceGetMethodSizeError struct{}
 
-func (t TestChartServiceGetMethodSizeError) AddImage(int, int) (*tiledimage.Image, error) {
+func (t TestChartServiceGetMethodSizeError) AddImage(int, int) (*chart.TiledImage, error) {
 	panic("implement me")
 
 }
 func (t TestChartServiceGetMethodSizeError) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceGetMethodSizeError) SetFragment(*tiledimage.Image, image.Image) error {
+func (t TestChartServiceGetMethodSizeError) SetFragment(*chart.TiledImage, image.Image) error {
 	panic("implement me")
 }
 
-func (t TestChartServiceGetMethodSizeError) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+func (t TestChartServiceGetMethodSizeError) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
 	return nil, &chart.SizeError{}
 }
-func (t TestChartServiceGetMethodSizeError) GetImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceGetMethodSizeError) GetImage(string) (*chart.TiledImage, error) {
 	return nil, nil
 }
 
@@ -399,19 +399,19 @@ func TestGet_SizeErr(t *testing.T) {
 
 type TestChartServiceGetMethodNotOverlaps struct{}
 
-func (t TestChartServiceGetMethodNotOverlaps) AddImage(int, int) (*tiledimage.Image, error) {
+func (t TestChartServiceGetMethodNotOverlaps) AddImage(int, int) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 func (t TestChartServiceGetMethodNotOverlaps) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceGetMethodNotOverlaps) SetFragment(*tiledimage.Image, image.Image) error {
+func (t TestChartServiceGetMethodNotOverlaps) SetFragment(*chart.TiledImage, image.Image) error {
 	panic("implement me")
 }
-func (t TestChartServiceGetMethodNotOverlaps) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+func (t TestChartServiceGetMethodNotOverlaps) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
 	return nil, chart.ErrNotOverlaps
 }
-func (t TestChartServiceGetMethodNotOverlaps) GetImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceGetMethodNotOverlaps) GetImage(string) (*chart.TiledImage, error) {
 	return nil, nil
 }
 
@@ -436,19 +436,19 @@ func TestGet_NotOverlaps(t *testing.T) {
 
 type TestChartServiceGetMethodSuccess struct{}
 
-func (t TestChartServiceGetMethodSuccess) AddImage(int, int) (*tiledimage.Image, error) {
+func (t TestChartServiceGetMethodSuccess) AddImage(int, int) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 func (t TestChartServiceGetMethodSuccess) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceGetMethodSuccess) SetFragment(*tiledimage.Image, image.Image) error {
+func (t TestChartServiceGetMethodSuccess) SetFragment(*chart.TiledImage, image.Image) error {
 	panic("implement me")
 }
-func (t TestChartServiceGetMethodSuccess) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+func (t TestChartServiceGetMethodSuccess) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
 	return image.Image(image.Rectangle{}), nil
 }
-func (t TestChartServiceGetMethodSuccess) GetImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceGetMethodSuccess) GetImage(string) (*chart.TiledImage, error) {
 	return nil, nil
 }
 
@@ -482,19 +482,19 @@ type Fragment struct {
 
 type TestChartServiceSetMethodWrongSize struct{}
 
-func (t TestChartServiceSetMethodWrongSize) AddImage(int, int) (*tiledimage.Image, error) {
+func (t TestChartServiceSetMethodWrongSize) AddImage(int, int) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 func (t TestChartServiceSetMethodWrongSize) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceSetMethodWrongSize) SetFragment(*tiledimage.Image, image.Image) error {
+func (t TestChartServiceSetMethodWrongSize) SetFragment(*chart.TiledImage, image.Image) error {
 	return nil
 }
-func (t TestChartServiceSetMethodWrongSize) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+func (t TestChartServiceSetMethodWrongSize) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
 	panic("implement me")
 }
-func (t TestChartServiceSetMethodWrongSize) GetImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceSetMethodWrongSize) GetImage(string) (*chart.TiledImage, error) {
 	return nil, nil
 }
 
@@ -562,19 +562,19 @@ func TestSet_WrongSize(t *testing.T) {
 
 type TestChartServiceSetMethodNotFound struct{}
 
-func (t TestChartServiceSetMethodNotFound) AddImage(int, int) (*tiledimage.Image, error) {
+func (t TestChartServiceSetMethodNotFound) AddImage(int, int) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 func (t TestChartServiceSetMethodNotFound) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceSetMethodNotFound) SetFragment(*tiledimage.Image, image.Image) error {
+func (t TestChartServiceSetMethodNotFound) SetFragment(*chart.TiledImage, image.Image) error {
 	panic("implement me")
 }
-func (t TestChartServiceSetMethodNotFound) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+func (t TestChartServiceSetMethodNotFound) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
 	panic("implement me")
 }
-func (t TestChartServiceSetMethodNotFound) GetImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceSetMethodNotFound) GetImage(string) (*chart.TiledImage, error) {
 	return nil, tiledimage.ErrNotExist
 }
 
@@ -602,19 +602,19 @@ func TestSet_NotFound(t *testing.T) {
 
 type TestChartServiceSetMethodNotOverlaps struct{}
 
-func (t TestChartServiceSetMethodNotOverlaps) AddImage(int, int) (*tiledimage.Image, error) {
+func (t TestChartServiceSetMethodNotOverlaps) AddImage(int, int) (*chart.TiledImage, error) {
 	panic("implement me")
 }
 func (t TestChartServiceSetMethodNotOverlaps) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceSetMethodNotOverlaps) SetFragment(*tiledimage.Image, image.Image) error {
+func (t TestChartServiceSetMethodNotOverlaps) SetFragment(*chart.TiledImage, image.Image) error {
 	return chart.ErrNotOverlaps
 }
-func (t TestChartServiceSetMethodNotOverlaps) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+func (t TestChartServiceSetMethodNotOverlaps) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
 	panic("implement me")
 }
-func (t TestChartServiceSetMethodNotOverlaps) GetImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceSetMethodNotOverlaps) GetImage(string) (*chart.TiledImage, error) {
 	return nil, nil
 }
 
@@ -642,19 +642,19 @@ func TestSet_NotOverlaps(t *testing.T) {
 
 type TestChartServiceSetMethodSuccess struct{}
 
-func (t TestChartServiceSetMethodSuccess) AddImage(int, int) (*tiledimage.Image, error) {
+func (t TestChartServiceSetMethodSuccess) AddImage(int, int) (*chart.TiledImage, error) {
 	return nil, nil
 }
 func (t TestChartServiceSetMethodSuccess) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceSetMethodSuccess) SetFragment(*tiledimage.Image, image.Image) error {
+func (t TestChartServiceSetMethodSuccess) SetFragment(*chart.TiledImage, image.Image) error {
 	return nil
 }
-func (t TestChartServiceSetMethodSuccess) GetFragment(*tiledimage.Image, int, int, int, int) (image.Image, error) {
+func (t TestChartServiceSetMethodSuccess) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
 	panic("implement me")
 }
-func (t TestChartServiceSetMethodSuccess) GetImage(string) (*tiledimage.Image, error) {
+func (t TestChartServiceSetMethodSuccess) GetImage(string) (*chart.TiledImage, error) {
 	return nil, nil
 }
 

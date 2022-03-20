@@ -3,9 +3,6 @@ package tiledimage_test
 import (
 	"chartographer-go/tiledimage"
 	"errors"
-
-	"image"
-
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -15,55 +12,41 @@ import (
 
 func TestFileSystemTileRepo_SuccessGet(t *testing.T) {
 	Convey("После создания получение изображения должно вернуть исходное", t, func() {
-		imageRepo := tiledimage.NewInMemoryImageRepo()
+		imageRepo := tiledimage.NewInMemoryRepo()
 
 		const (
-			id     = "0"
-			width  = 1
-			height = 1
+			key   = "0"
+			value = 42
 		)
-		tiledImg := &tiledimage.Image{
-			Id:     id,
-			Width:  width,
-			Height: height,
-			Tiles:  []image.Rectangle{},
-		}
 
-		imageRepo.Add(tiledImg)
-		got, err := imageRepo.Get(id)
+		imageRepo.Add(key, value)
+		got, err := imageRepo.Get(key)
 
 		So(err, ShouldBeNil)
-		So(got, ShouldResemble, tiledImg)
+		So(got, ShouldResemble, value)
 	})
 }
 
 func TestFileSystemTileRepo_SuccessDelete(t *testing.T) {
 	Convey("После создания и удаления получение изображения должно вернуть исходное", t, func() {
-		imageRepo := tiledimage.NewInMemoryImageRepo()
+		imageRepo := tiledimage.NewInMemoryRepo()
 
 		const (
-			id     = "0"
-			width  = 1
-			height = 1
+			key   = "0"
+			value = 42
 		)
-		tiledImg := &tiledimage.Image{
-			Id:     id,
-			Width:  width,
-			Height: height,
-			Tiles:  []image.Rectangle{},
-		}
 
-		imageRepo.Add(tiledImg)
-		err := imageRepo.Delete(id)
+		imageRepo.Add(key, value)
+		err := imageRepo.Delete(key)
 		So(err, ShouldBeNil)
-		_, err = imageRepo.Get(id)
+		_, err = imageRepo.Get(key)
 		So(err, ShouldNotBeNil)
 	})
 }
 
 func TestFileSystemTileRepo_Delete(t *testing.T) {
 	Convey("Удаление несуществующего изображения должно вернуть ошибку", t, func() {
-		imageRepo := tiledimage.NewInMemoryImageRepo()
+		imageRepo := tiledimage.NewInMemoryRepo()
 
 		err := imageRepo.Delete("0")
 
@@ -73,7 +56,7 @@ func TestFileSystemTileRepo_Delete(t *testing.T) {
 
 func TestFileSystemTileRepo_Get(t *testing.T) {
 	Convey("Получение несуществующего изображения должно вернуть ошибку", t, func() {
-		imageRepo := tiledimage.NewInMemoryImageRepo()
+		imageRepo := tiledimage.NewInMemoryRepo()
 
 		_, err := imageRepo.Get("0")
 

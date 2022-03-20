@@ -6,6 +6,7 @@ import (
 	"chartographer-go/tiledimage"
 	"chartographer-go/tileutils"
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"image"
 	"image/color"
@@ -13,11 +14,11 @@ import (
 )
 
 type Service interface {
-	AddImage(width, height int) (*tiledimage.Image, error)
-	GetImage(id string) (*tiledimage.Image, error)
+	AddImage(width, height int) (*TiledImage, error)
+	GetImage(id string) (*TiledImage, error)
 	DeleteImage(id string) error
-	SetFragment(img *tiledimage.Image, fragment image.Image) error
-	GetFragment(img *tiledimage.Image, x, y, width, height int) (image.Image, error)
+	SetFragment(img *TiledImage, fragment image.Image) error
+	GetFragment(img *TiledImage, x, y, width, height int) (image.Image, error)
 }
 
 // ChartographerService содержит бизнес логику обработки изображений.
@@ -41,7 +42,7 @@ const (
 // AddImage разделяет размеры изображения на тайлы, создает image.RGBA изображения в соответствии с тайлами,
 // сохраняет тайлы с помощью репозитория тайлов.
 // Возможна ошибка типа *SizeError
-func (cs *ChartographerService) AddImage(width, height int) (*tiledimage.Image, error) {
+func (cs *ChartographerService) AddImage(width, height int) (*TiledImage, error) {
 	if width < minWidth || width > maxWidth ||
 		height < minHeight || height > maxHeight {
 		return nil, &SizeError{
@@ -52,14 +53,14 @@ func (cs *ChartographerService) AddImage(width, height int) (*tiledimage.Image, 
 
 	tiles := tileutils.CreateTiles(width, height, cs.tileMaxSize)
 
-	img := &tiledimage.Image{
+	img := &TiledImage{
 		Id:          uuid.NewString(),
 		Width:       width,
 		Height:      height,
 		TileMaxSize: cs.tileMaxSize,
 		Tiles:       tiles,
 	}
-	cs.imageRepo.Add(img)
+	cs.imageRepo.Add(img.Id, img)
 
 	for _, t := range img.Tiles {
 		i := newOpaqueRGBA(t)
@@ -110,7 +111,7 @@ func (cs *ChartographerService) DeleteImage(id string) error {
 // Примечание:
 // если фрагмент частично выходит за границы изображения, то часть фрагмента вне изображения игнорируется.
 // Возможна ошибка ErrNotOverlaps и другие.
-func (cs *ChartographerService) SetFragment(img *tiledimage.Image, fragment image.Image) error {
+func (cs *ChartographerService) SetFragment(img *TiledImage, fragment image.Image) error {
 	imgRect := image.Rect(0, 0, img.Width, img.Height)
 
 	if !imgRect.Overlaps(fragment.Bounds()) {
@@ -151,7 +152,7 @@ const (
 // Возвращаемое изображение будет иметь начальные координаты (x; y).
 // Примечание: часть фрагмента вне границ изображения будет иметь чёрный цвет (цвет по умолчанию).
 // Возможны ошибки SizeError, ErrNotOverlaps и другие.
-func (cs *ChartographerService) GetFragment(img *tiledimage.Image, x, y, width, height int) (image.Image, error) {
+func (cs *ChartographerService) GetFragment(img *TiledImage, x, y, width, height int) (image.Image, error) {
 	if width < fragmentMinWidth || width > fragmentMaxWidth ||
 		height < fragmentMinHeight || height > fragmentMaxHeight {
 		return nil, &SizeError{
@@ -182,6 +183,16 @@ func (cs *ChartographerService) GetFragment(img *tiledimage.Image, x, y, width, 
 	return fragment, nil
 }
 
-func (cs *ChartographerService) GetImage(id string) (*tiledimage.Image, error) {
-	return cs.imageRepo.Get(id)
+func (cs *ChartographerService) GetImage(id string) (*TiledImage, error) {
+	i, err := cs.imageRepo.Get(id)
+	if err != nil {
+		return nil, err
+	}
+
+	img, ok := i.(*TiledImage)
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("interface conversion: interface is %T, not *TiledImage\n", i))
+	}
+
+	return img, nil
 }
