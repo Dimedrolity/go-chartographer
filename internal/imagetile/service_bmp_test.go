@@ -46,8 +46,7 @@ func TestBmpService_SuccessGet(t *testing.T) {
 		img := image.NewRGBA(image.Rect(x, y, x+width, y+height))
 		img.Set(x, y, color.RGBA{A: 255}) // чтобы в SaveTile Decode распознал как 24-битное
 
-		id := "0"
-
+		const id = "0"
 		err := bmpService.SaveTile(id, x, y, img)
 		So(err, ShouldBeNil)
 
@@ -72,8 +71,7 @@ func TestBmpService_SuccessDelete(t *testing.T) {
 		img := image.NewRGBA(image.Rect(x, y, x+width, y+height))
 		img.Set(x, y, color.RGBA{A: 0xFF}) // так как в GetTile вызывается ShiftRect, который работает только с RGBA
 
-		id := "0"
-
+		const id = "0"
 		err := bmpService.SaveTile(id, x, y, img)
 		So(err, ShouldBeNil)
 

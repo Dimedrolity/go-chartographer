@@ -21,7 +21,7 @@ func TestFileSystemTileRepo_SuccessGet(t *testing.T) {
 			y = 1
 		)
 
-		id := "0"
+		const id = "0"
 		img := []byte{1, 2, 3, 4, 5}
 		err = tileRepo.SaveTile(id, x, y, img)
 		So(err, ShouldBeNil)
@@ -43,7 +43,7 @@ func TestFileSystemTileRepo_SuccessDelete(t *testing.T) {
 			y = 0
 		)
 
-		id := "0"
+		const id = "0"
 		img := []byte{1, 2, 3, 4, 5}
 
 		err = tileRepo.SaveTile(id, x, y, img)
@@ -75,9 +75,7 @@ func TestFileSystemTileRepo_ErrorDelete(t *testing.T) {
 		tileRepo, err := imagetile.NewFileSystemTileRepo(t.TempDir())
 		So(err, ShouldBeNil)
 
-		id := "0"
-
-		err = tileRepo.DeleteImage(id)
+		err = tileRepo.DeleteImage("0")
 		So(err, ShouldBeNil)
 	})
 }

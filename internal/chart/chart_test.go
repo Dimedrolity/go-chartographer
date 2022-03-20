@@ -141,7 +141,7 @@ func TestGetFragment_In(t *testing.T) {
 		)
 		img.SetRGBA(redX, redY, red)
 
-		id := "0"
+		const id = "0"
 		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.GetFragment, возвращал стаб
 
 		const (
@@ -192,7 +192,7 @@ func TestGetFragment_PartIntersect(t *testing.T) {
 		)
 		img.SetRGBA(redX, redY, red)
 
-		id := "0"
+		const id = "0"
 		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.GetFragment, возвращал стаб
 
 		const (
@@ -253,7 +253,7 @@ func TestGetFragment_NotOverlaps(t *testing.T) {
 		)
 		img.SetRGBA(redX, redY, red)
 
-		id := "0"
+		const id = "0"
 		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.GetFragment, возвращал стаб
 
 		const (
@@ -304,7 +304,7 @@ func TestGetFragment_In_NotFirstTile(t *testing.T) {
 		)
 		img.SetRGBA(redX, redY, red)
 
-		id := "0"
+		const id = "0"
 		_ = tileRepo.SaveTile(id, tileX, tileY, img) // чтобы getTile, вызываемый в chart.GetFragment, возвращал стаб
 
 		const (
@@ -382,7 +382,7 @@ func TestGetFragment_In_TwoTiles(t *testing.T) {
 		t1.SetRGBA(redX, redY, red)
 		t2.SetRGBA(greenX, greenY, green)
 
-		id := "0"
+		const id = "0"
 		_ = tileRepo.SaveTile(id, tile1X, tile1Y, t1) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 		_ = tileRepo.SaveTile(id, tile2X, tile2Y, t2) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
@@ -429,7 +429,7 @@ func TestGetFragment_Size(t *testing.T) {
 	chartService := chart2.NewChartographerService(imageRepo, tileRepo, tileMaxSize)
 
 	emptyImg := image.NewRGBA(image.Rect(0, 0, 1, 1))
-	id := "0"
+	const id = "0"
 	_ = tileRepo.SaveTile(id, 0, 0, emptyImg) // чтобы getTile, вызываемый в chart.GetFragment, возвращал стаб
 
 	tiledEmptyImg := &chart2.TiledImage{
@@ -501,7 +501,7 @@ func TestSetFragment_In(t *testing.T) {
 		)
 		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
 
-		id := "0"
+		const id = "0"
 		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
 		tiledImg := &chart2.TiledImage{
@@ -565,7 +565,7 @@ func TestSetFragment_NotOverlaps(t *testing.T) {
 		)
 		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
 
-		id := "0"
+		const id = "0"
 		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
 		tiledImg := &chart2.TiledImage{
@@ -621,7 +621,7 @@ func TestSetFragment_PartIntersect(t *testing.T) {
 		)
 		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
 
-		id := "0"
+		const id = "0"
 		_ = tileRepo.SaveTile(id, 0, 0, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
 		tiledImg := &chart2.TiledImage{
@@ -686,7 +686,7 @@ func TestSetFragment_In_NotFirstTile(t *testing.T) {
 		)
 		img := image.NewRGBA(image.Rect(tileX, tileY, tileX+tileWidth, tileY+tileHeight))
 
-		id := "0"
+		const id = "0"
 		_ = tileRepo.SaveTile(id, tileX, tileY, img) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
 		const (
@@ -750,7 +750,7 @@ func TestSetFragment_In_TwoTiles(t *testing.T) {
 		t1 := image.NewRGBA(image.Rect(tile1X, tile1Y, tile1X+tile1Width, tile1Y+tile1Height))
 		t2 := image.NewRGBA(image.Rect(tile2X, tile2Y, tile2X+tile2Width, tile2Y+tile2Height))
 
-		id := "0"
+		const id = "0"
 		_ = tileRepo.SaveTile(id, tile1X, tile1Y, t1) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 		_ = tileRepo.SaveTile(id, tile2X, tile2Y, t2) // чтобы getTile, вызываемый в chart.SetFragment, возвращал стаб
 
@@ -813,7 +813,7 @@ func TestDeleteImage(t *testing.T) {
 		tileRepo := &TestTileRepo{images: make(map[string]map[tileKey]image.Image)}
 		chartService := chart2.NewChartographerService(imageRepo, tileRepo, 0)
 
-		id := "0"
+		const id = "0"
 		tiledImg := &chart2.TiledImage{
 			Id: id,
 		}
