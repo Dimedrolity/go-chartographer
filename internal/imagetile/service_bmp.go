@@ -26,7 +26,7 @@ func (s *BmpService) GetTile(id string, x, y int) (image.Image, error) {
 		return nil, err
 	}
 
-	img, err := bmp.Decode(bytes.NewReader(tile))
+	img, err := s.Decode(tile)
 	if err != nil {
 		return nil, err
 	}
@@ -38,9 +38,7 @@ func (s *BmpService) GetTile(id string, x, y int) (image.Image, error) {
 
 // SaveTile декодирует тайл-изображение в формат BMP и сохраняет.
 func (s *BmpService) SaveTile(id string, x int, y int, img image.Image) error {
-	// TODO можно было бы обойтись без буфера, Create файл и bmp.Encode(файл)
-	// 	file, err := os.OpenFile(filepath.Join(dir, x+".bmp"), os.O_WRONLY|os.O_CREATE, 0777)
-	encode, err := Encode(img)
+	encode, err := s.Encode(img)
 	if err != nil {
 		return err
 	}
@@ -58,8 +56,8 @@ func (s *BmpService) DeleteImage(id string) error {
 	return s.repo.DeleteImage(id)
 }
 
-// Encode обертка над bmp. TODO нужна ли?
-func Encode(img image.Image) ([]byte, error) {
+// Encode декодирует image.Image в формат BMP.
+func (s *BmpService) Encode(img image.Image) ([]byte, error) {
 	buffer := bytes.Buffer{}
 	err := bmp.Encode(&buffer, img)
 	if err != nil {
@@ -67,4 +65,14 @@ func Encode(img image.Image) ([]byte, error) {
 	}
 
 	return buffer.Bytes(), nil
+}
+
+// Decode декодирует байты BMP изображения в image.Image.
+func (s *BmpService) Decode(b []byte) (image.Image, error) {
+	img, err := bmp.Decode(bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+
+	return img, nil
 }

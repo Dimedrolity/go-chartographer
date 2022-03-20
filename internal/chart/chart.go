@@ -17,6 +17,7 @@ type Service interface {
 	AddImage(width, height int) (*TiledImage, error)
 	GetImage(id string) (*TiledImage, error)
 	DeleteImage(id string) error
+
 	SetFragment(img *TiledImage, fragment image.Image) error
 	GetFragment(img *TiledImage, x, y, width, height int) (image.Image, error)
 }

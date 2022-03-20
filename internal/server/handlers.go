@@ -109,6 +109,7 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	// TODO этого здесь быть не должно
 	imagetile.ShiftRect(fragment, x, y)
 
 	err = s.chartService.SetFragment(img, fragment)
@@ -168,6 +169,7 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// TODO нормально ли использовать bmp в хендлере?
+	// вызывать через chartService.Encode
 	err = bmp.Encode(w, fragment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

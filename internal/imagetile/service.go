@@ -11,4 +11,7 @@ type Service interface {
 	// У возвращаемого image.Image Bounds().Min равен (x; y).
 	GetTile(id string, x, y int) (image.Image, error)
 	DeleteImage(id string) error
+
+	Encode(img image.Image) ([]byte, error)
+	Decode(b []byte) (image.Image, error)
 }
