@@ -1,4 +1,4 @@
-package imagetile
+package imgstore
 
 import "image"
 
@@ -8,7 +8,8 @@ type Service interface {
 	// Координатами являются (x; y), а не img.Bounds().Min.
 	SaveTile(id string, x int, y int, img image.Image) error
 	// GetTile
-	// У возвращаемого image.Image Bounds().Min равен (x; y).
+	// У возвращаемого image.Image Bounds().Min равен (0; 0).
+	// Для смещения на (x; y) использовать RectShifter.
 	GetTile(id string, x, y int) (image.Image, error)
 	DeleteImage(id string) error
 

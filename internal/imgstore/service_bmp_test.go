@@ -1,10 +1,10 @@
-package imagetile_test
+package imgstore_test
 
 import (
 	"bytes"
 	"errors"
 	. "github.com/smartystreets/goconvey/convey"
-	"go-chartographer/internal/imagetile"
+	"go-chartographer/internal/imgstore"
 	"golang.org/x/image/bmp"
 	"image"
 	"image/color"
@@ -123,7 +123,7 @@ func TestBmpService_SuccessGet(t *testing.T) {
 	Convey("Проверка сохранения и получения изображения."+
 		"Координаты полученного изображения должны соответствовать исходынм.", t, func() {
 		tileRepo := &TestTileRepo{images: make(map[string][]byte)}
-		bmpService := imagetile.NewBmpService(tileRepo)
+		bmpService := imgstore.NewBmpService(tileRepo)
 
 		const (
 			x      = 0
@@ -148,7 +148,7 @@ func TestBmpService_SuccessGet(t *testing.T) {
 func TestBmpService_SuccessDelete(t *testing.T) {
 	Convey("После создания и удаления вызов фукнции получения должен вернуть ошибку.", t, func() {
 		tileRepo := &TestTileRepo{images: make(map[string][]byte)}
-		bmpService := imagetile.NewBmpService(tileRepo)
+		bmpService := imgstore.NewBmpService(tileRepo)
 
 		const (
 			x      = 0
@@ -176,7 +176,7 @@ func TestBmpService_SuccessDelete(t *testing.T) {
 func TestBmpService_ErrorGet(t *testing.T) {
 	Convey("При запросе не существующего тайла должна быть ошибка.", t, func() {
 		tileRepo := &TestTileRepo{images: make(map[string][]byte)}
-		bmpService := imagetile.NewBmpService(tileRepo)
+		bmpService := imgstore.NewBmpService(tileRepo)
 
 		_, err := bmpService.GetTile("0", 0, 0)
 		So(err, ShouldNotBeNil)

@@ -1,4 +1,4 @@
-package imagetile
+package imgstore
 
 import (
 	"fmt"

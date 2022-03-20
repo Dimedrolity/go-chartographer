@@ -1,4 +1,4 @@
-package imagetile
+package imgstore
 
 type Repository interface {
 	SaveTile(id string, x int, y int, img []byte) error

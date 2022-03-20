@@ -2,22 +2,22 @@ package app
 
 import (
 	"go-chartographer/internal/chart"
-	"go-chartographer/internal/imagetile"
+	"go-chartographer/internal/imgstore"
 	"go-chartographer/internal/server"
 	"go-chartographer/pkg/kvstore"
 )
 
 // Run инициализирует зависимости сервера и запускает его.
 func Run(port, dataDirPath string, tileMaxSize int) error {
-	tileRepo, err := imagetile.NewFileSystemTileRepo(dataDirPath)
+	tileRepo, err := imgstore.NewFileSystemTileRepo(dataDirPath)
 	if err != nil {
 		return err
 	}
 
-	bmpService := imagetile.NewBmpService(tileRepo)
+	bmpService := imgstore.NewBmpService(tileRepo)
 
 	imageRepo := kvstore.NewInMemoryStore()
-	adapter := &imagetile.ImageAdapter{}
+	adapter := &chart.ImageAdapter{}
 	chartService := chart.NewChartographerService(imageRepo, bmpService, adapter, tileMaxSize)
 	config := server.NewConfig(port)
 	srv := server.NewServer(config, chartService)

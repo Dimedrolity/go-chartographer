@@ -3,12 +3,13 @@ package server
 import (
 	"errors"
 	"fmt"
-	"go-chartographer/internal/chart"
 	"io"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+
+	"go-chartographer/internal/chart"
 )
 
 func paramError(name string, err error) error {

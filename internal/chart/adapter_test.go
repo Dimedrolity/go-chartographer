@@ -1,7 +1,7 @@
-package imagetile_test
+package chart_test
 
 import (
-	"go-chartographer/internal/imagetile"
+	"go-chartographer/internal/chart"
 	"image"
 	"image/color"
 	"testing"
@@ -31,7 +31,7 @@ func TestAdapter(t *testing.T) {
 			offsetX = 10
 			offsetY = 20
 		)
-		a := imagetile.ImageAdapter{}
+		a := chart.ImageAdapter{}
 		a.ShiftRect(img, offsetX, offsetY)
 
 		So(img.Bounds().Dx(), ShouldEqual, width)

@@ -1,11 +1,10 @@
-// Package chart - слой сервиса приложения.
 package chart
 
 import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"go-chartographer/internal/imagetile"
+	"go-chartographer/internal/imgstore"
 	"go-chartographer/internal/tileutils"
 	"go-chartographer/pkg/kvstore"
 	"image"
@@ -13,27 +12,14 @@ import (
 	"image/draw"
 )
 
-type Service interface {
-	AddImage(width, height int) (*TiledImage, error)
-	GetImage(id string) (*TiledImage, error)
-	DeleteImage(id string) error
-
-	SetFragment(img *TiledImage, x int, y int, fragment image.Image) error
-	GetFragment(img *TiledImage, x, y, width, height int) (image.Image, error)
-
-	Encode(img image.Image) ([]byte, error)
-	Decode(b []byte) (image.Image, error)
-}
-
-// ChartographerService содержит бизнес логику обработки изображений.
 type ChartographerService struct {
 	imageRepo   kvstore.Store
-	tileService imagetile.Service
-	adapter     imagetile.RectShifter
+	tileService imgstore.Service
+	adapter     RectShifter
 	tileMaxSize int // Определяет максимальный размер тайла по ширине и высоте.
 }
 
-func NewChartographerService(imageRepo kvstore.Store, tileRepo imagetile.Service, adapter imagetile.RectShifter, tileMaxSize int) *ChartographerService {
+func NewChartographerService(imageRepo kvstore.Store, tileRepo imgstore.Service, adapter RectShifter, tileMaxSize int) *ChartographerService {
 	return &ChartographerService{
 		imageRepo:   imageRepo,
 		tileService: tileRepo,
@@ -98,6 +84,8 @@ func newOpaqueRGBA(r image.Rectangle) image.Image {
 	return img
 }
 
+// DeleteImage - удаление изображения по id.
+// Возможна ошибка ErrNotExist и другие.
 func (cs *ChartographerService) DeleteImage(id string) error {
 	err := cs.imageRepo.Delete(id)
 	if err != nil {
@@ -203,6 +191,8 @@ func (cs *ChartographerService) GetFragment(img *TiledImage, x, y, width, height
 	return fragment, nil
 }
 
+// GetImage - получение изображения по id.
+// Возможна ошибка ErrNotExist и другие.
 func (cs *ChartographerService) GetImage(id string) (*TiledImage, error) {
 	i, err := cs.imageRepo.Get(id)
 	if err != nil {

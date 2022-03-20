@@ -1,9 +1,10 @@
-package imagetile
+package chart
 
 import (
 	"image"
 )
 
+// RectShifter - адаптер (паттерн) для смещения прямоугольника изображения.
 type RectShifter interface {
 	ShiftRect(img image.Image, x, y int)
 }
