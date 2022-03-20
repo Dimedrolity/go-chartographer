@@ -4,7 +4,7 @@ import (
 	"sync"
 )
 
-// InMemoryStore - потокобезопасное in-memory хранилище.
+// InMemoryStore - потокобезопасное in-memory key/value хранилище.
 type InMemoryStore struct {
 	store map[string]interface{}
 	mu    *sync.Mutex
@@ -12,6 +12,8 @@ type InMemoryStore struct {
 
 func NewInMemoryStore() *InMemoryStore {
 	return &InMemoryStore{
+		// хорошо бы указывать дженерик вместо interface{} при инициализации,
+		// таким образом вызывающая сторона определяла бы тип value.
 		store: make(map[string]interface{}),
 		mu:    &sync.Mutex{},
 	}
