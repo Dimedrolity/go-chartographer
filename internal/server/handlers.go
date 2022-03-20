@@ -1,11 +1,11 @@
 package server
 
 import (
-	"chartographer-go/internal/chart"
-	"chartographer-go/internal/imagetile"
-	"chartographer-go/pkg/kvstore"
 	"errors"
 	"fmt"
+	"go-chartographer/internal/chart"
+	"go-chartographer/internal/imagetile"
+	"go-chartographer/pkg/kvstore"
 	"net/http"
 	"strconv"
 

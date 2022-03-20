@@ -1,10 +1,10 @@
 package app
 
 import (
-	"chartographer-go/internal/chart"
-	imagetile2 "chartographer-go/internal/imagetile"
-	"chartographer-go/internal/server"
-	"chartographer-go/pkg/kvstore"
+	"go-chartographer/internal/chart"
+	imagetile2 "go-chartographer/internal/imagetile"
+	"go-chartographer/internal/server"
+	"go-chartographer/pkg/kvstore"
 )
 
 // Run инициализирует зависимости сервера и запускает его.

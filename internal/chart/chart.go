@@ -2,12 +2,12 @@
 package chart
 
 import (
-	"chartographer-go/internal/imagetile"
-	"chartographer-go/internal/tileutils"
-	"chartographer-go/pkg/kvstore"
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
+	"go-chartographer/internal/imagetile"
+	"go-chartographer/internal/tileutils"
+	"go-chartographer/pkg/kvstore"
 	"image"
 	"image/color"
 	"image/draw"

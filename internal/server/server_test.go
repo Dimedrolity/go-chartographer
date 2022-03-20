@@ -2,9 +2,9 @@ package server_test
 
 import (
 	"bytes"
-	chart2 "chartographer-go/internal/chart"
-	"chartographer-go/internal/server"
-	"chartographer-go/pkg/kvstore"
+	chart2 "go-chartographer/internal/chart"
+	"go-chartographer/internal/server"
+	"go-chartographer/pkg/kvstore"
 	"golang.org/x/image/bmp"
 	"image"
 	"net/http"

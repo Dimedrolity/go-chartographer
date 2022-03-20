@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="go test all pkg" type="GoTestRunConfiguration" factoryName="Go Test">
-    <module name="chartographer-go" />
+    <module name="go-chartographer" />
     <working_directory value="$PROJECT_DIR$" />
     <kind value="DIRECTORY" />
     <package value="D:\GolandProjects\chartographer-go\chart" />

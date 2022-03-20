@@ -1,8 +1,8 @@
 package imagetile_test
 
 import (
-	"chartographer-go/internal/imagetile"
 	"errors"
+	"go-chartographer/internal/imagetile"
 	"os"
 	"testing"
 

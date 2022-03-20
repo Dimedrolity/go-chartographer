@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="go build and run" type="GoApplicationRunConfiguration" factoryName="Go Application">
-    <module name="chartographer-go" />
+  <configuration default="false" name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
+    <module name="go-chartographer" />
     <working_directory value="$PROJECT_DIR$" />
     <parameters value="data" />
     <kind value="FILE" />

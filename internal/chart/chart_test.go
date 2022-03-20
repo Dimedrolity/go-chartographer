@@ -1,8 +1,8 @@
 package chart_test
 
 import (
-	chart2 "chartographer-go/internal/chart"
 	"errors"
+	chart2 "go-chartographer/internal/chart"
 	"image"
 	"image/color"
 	"testing"

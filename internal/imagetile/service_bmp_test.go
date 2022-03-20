@@ -1,9 +1,9 @@
 package imagetile_test
 
 import (
-	"chartographer-go/internal/imagetile"
 	"errors"
 	. "github.com/smartystreets/goconvey/convey"
+	"go-chartographer/internal/imagetile"
 	"image"
 	"image/color"
 	"testing"

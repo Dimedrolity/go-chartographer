@@ -1,7 +1,7 @@
 package server
 
 import (
-	"chartographer-go/internal/chart"
+	"go-chartographer/internal/chart"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"

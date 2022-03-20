@@ -2,8 +2,8 @@ package main
 
 import (
 	"bytes"
-	"chartographer-go/internal/imagetile"
 	. "github.com/smartystreets/goconvey/convey"
+	"go-chartographer/internal/imagetile"
 	"golang.org/x/image/bmp"
 	"image"
 	"image/color"

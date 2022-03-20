@@ -1,8 +1,8 @@
 package kvstore_test
 
 import (
-	"chartographer-go/pkg/kvstore"
 	"errors"
+	"go-chartographer/pkg/kvstore"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"

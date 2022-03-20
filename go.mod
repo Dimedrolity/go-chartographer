@@ -1,4 +1,4 @@
-module chartographer-go
+module go-chartographer
 
 go 1.17
 

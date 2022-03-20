@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"chartographer-go/internal/app"
+	"go-chartographer/internal/app"
 )
 
 func main() {
