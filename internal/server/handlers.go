@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"go-chartographer/internal/chart"
 	"go-chartographer/internal/imagetile"
-	"go-chartographer/pkg/kvstore"
 	"io"
 	"net/http"
 	"strconv"
@@ -30,6 +29,7 @@ func getQueryParamInt(req *http.Request, name string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	i, err := strconv.Atoi(s)
 	if err != nil {
 		return 0, paramError(name, err)
@@ -44,6 +44,7 @@ func (s *Server) createImage(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	height, err := getQueryParamInt(req, "height")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -51,13 +52,16 @@ func (s *Server) createImage(w http.ResponseWriter, req *http.Request) {
 	}
 
 	img, err := s.chartService.AddImage(width, height)
+
 	var errSize *chart.SizeError
 	if err != nil {
 		if errors.As(err, &errSize) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+
 		return
 	}
 
@@ -74,6 +78,7 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	y, err := getQueryParamInt(req, "y")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -86,6 +91,7 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	_, err = getQueryParamInt(req, "height")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -96,10 +102,11 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 
 	img, err := s.chartService.GetImage(id)
 	if err != nil {
-		if errors.Is(err, kvstore.ErrNotExist) {
+		if errors.Is(err, chart.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
+
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -110,6 +117,7 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	fragment, err := s.chartService.Decode(b)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -125,6 +133,7 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -136,16 +145,19 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	y, err := getQueryParamInt(req, "y")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	width, err := getQueryParamInt(req, "width")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	height, err := getQueryParamInt(req, "height")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -156,15 +168,18 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 
 	img, err := s.chartService.GetImage(id)
 	if err != nil {
-		if errors.Is(err, kvstore.ErrNotExist) {
+		if errors.Is(err, chart.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
+
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+
 		return
 	}
 
 	fragment, err := s.chartService.GetFragment(img, x, y, width, height)
+
 	var errSize *chart.SizeError
 	if err != nil {
 		if errors.As(err, &errSize) || errors.Is(err, chart.ErrNotOverlaps) {
@@ -192,7 +207,7 @@ func (s *Server) deleteImage(w http.ResponseWriter, req *http.Request) {
 
 	err := s.chartService.DeleteImage(id)
 	if err != nil {
-		if errors.Is(err, kvstore.ErrNotExist) {
+		if errors.Is(err, chart.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}

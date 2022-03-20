@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"go-chartographer/internal/chart"
 	"go-chartographer/internal/server"
-	"go-chartographer/pkg/kvstore"
-	"golang.org/x/image/bmp"
 	"image"
 	"image/color"
 	"net/http"
@@ -51,6 +49,7 @@ func TestCreate_WrongSize(t *testing.T) {
 	type Size struct {
 		Width, Height interface{}
 	}
+
 	tmpl, _ := template.New("right request").Parse("/chartas/?width={{.Width}}&height={{.Height}}")
 
 	testWrongSize := func(tmpl *template.Template, size *Size) {
@@ -88,7 +87,6 @@ func TestCreate_WrongSize(t *testing.T) {
 	Convey("string height", t, func() {
 		testWrongSize(tmpl, &Size{Width: 1, Height: "a"})
 	})
-
 }
 
 type TestChartServiceCreateMethodSizeErr struct{}
@@ -203,7 +201,7 @@ func (t TestChartServiceDeleteMethodNotFound) AddImage(int, int) (*chart.TiledIm
 	panic("implement me")
 }
 func (t TestChartServiceDeleteMethodNotFound) DeleteImage(string) error {
-	return kvstore.ErrNotExist
+	return chart.ErrNotExist
 }
 func (t TestChartServiceDeleteMethodNotFound) SetFragment(*chart.TiledImage, image.Image) error {
 	panic("implement me")
@@ -224,7 +222,8 @@ func (t TestChartServiceDeleteMethodNotFound) Decode([]byte) (image.Image, error
 func TestDelete_NotFound(t *testing.T) {
 	srv := server.NewServer(&server.Config{}, &TestChartServiceDeleteMethodNotFound{})
 
-	tmpl, _ := template.New("right request").Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}&height={{.Height}}")
+	tmpl, _ := template.New("right request").
+		Parse("/chartas/{{.Id}}/?x={{.X}}&y={{.Y}}&width={{.Width}}&height={{.Height}}")
 
 	Convey("", t, func() {
 		b := bytes.Buffer{}
@@ -365,7 +364,7 @@ func (t TestChartServiceGetMethodNotFound) GetFragment(*chart.TiledImage, int, i
 	return nil, nil
 }
 func (t TestChartServiceGetMethodNotFound) GetImage(string) (*chart.TiledImage, error) {
-	return nil, kvstore.ErrNotExist
+	return nil, chart.ErrNotExist
 }
 func (t TestChartServiceGetMethodNotFound) Encode(image.Image) ([]byte, error) {
 	panic("implement me")
@@ -634,7 +633,7 @@ func (t TestChartServiceSetMethodNotFound) GetFragment(*chart.TiledImage, int, i
 	panic("implement me")
 }
 func (t TestChartServiceSetMethodNotFound) GetImage(string) (*chart.TiledImage, error) {
-	return nil, kvstore.ErrNotExist
+	return nil, chart.ErrNotExist
 }
 func (t TestChartServiceSetMethodNotFound) Encode(image.Image) ([]byte, error) {
 	panic("implement me")
@@ -653,10 +652,7 @@ func TestSet_NotFound(t *testing.T) {
 		err := tmpl.Execute(&b, &Fragment{Id: "0", X: 0, Y: 0, Width: 1, Height: 1})
 		So(err, ShouldBeNil)
 		url := b.String()
-		img := image.Image(image.Rect(0, 0, 1, 1))
-		imgBuffer := bytes.Buffer{}
-		_ = bmp.Encode(&imgBuffer, img)
-		req := httptest.NewRequest("POST", url, &imgBuffer)
+		req := httptest.NewRequest("POST", url, &bytes.Buffer{})
 		w := httptest.NewRecorder()
 
 		srv.ServeHTTP(w, req)

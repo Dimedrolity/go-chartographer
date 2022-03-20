@@ -95,6 +95,9 @@ func newOpaqueRGBA(r image.Rectangle) image.Image {
 func (cs *ChartographerService) DeleteImage(id string) error {
 	err := cs.imageRepo.Delete(id)
 	if err != nil {
+		if errors.Is(err, kvstore.ErrNotExist) {
+			return ErrNotExist
+		}
 		return err
 	}
 
@@ -190,6 +193,10 @@ func (cs *ChartographerService) GetFragment(img *TiledImage, x, y, width, height
 func (cs *ChartographerService) GetImage(id string) (*TiledImage, error) {
 	i, err := cs.imageRepo.Get(id)
 	if err != nil {
+		if errors.Is(err, kvstore.ErrNotExist) {
+			return nil, ErrNotExist
+		}
+
 		return nil, err
 	}
 
