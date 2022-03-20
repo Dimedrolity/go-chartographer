@@ -20,17 +20,20 @@ type Service interface {
 
 	SetFragment(img *TiledImage, fragment image.Image) error
 	GetFragment(img *TiledImage, x, y, width, height int) (image.Image, error)
+
+	Encode(img image.Image) ([]byte, error)
+	Decode(b []byte) (image.Image, error)
 }
 
 // ChartographerService содержит бизнес логику обработки изображений.
 type ChartographerService struct {
 	imageRepo   kvstore.Store
-	tileRepo    imagetile.Service
+	tileService imagetile.Service
 	tileMaxSize int // Определяет максимальный размер тайла по ширине и высоте.
 }
 
 func NewChartographerService(imageRepo kvstore.Store, tileRepo imagetile.Service, tileMaxSize int) *ChartographerService {
-	return &ChartographerService{imageRepo: imageRepo, tileRepo: tileRepo, tileMaxSize: tileMaxSize}
+	return &ChartographerService{imageRepo: imageRepo, tileService: tileRepo, tileMaxSize: tileMaxSize}
 }
 
 const (
@@ -66,7 +69,7 @@ func (cs *ChartographerService) AddImage(width, height int) (*TiledImage, error)
 	for _, t := range img.Tiles {
 		i := newOpaqueRGBA(t)
 
-		err := cs.tileRepo.SaveTile(img.Id, t.Min.X, t.Min.Y, i)
+		err := cs.tileService.SaveTile(img.Id, t.Min.X, t.Min.Y, i)
 		if err != nil {
 			return nil, err
 		}
@@ -95,7 +98,7 @@ func (cs *ChartographerService) DeleteImage(id string) error {
 		return err
 	}
 
-	err = cs.tileRepo.DeleteImage(id)
+	err = cs.tileService.DeleteImage(id)
 	if err != nil {
 		return err
 	}
@@ -121,7 +124,7 @@ func (cs *ChartographerService) SetFragment(img *TiledImage, fragment image.Imag
 
 	overlapped := tileutils.OverlappedTiles(img.Tiles, fragment.Bounds())
 	for _, t := range overlapped {
-		tileImg, err := cs.tileRepo.GetTile(img.Id, t.Min.X, t.Min.Y)
+		tileImg, err := cs.tileService.GetTile(img.Id, t.Min.X, t.Min.Y)
 		if err != nil {
 			return err
 		}
@@ -133,7 +136,7 @@ func (cs *ChartographerService) SetFragment(img *TiledImage, fragment image.Imag
 		intersect := t.Intersect(fragment.Bounds())
 		draw.Draw(mutableTile, intersect, fragment, intersect.Bounds().Min, draw.Src)
 
-		err = cs.tileRepo.SaveTile(img.Id, t.Min.X, t.Min.Y, mutableTile)
+		err = cs.tileService.SaveTile(img.Id, t.Min.X, t.Min.Y, mutableTile)
 		if err != nil {
 			return err
 		}
@@ -172,7 +175,7 @@ func (cs *ChartographerService) GetFragment(img *TiledImage, x, y, width, height
 	overlapped := tileutils.OverlappedTiles(img.Tiles, fragment.Bounds())
 
 	for _, t := range overlapped {
-		tileImg, err := cs.tileRepo.GetTile(img.Id, t.Min.X, t.Min.Y)
+		tileImg, err := cs.tileService.GetTile(img.Id, t.Min.X, t.Min.Y)
 		if err != nil {
 			return nil, err
 		}
@@ -196,4 +199,12 @@ func (cs *ChartographerService) GetImage(id string) (*TiledImage, error) {
 	}
 
 	return img, nil
+}
+
+func (cs *ChartographerService) Encode(img image.Image) ([]byte, error) {
+	return cs.tileService.Encode(img)
+}
+
+func (cs *ChartographerService) Decode(b []byte) (image.Image, error) {
+	return cs.tileService.Decode(b)
 }

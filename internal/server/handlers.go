@@ -6,11 +6,11 @@ import (
 	"go-chartographer/internal/chart"
 	"go-chartographer/internal/imagetile"
 	"go-chartographer/pkg/kvstore"
+	"io"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"golang.org/x/image/bmp"
 )
 
 func paramError(name string, err error) error {
@@ -22,6 +22,7 @@ func getQueryParam(req *http.Request, name string) (string, error) {
 	if !q.Has(name) || q.Get(name) == "" {
 		return "", paramError(name, errors.New("отсутствует или пустая строка"))
 	}
+
 	return q.Get(name), nil
 }
 func getQueryParamInt(req *http.Request, name string) (int, error) {
@@ -33,6 +34,7 @@ func getQueryParamInt(req *http.Request, name string) (int, error) {
 	if err != nil {
 		return 0, paramError(name, err)
 	}
+
 	return i, nil
 }
 
@@ -103,12 +105,17 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// TODO не декодировать сразу, сначала проверить, что есть пересечение img и width height
-	// TODO вынести декодирование в сервис, иначе приходится в тестах создавать реальный BMP
-	fragment, err := bmp.Decode(req.Body)
+	b, err := io.ReadAll(req.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	fragment, err := s.chartService.Decode(b)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	// TODO этого здесь быть не должно
 	imagetile.ShiftRect(fragment, x, y)
 
@@ -168,12 +175,14 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// TODO нормально ли использовать bmp в хендлере?
-	// вызывать через chartService.Encode
-	err = bmp.Encode(w, fragment)
+	b, err := s.chartService.Encode(fragment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+	_, err = w.Write(b)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	w.Header().Set("Content-Type", "image/bmp")
 }

@@ -29,6 +29,7 @@ func NewServer(config *Config, chartService chart.Service) *Server {
 		chartService: chartService,
 	}
 	s.setRoutes()
+
 	return s
 }
 
@@ -38,5 +39,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) Run() error {
 	p := ":" + s.config.Port
+
 	return http.ListenAndServe(p, s)
 }
