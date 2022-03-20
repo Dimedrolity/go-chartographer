@@ -3,9 +3,9 @@
     <module name="chartographer-go" />
     <working_directory value="$PROJECT_DIR$" />
     <parameters value="data" />
-    <kind value="DIRECTORY" />
+    <kind value="FILE" />
     <directory value="$PROJECT_DIR$" />
-    <filePath value="$PROJECT_DIR$/" />
+    <filePath value="$PROJECT_DIR$/cmd/main/main.go" />
     <method v="2" />
   </configuration>
 </component>
