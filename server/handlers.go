@@ -11,7 +11,7 @@ import (
 
 	"chartographer-go/chart"
 	"chartographer-go/imagetile"
-	"chartographer-go/tiledimage"
+	"chartographer-go/kvstore"
 )
 
 func paramError(name string, err error) error {
@@ -95,7 +95,7 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 
 	img, err := s.chartService.GetImage(id)
 	if err != nil {
-		if errors.Is(err, tiledimage.ErrNotExist) {
+		if errors.Is(err, kvstore.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -149,7 +149,7 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 
 	img, err := s.chartService.GetImage(id)
 	if err != nil {
-		if errors.Is(err, tiledimage.ErrNotExist) {
+		if errors.Is(err, kvstore.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -181,7 +181,7 @@ func (s *Server) deleteImage(w http.ResponseWriter, req *http.Request) {
 
 	err := s.chartService.DeleteImage(id)
 	if err != nil {
-		if errors.Is(err, tiledimage.ErrNotExist) {
+		if errors.Is(err, kvstore.ErrNotExist) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -1,7 +1,7 @@
-package tiledimage_test
+package kvstore_test
 
 import (
-	"chartographer-go/tiledimage"
+	"chartographer-go/kvstore"
 	"errors"
 	"testing"
 
@@ -12,7 +12,7 @@ import (
 
 func TestFileSystemTileRepo_SuccessGet(t *testing.T) {
 	Convey("После создания получение изображения должно вернуть исходное", t, func() {
-		imageRepo := tiledimage.NewInMemoryRepo()
+		imageRepo := kvstore.NewInMemoryStore()
 
 		const (
 			key   = "0"
@@ -29,7 +29,7 @@ func TestFileSystemTileRepo_SuccessGet(t *testing.T) {
 
 func TestFileSystemTileRepo_SuccessDelete(t *testing.T) {
 	Convey("После создания и удаления получение изображения должно вернуть исходное", t, func() {
-		imageRepo := tiledimage.NewInMemoryRepo()
+		imageRepo := kvstore.NewInMemoryStore()
 
 		const (
 			key   = "0"
@@ -46,20 +46,20 @@ func TestFileSystemTileRepo_SuccessDelete(t *testing.T) {
 
 func TestFileSystemTileRepo_Delete(t *testing.T) {
 	Convey("Удаление несуществующего изображения должно вернуть ошибку", t, func() {
-		imageRepo := tiledimage.NewInMemoryRepo()
+		imageRepo := kvstore.NewInMemoryStore()
 
 		err := imageRepo.Delete("0")
 
-		So(errors.Is(err, tiledimage.ErrNotExist), ShouldBeTrue)
+		So(errors.Is(err, kvstore.ErrNotExist), ShouldBeTrue)
 	})
 }
 
 func TestFileSystemTileRepo_Get(t *testing.T) {
 	Convey("Получение несуществующего изображения должно вернуть ошибку", t, func() {
-		imageRepo := tiledimage.NewInMemoryRepo()
+		imageRepo := kvstore.NewInMemoryStore()
 
 		_, err := imageRepo.Get("0")
 
-		So(errors.Is(err, tiledimage.ErrNotExist), ShouldBeTrue)
+		So(errors.Is(err, kvstore.ErrNotExist), ShouldBeTrue)
 	})
 }

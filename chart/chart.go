@@ -3,7 +3,7 @@ package chart
 
 import (
 	"chartographer-go/imagetile"
-	"chartographer-go/tiledimage"
+	"chartographer-go/kvstore"
 	"chartographer-go/tileutils"
 	"errors"
 	"fmt"
@@ -23,12 +23,12 @@ type Service interface {
 
 // ChartographerService содержит бизнес логику обработки изображений.
 type ChartographerService struct {
-	imageRepo   tiledimage.Repository
+	imageRepo   kvstore.Store
 	tileRepo    imagetile.Service
 	tileMaxSize int // Определяет максимальный размер тайла по ширине и высоте.
 }
 
-func NewChartographerService(imageRepo tiledimage.Repository, tileRepo imagetile.Service, tileMaxSize int) *ChartographerService {
+func NewChartographerService(imageRepo kvstore.Store, tileRepo imagetile.Service, tileMaxSize int) *ChartographerService {
 	return &ChartographerService{imageRepo: imageRepo, tileRepo: tileRepo, tileMaxSize: tileMaxSize}
 }
 

@@ -3,8 +3,8 @@ package server_test
 import (
 	"bytes"
 	"chartographer-go/chart"
+	"chartographer-go/kvstore"
 	"chartographer-go/server"
-	"chartographer-go/tiledimage"
 	"golang.org/x/image/bmp"
 	"image"
 	"net/http"
@@ -185,7 +185,7 @@ func (t TestChartServiceDeleteMethodNotFound) AddImage(int, int) (*chart.TiledIm
 	panic("implement me")
 }
 func (t TestChartServiceDeleteMethodNotFound) DeleteImage(string) error {
-	return tiledimage.ErrNotExist
+	return kvstore.ErrNotExist
 }
 func (t TestChartServiceDeleteMethodNotFound) SetFragment(*chart.TiledImage, image.Image) error {
 	panic("implement me")
@@ -336,7 +336,7 @@ func (t TestChartServiceGetMethodNotFound) GetFragment(*chart.TiledImage, int, i
 	return nil, nil
 }
 func (t TestChartServiceGetMethodNotFound) GetImage(string) (*chart.TiledImage, error) {
-	return nil, tiledimage.ErrNotExist
+	return nil, kvstore.ErrNotExist
 }
 
 func TestGet_NotFound(t *testing.T) {
@@ -575,7 +575,7 @@ func (t TestChartServiceSetMethodNotFound) GetFragment(*chart.TiledImage, int, i
 	panic("implement me")
 }
 func (t TestChartServiceSetMethodNotFound) GetImage(string) (*chart.TiledImage, error) {
-	return nil, tiledimage.ErrNotExist
+	return nil, kvstore.ErrNotExist
 }
 
 func TestSet_NotFound(t *testing.T) {

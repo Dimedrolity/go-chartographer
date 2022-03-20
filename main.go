@@ -7,7 +7,7 @@ import (
 
 	"chartographer-go/chart"
 	"chartographer-go/imagetile"
-	"chartographer-go/tiledimage"
+	"chartographer-go/kvstore"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func run() error {
 	}
 	bmpService := imagetile.NewBmpService(tileRepo)
 	tileMaxSize := 1000
-	imageRepo := tiledimage.NewInMemoryRepo()
+	imageRepo := kvstore.NewInMemoryStore()
 	// хорошо бы вписался дженерик при инициализации imageRepo, необходимо указать *chart.TiledImage
 	chartService := chart.NewChartographerService(imageRepo, bmpService, tileMaxSize)
 	// TODO вынести хост и порт в .env
