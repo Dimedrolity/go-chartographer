@@ -17,7 +17,8 @@ func Run(port, dataDirPath string, tileMaxSize int) error {
 	bmpService := imagetile.NewBmpService(tileRepo)
 
 	imageRepo := kvstore.NewInMemoryStore()
-	chartService := chart.NewChartographerService(imageRepo, bmpService, tileMaxSize)
+	adapter := &imagetile.ImageAdapter{}
+	chartService := chart.NewChartographerService(imageRepo, bmpService, adapter, tileMaxSize)
 	config := server.NewConfig(port)
 	srv := server.NewServer(config, chartService)
 

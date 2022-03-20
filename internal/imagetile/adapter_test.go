@@ -31,7 +31,8 @@ func TestAdapter(t *testing.T) {
 			offsetX = 10
 			offsetY = 20
 		)
-		imagetile.ShiftRect(img, offsetX, offsetY)
+		a := imagetile.ImageAdapter{}
+		a.ShiftRect(img, offsetX, offsetY)
 
 		So(img.Bounds().Dx(), ShouldEqual, width)
 		So(img.Bounds().Dy(), ShouldEqual, height)

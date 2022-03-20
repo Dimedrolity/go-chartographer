@@ -18,7 +18,7 @@ type Service interface {
 	GetImage(id string) (*TiledImage, error)
 	DeleteImage(id string) error
 
-	SetFragment(img *TiledImage, fragment image.Image) error
+	SetFragment(img *TiledImage, x int, y int, fragment image.Image) error
 	GetFragment(img *TiledImage, x, y, width, height int) (image.Image, error)
 
 	Encode(img image.Image) ([]byte, error)
@@ -29,11 +29,17 @@ type Service interface {
 type ChartographerService struct {
 	imageRepo   kvstore.Store
 	tileService imagetile.Service
+	adapter     imagetile.RectShifter
 	tileMaxSize int // Определяет максимальный размер тайла по ширине и высоте.
 }
 
-func NewChartographerService(imageRepo kvstore.Store, tileRepo imagetile.Service, tileMaxSize int) *ChartographerService {
-	return &ChartographerService{imageRepo: imageRepo, tileService: tileRepo, tileMaxSize: tileMaxSize}
+func NewChartographerService(imageRepo kvstore.Store, tileRepo imagetile.Service, adapter imagetile.RectShifter, tileMaxSize int) *ChartographerService {
+	return &ChartographerService{
+		imageRepo:   imageRepo,
+		tileService: tileRepo,
+		adapter:     adapter,
+		tileMaxSize: tileMaxSize,
+	}
 }
 
 const (
@@ -118,7 +124,9 @@ func (cs *ChartographerService) DeleteImage(id string) error {
 // Примечание:
 // если фрагмент частично выходит за границы изображения, то часть фрагмента вне изображения игнорируется.
 // Возможна ошибка ErrNotOverlaps и другие.
-func (cs *ChartographerService) SetFragment(img *TiledImage, fragment image.Image) error {
+func (cs *ChartographerService) SetFragment(img *TiledImage, x int, y int, fragment image.Image) error {
+	cs.adapter.ShiftRect(fragment, x, y)
+
 	imgRect := image.Rect(0, 0, img.Width, img.Height)
 
 	if !imgRect.Overlaps(fragment.Bounds()) {
@@ -131,6 +139,9 @@ func (cs *ChartographerService) SetFragment(img *TiledImage, fragment image.Imag
 		if err != nil {
 			return err
 		}
+
+		cs.adapter.ShiftRect(tileImg, t.Min.X, t.Min.Y)
+
 		mutableTile, ok := tileImg.(draw.Image)
 		if !ok {
 			return errors.New("изображение должно реализовывать draw.Image")
@@ -182,6 +193,8 @@ func (cs *ChartographerService) GetFragment(img *TiledImage, x, y, width, height
 		if err != nil {
 			return nil, err
 		}
+
+		cs.adapter.ShiftRect(tileImg, t.Min.X, t.Min.Y)
 
 		intersect := t.Intersect(fragment.Bounds())
 		draw.Draw(fragment, intersect, tileImg, intersect.Min, draw.Src)

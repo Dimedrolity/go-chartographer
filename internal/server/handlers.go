@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"go-chartographer/internal/chart"
-	"go-chartographer/internal/imagetile"
 	"io"
 	"net/http"
 	"strconv"
@@ -61,11 +60,11 @@ func (s *Server) createImage(w http.ResponseWriter, req *http.Request) {
 		}
 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
+
 	_, err = w.Write([]byte(img.Id))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -124,10 +123,7 @@ func (s *Server) setFragment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// TODO этого здесь быть не должно
-	imagetile.ShiftRect(fragment, x, y)
-
-	err = s.chartService.SetFragment(img, fragment)
+	err = s.chartService.SetFragment(img, x, y, fragment)
 	if err != nil {
 		if errors.Is(err, chart.ErrNotOverlaps) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -174,7 +170,6 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 		}
 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-
 		return
 	}
 
@@ -186,6 +181,7 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -195,10 +191,12 @@ func (s *Server) getFragment(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	_, err = w.Write(b)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+
 	w.Header().Set("Content-Type", "image/bmp")
 }
 
@@ -211,6 +209,7 @@ func (s *Server) deleteImage(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
+
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

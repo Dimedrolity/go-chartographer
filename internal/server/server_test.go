@@ -27,7 +27,7 @@ func (t TestChartServiceAllPanic) AddImage(int, int) (*chart.TiledImage, error) 
 func (t TestChartServiceAllPanic) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceAllPanic) SetFragment(*chart.TiledImage, image.Image) error {
+func (t TestChartServiceAllPanic) SetFragment(*chart.TiledImage, int, int, image.Image) error {
 	panic("implement me")
 }
 func (t TestChartServiceAllPanic) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
@@ -97,7 +97,7 @@ func (t TestChartServiceCreateMethodSizeErr) AddImage(int, int) (*chart.TiledIma
 func (t TestChartServiceCreateMethodSizeErr) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceCreateMethodSizeErr) SetFragment(*chart.TiledImage, image.Image) error {
+func (t TestChartServiceCreateMethodSizeErr) SetFragment(*chart.TiledImage, int, int, image.Image) error {
 	panic("implement me")
 }
 func (t TestChartServiceCreateMethodSizeErr) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
@@ -152,7 +152,7 @@ func (t TestChartServiceCreateMethodSuccess) AddImage(int, int) (*chart.TiledIma
 func (t TestChartServiceCreateMethodSuccess) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceCreateMethodSuccess) SetFragment(*chart.TiledImage, image.Image) error {
+func (t TestChartServiceCreateMethodSuccess) SetFragment(*chart.TiledImage, int, int, image.Image) error {
 	panic("implement me")
 }
 func (t TestChartServiceCreateMethodSuccess) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
@@ -174,7 +174,8 @@ func TestCreate_Success(t *testing.T) {
 	type Size struct {
 		Width, Height interface{}
 	}
-	tmpl, _ := template.New("test").Parse("/chartas/?width={{.Width}}&height={{.Height}}")
+	tmpl, _ := template.New("test").
+		Parse("/chartas/?width={{.Width}}&height={{.Height}}")
 
 	Convey("", t, func() {
 		b := bytes.Buffer{}
@@ -191,7 +192,7 @@ func TestCreate_Success(t *testing.T) {
 	})
 }
 
-//endregion
+// endregion
 
 // region Удаление изображения
 
@@ -203,7 +204,7 @@ func (t TestChartServiceDeleteMethodNotFound) AddImage(int, int) (*chart.TiledIm
 func (t TestChartServiceDeleteMethodNotFound) DeleteImage(string) error {
 	return chart.ErrNotExist
 }
-func (t TestChartServiceDeleteMethodNotFound) SetFragment(*chart.TiledImage, image.Image) error {
+func (t TestChartServiceDeleteMethodNotFound) SetFragment(*chart.TiledImage, int, int, image.Image) error {
 	panic("implement me")
 }
 func (t TestChartServiceDeleteMethodNotFound) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
@@ -247,7 +248,7 @@ func (t TestChartServiceDeleteMethodSuccess) AddImage(int, int) (*chart.TiledIma
 func (t TestChartServiceDeleteMethodSuccess) DeleteImage(string) error {
 	return nil
 }
-func (t TestChartServiceDeleteMethodSuccess) SetFragment(*chart.TiledImage, image.Image) error {
+func (t TestChartServiceDeleteMethodSuccess) SetFragment(*chart.TiledImage, int, int, image.Image) error {
 	panic("implement me")
 }
 func (t TestChartServiceDeleteMethodSuccess) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
@@ -282,9 +283,9 @@ func TestDelete_Success(t *testing.T) {
 	})
 }
 
-//endregion
+// endregion
 
-//region Получение фрагмента изображения
+// region Получение фрагмента изображения
 
 func TestGet_WrongParams(t *testing.T) {
 	srv := server.NewServer(&server.Config{}, &TestChartServiceAllPanic{})
@@ -356,7 +357,7 @@ func (t TestChartServiceGetMethodNotFound) AddImage(int, int) (*chart.TiledImage
 func (t TestChartServiceGetMethodNotFound) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceGetMethodNotFound) SetFragment(*chart.TiledImage, image.Image) error {
+func (t TestChartServiceGetMethodNotFound) SetFragment(*chart.TiledImage, int, int, image.Image) error {
 	panic("implement me")
 }
 
@@ -401,7 +402,7 @@ func (t TestChartServiceGetMethodSizeError) AddImage(int, int) (*chart.TiledImag
 func (t TestChartServiceGetMethodSizeError) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceGetMethodSizeError) SetFragment(*chart.TiledImage, image.Image) error {
+func (t TestChartServiceGetMethodSizeError) SetFragment(*chart.TiledImage, int, int, image.Image) error {
 	panic("implement me")
 }
 
@@ -445,7 +446,7 @@ func (t TestChartServiceGetMethodNotOverlaps) AddImage(int, int) (*chart.TiledIm
 func (t TestChartServiceGetMethodNotOverlaps) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceGetMethodNotOverlaps) SetFragment(*chart.TiledImage, image.Image) error {
+func (t TestChartServiceGetMethodNotOverlaps) SetFragment(*chart.TiledImage, int, int, image.Image) error {
 	panic("implement me")
 }
 func (t TestChartServiceGetMethodNotOverlaps) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
@@ -488,7 +489,7 @@ func (t TestChartServiceGetMethodSuccess) AddImage(int, int) (*chart.TiledImage,
 func (t TestChartServiceGetMethodSuccess) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceGetMethodSuccess) SetFragment(*chart.TiledImage, image.Image) error {
+func (t TestChartServiceGetMethodSuccess) SetFragment(*chart.TiledImage, int, int, image.Image) error {
 	panic("implement me")
 }
 func (t TestChartServiceGetMethodSuccess) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
@@ -523,9 +524,9 @@ func TestGet_Success(t *testing.T) {
 	})
 }
 
-//endregion
+// endregion
 
-//region Установка фрагмента изображения
+// region Установка фрагмента изображения
 
 type Fragment struct {
 	Id                  string
@@ -540,7 +541,7 @@ func (t TestChartServiceSetMethodWrongSize) AddImage(int, int) (*chart.TiledImag
 func (t TestChartServiceSetMethodWrongSize) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceSetMethodWrongSize) SetFragment(*chart.TiledImage, image.Image) error {
+func (t TestChartServiceSetMethodWrongSize) SetFragment(*chart.TiledImage, int, int, image.Image) error {
 	return nil
 }
 func (t TestChartServiceSetMethodWrongSize) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
@@ -626,7 +627,7 @@ func (t TestChartServiceSetMethodNotFound) AddImage(int, int) (*chart.TiledImage
 func (t TestChartServiceSetMethodNotFound) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceSetMethodNotFound) SetFragment(*chart.TiledImage, image.Image) error {
+func (t TestChartServiceSetMethodNotFound) SetFragment(*chart.TiledImage, int, int, image.Image) error {
 	panic("implement me")
 }
 func (t TestChartServiceSetMethodNotFound) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
@@ -669,7 +670,7 @@ func (t TestChartServiceSetMethodNotOverlaps) AddImage(int, int) (*chart.TiledIm
 func (t TestChartServiceSetMethodNotOverlaps) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceSetMethodNotOverlaps) SetFragment(*chart.TiledImage, image.Image) error {
+func (t TestChartServiceSetMethodNotOverlaps) SetFragment(*chart.TiledImage, int, int, image.Image) error {
 	return chart.ErrNotOverlaps
 }
 func (t TestChartServiceSetMethodNotOverlaps) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
@@ -715,7 +716,7 @@ func (t TestChartServiceSetMethodSuccess) AddImage(int, int) (*chart.TiledImage,
 func (t TestChartServiceSetMethodSuccess) DeleteImage(string) error {
 	panic("implement me")
 }
-func (t TestChartServiceSetMethodSuccess) SetFragment(*chart.TiledImage, image.Image) error {
+func (t TestChartServiceSetMethodSuccess) SetFragment(*chart.TiledImage, int, int, image.Image) error {
 	return nil
 }
 func (t TestChartServiceSetMethodSuccess) GetFragment(*chart.TiledImage, int, int, int, int) (image.Image, error) {
@@ -754,4 +755,4 @@ func TestSet_Success(t *testing.T) {
 	})
 }
 
-//endregion
+// endregion

@@ -126,8 +126,8 @@ func TestBmpService_SuccessGet(t *testing.T) {
 		bmpService := imagetile.NewBmpService(tileRepo)
 
 		const (
-			x      = 1
-			y      = 1
+			x      = 0
+			y      = 0
 			width  = 1
 			height = 1
 		)
@@ -157,7 +157,6 @@ func TestBmpService_SuccessDelete(t *testing.T) {
 			height = 1
 		)
 		img := image.NewRGBA(image.Rect(x, y, x+width, y+height))
-		img.Set(x, y, color.RGBA{A: 0xFF}) // так как в GetTile вызывается ShiftRect, который работает только с RGBA
 
 		const id = "0"
 		err := bmpService.SaveTile(id, x, y, img)

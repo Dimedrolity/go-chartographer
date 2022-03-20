@@ -31,8 +31,6 @@ func (s *BmpService) GetTile(id string, x, y int) (image.Image, error) {
 		return nil, err
 	}
 
-	ShiftRect(img, x, y)
-
 	return img, nil
 }
 
