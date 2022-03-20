@@ -2,11 +2,12 @@ package imgstore_test
 
 import (
 	"errors"
-	"go-chartographer/internal/imgstore"
 	"os"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
+
+	"go-chartographer/internal/imgstore"
 )
 
 // TestFileSystemTileRepo - интеграционные тесты, так как происходит взаимодействие с файловой системой.

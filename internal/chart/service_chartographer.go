@@ -3,13 +3,15 @@ package chart
 import (
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	"go-chartographer/internal/imgstore"
-	"go-chartographer/internal/tileutils"
-	"go-chartographer/pkg/kvstore"
 	"image"
 	"image/color"
 	"image/draw"
+
+	"github.com/google/uuid"
+
+	"go-chartographer/internal/imgstore"
+	"go-chartographer/internal/tileutils"
+	"go-chartographer/pkg/kvstore"
 )
 
 type ChartographerService struct {

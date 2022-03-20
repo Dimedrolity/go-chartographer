@@ -2,8 +2,6 @@ package server_test
 
 import (
 	"bytes"
-	"go-chartographer/internal/chart"
-	"go-chartographer/internal/server"
 	"image"
 	"image/color"
 	"net/http"
@@ -12,6 +10,9 @@ import (
 	"text/template"
 
 	. "github.com/smartystreets/goconvey/convey"
+
+	"go-chartographer/internal/chart"
+	"go-chartographer/internal/server"
 )
 
 // Может быть подключить библиотеку для создания стабов в рантайме? типа FakeItEasy на C#

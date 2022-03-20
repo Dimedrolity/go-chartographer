@@ -2,8 +2,9 @@ package imgstore
 
 import (
 	"bytes"
-	"golang.org/x/image/bmp"
 	"image"
+
+	"golang.org/x/image/bmp"
 )
 
 // BmpService - хранилище изображений-тайлов формата BMP.

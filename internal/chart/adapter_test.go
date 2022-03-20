@@ -1,12 +1,13 @@
 package chart_test
 
 import (
-	"go-chartographer/internal/chart"
 	"image"
 	"image/color"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
+
+	"go-chartographer/internal/chart"
 )
 
 func TestAdapter(t *testing.T) {

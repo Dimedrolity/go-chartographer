@@ -3,12 +3,14 @@ package imgstore_test
 import (
 	"bytes"
 	"errors"
-	. "github.com/smartystreets/goconvey/convey"
-	"go-chartographer/internal/imgstore"
-	"golang.org/x/image/bmp"
 	"image"
 	"image/color"
 	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
+	"golang.org/x/image/bmp"
+
+	"go-chartographer/internal/imgstore"
 )
 
 // TestEncodeDecode - тест библиотеки "golang.org/x/image/bmp" для того, чтобы повысить доверие.

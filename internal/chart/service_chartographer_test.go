@@ -2,13 +2,14 @@ package chart_test
 
 import (
 	"errors"
-	"go-chartographer/internal/chart"
-	"go-chartographer/pkg/kvstore"
 	"image"
 	"image/color"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
+
+	"go-chartographer/internal/chart"
+	"go-chartographer/pkg/kvstore"
 )
 
 //

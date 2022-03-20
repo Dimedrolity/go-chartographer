@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	. "go-chartographer/pkg/kvstore"
-
 	. "github.com/smartystreets/goconvey/convey"
+
+	. "go-chartographer/pkg/kvstore"
 )
 
 // Методы тестируются в парах, так как нет доступа к внутренней структуре данных
