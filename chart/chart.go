@@ -3,7 +3,7 @@ package chart
 
 import (
 	"chartographer-go/imagetile"
-	"chartographer-go/kvstore"
+	"chartographer-go/pkg/kvstore"
 	"chartographer-go/tileutils"
 	"errors"
 	"fmt"

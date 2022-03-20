@@ -3,7 +3,7 @@ package server_test
 import (
 	"bytes"
 	"chartographer-go/chart"
-	"chartographer-go/kvstore"
+	"chartographer-go/pkg/kvstore"
 	"chartographer-go/server"
 	"golang.org/x/image/bmp"
 	"image"

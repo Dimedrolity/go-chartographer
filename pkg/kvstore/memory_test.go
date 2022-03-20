@@ -1,7 +1,7 @@
 package kvstore_test
 
 import (
-	"chartographer-go/kvstore"
+	"chartographer-go/pkg/kvstore"
 	"errors"
 	"testing"
 

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"chartographer-go/pkg/kvstore"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,7 +12,6 @@ import (
 
 	"chartographer-go/chart"
 	"chartographer-go/imagetile"
-	"chartographer-go/kvstore"
 )
 
 func paramError(name string, err error) error {

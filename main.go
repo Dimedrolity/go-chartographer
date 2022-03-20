@@ -1,13 +1,13 @@
 package main
 
 import (
+	"chartographer-go/pkg/kvstore"
 	"chartographer-go/server"
 	"log"
 	"os"
 
 	"chartographer-go/chart"
 	"chartographer-go/imagetile"
-	"chartographer-go/kvstore"
 )
 
 func main() {
