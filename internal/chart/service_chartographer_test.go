@@ -12,9 +12,7 @@ import (
 	"go-chartographer/pkg/kvstore"
 )
 
-//
-// Создание изображения
-//
+// region Создание изображения
 
 // TestTileService - заглушка (stub)
 type tileKey struct {
@@ -138,9 +136,9 @@ func TestNewRGBA(t *testing.T) {
 	})
 }
 
-//
-// Получение фрагмента изображения
-//
+// endregion Создание изображения
+
+// region Получение фрагмента изображения
 
 func TestGetFragment_In(t *testing.T) {
 	Convey("Fragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения.\n"+
@@ -508,9 +506,10 @@ func TestGetFragment_Size(t *testing.T) {
 	})
 }
 
-// -----------
-// SetFragment
-// -----------
+// endregion Получение фрагмента изображения
+
+// region Установка фрагмента изображения
+
 func TestSetFragment_In(t *testing.T) {
 	Convey("SetFragment когда прямоугольник фрагмента полностью лежит в прямоугольнике изображения.\n"+
 		"После вызова функции SetFragment красный пиксель фрагмента должен появиться в изображении", t, func() {
@@ -832,9 +831,9 @@ func TestSetFragment_In_TwoTiles(t *testing.T) {
 	})
 }
 
-//
-// Удаление изображения
-//
+// endregion Установка фрагмента изображения
+
+// region Удаление изображения
 
 func TestDeleteImage_Success(t *testing.T) {
 	Convey("Должно удалить все данные изображения", t, func() {
@@ -893,9 +892,9 @@ func TestDeleteImage_NotExist(t *testing.T) {
 	})
 }
 
-//
-// Получение изображения
-//
+// endregion Удаление изображения
+
+// region Получение изображения
 
 type TestImageRepoGetNotExist struct{}
 
@@ -939,3 +938,5 @@ func TestGetImage_Success(t *testing.T) {
 		So(img, ShouldResemble, tiledImg)
 	})
 }
+
+// endregion Получение изображения

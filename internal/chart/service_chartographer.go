@@ -106,7 +106,7 @@ func (cs *ChartographerService) DeleteImage(id string) error {
 	return nil
 }
 
-// SetFragment измененяет пиксели изображения id пикселями фрагмента fragment,
+// SetFragment измененяет пиксели изображения img.Id пикселями фрагмента fragment,
 // накладывая прямогольник фрагмента - fragment.Bounds() - на изображение.
 // Изображение имеет начальные координаты (0;0), фрагмент может иметь начальные координаты отличные от (0;0).
 //
