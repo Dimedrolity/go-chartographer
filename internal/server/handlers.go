@@ -10,6 +10,9 @@ import (
 	"go-chartographer/internal/chart"
 )
 
+// TODO использовать библиотеку для парсинга query params
+// "github.com/gorilla/schema"
+
 func (s *Server) createImage(w http.ResponseWriter, req *http.Request) {
 	width, err := getQueryParamInt(req, "width")
 	if err != nil {
