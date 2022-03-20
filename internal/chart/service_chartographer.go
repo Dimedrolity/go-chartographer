@@ -3,6 +3,7 @@ package chart
 import (
 	"errors"
 	"fmt"
+	"go-chartographer/internal/chart/tileutils"
 	"image"
 	"image/color"
 	"image/draw"
@@ -10,7 +11,6 @@ import (
 	"github.com/google/uuid"
 
 	"go-chartographer/internal/imgstore"
-	"go-chartographer/internal/tileutils"
 	"go-chartographer/pkg/kvstore"
 )
 
@@ -94,6 +94,7 @@ func (cs *ChartographerService) DeleteImage(id string) error {
 		if errors.Is(err, kvstore.ErrNotExist) {
 			return ErrNotExist
 		}
+
 		return err
 	}
 

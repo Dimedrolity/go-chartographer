@@ -1,12 +1,11 @@
 package tileutils_test
 
 import (
+	. "go-chartographer/internal/chart/tileutils"
 	"image"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
-
-	. "go-chartographer/internal/tileutils"
 )
 
 func TestCreateTiles(t *testing.T) {

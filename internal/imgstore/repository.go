@@ -1,5 +1,6 @@
 package imgstore
 
+// Repository - хранилище изображений-тайлов.
 type Repository interface {
 	SaveTile(id string, x int, y int, img []byte) error
 	GetTile(id string, x, y int) ([]byte, error)
