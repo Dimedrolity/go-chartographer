@@ -9,6 +9,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 
 	"go-chartographer/internal/chart"
+	"go-chartographer/internal/imgstore"
 	"go-chartographer/pkg/kvstore"
 )
 
@@ -19,6 +20,7 @@ type tileKey struct {
 	x, y int
 }
 type TestTileService struct {
+	imgstore.Service
 	images map[string]map[tileKey]image.Image
 }
 
@@ -37,15 +39,10 @@ func (r *TestTileService) DeleteImage(id string) error {
 	delete(r.images, id)
 	return nil
 }
-func (r *TestTileService) Encode(image.Image) ([]byte, error) {
-	panic("implement me")
-}
-func (r *TestTileService) Decode([]byte) (image.Image, error) {
-	panic("implement me")
-}
 
 //TestImageRepo - заглушка (stub)
 type TestImageRepo struct {
+	kvstore.Store
 	images map[string]*chart.TiledImage
 }
 
@@ -61,7 +58,9 @@ func (r *TestImageRepo) Delete(id string) error {
 	return nil
 }
 
-type TestTileServiceEmpty struct{}
+type TestTileServiceEmpty struct {
+	imgstore.Service
+}
 
 func (s TestTileServiceEmpty) SaveTile(string, int, int, image.Image) error {
 	return nil
@@ -71,12 +70,6 @@ func (s TestTileServiceEmpty) GetTile(string, int, int) (image.Image, error) {
 }
 func (s TestTileServiceEmpty) DeleteImage(string) error {
 	return nil
-}
-func (s *TestTileServiceEmpty) Encode(image.Image) ([]byte, error) {
-	panic("implement me")
-}
-func (s *TestTileServiceEmpty) Decode([]byte) (image.Image, error) {
-	panic("implement me")
 }
 
 type TestAdapterEmpty struct{}
@@ -256,7 +249,6 @@ func TestGetFragment_NotOverlaps(t *testing.T) {
 		"Результатом Fragment должно быть полностью черное изображение", t, func() {
 		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
 		tileRepo := &TestTileService{images: make(map[string]map[tileKey]image.Image)}
-		//adapter := &TestAdapterEmpty{}
 		tileMaxSize := 1000
 		chartService := chart.NewChartographerService(imageRepo, tileRepo, nil, tileMaxSize)
 
@@ -835,7 +827,6 @@ func TestDeleteImage_Success(t *testing.T) {
 	Convey("Должно удалить все данные изображения", t, func() {
 		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
 		tileRepo := &TestTileService{images: make(map[string]map[tileKey]image.Image)}
-		//adapter := &TestAdapterEmpty{}
 		chartService := chart.NewChartographerService(imageRepo, tileRepo, nil, 0)
 
 		const id = "0"
@@ -864,14 +855,10 @@ func TestDeleteImage_Success(t *testing.T) {
 	})
 }
 
-type TestImageRepoDeleteNotExist struct{}
+type TestImageRepoDeleteNotExist struct {
+	kvstore.Store
+}
 
-func (r *TestImageRepoDeleteNotExist) Add(string, interface{}) {
-	panic("implement me")
-}
-func (r *TestImageRepoDeleteNotExist) Get(string) (interface{}, error) {
-	panic("implement me")
-}
 func (r *TestImageRepoDeleteNotExist) Delete(string) error {
 	return kvstore.ErrNotExist
 }
@@ -880,7 +867,6 @@ func TestDeleteImage_NotExist(t *testing.T) {
 	Convey("При запросе несуществующего изображения должна быть ошибка", t, func() {
 		imageRepo := &TestImageRepoDeleteNotExist{}
 		tileRepo := &TestTileService{images: make(map[string]map[tileKey]image.Image)}
-		//adapter := &TestAdapterEmpty{}
 		chartService := chart.NewChartographerService(imageRepo, tileRepo, nil, 0)
 
 		err := chartService.DeleteImage("0")
@@ -892,23 +878,18 @@ func TestDeleteImage_NotExist(t *testing.T) {
 
 // region Получение изображения
 
-type TestImageRepoGetNotExist struct{}
-
-func (r *TestImageRepoGetNotExist) Add(string, interface{}) {
-	panic("implement me")
+type TestImageRepoGetNotExist struct {
+	kvstore.Store
 }
+
 func (r *TestImageRepoGetNotExist) Get(string) (interface{}, error) {
 	return nil, kvstore.ErrNotExist
-}
-func (r *TestImageRepoGetNotExist) Delete(string) error {
-	panic("implement me")
 }
 
 func TestGetImage_NotExist(t *testing.T) {
 	Convey("При запросе несуществующего изображения должна быть ошибка", t, func() {
 		imageRepo := &TestImageRepoGetNotExist{}
 		tileRepo := &TestTileService{images: make(map[string]map[tileKey]image.Image)}
-		//adapter := &TestAdapterEmpty{}
 		chartService := chart.NewChartographerService(imageRepo, tileRepo, nil, 0)
 
 		_, err := chartService.GetImage("0")
@@ -920,7 +901,6 @@ func TestGetImage_Success(t *testing.T) {
 	Convey("Должно удалить все данные изображения", t, func() {
 		imageRepo := &TestImageRepo{images: make(map[string]*chart.TiledImage)}
 		tileRepo := &TestTileService{images: make(map[string]map[tileKey]image.Image)}
-		//adapter := &TestAdapterEmpty{}
 		chartService := chart.NewChartographerService(imageRepo, tileRepo, nil, 0)
 
 		const id = "0"
