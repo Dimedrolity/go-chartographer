@@ -1,0 +1,8 @@
+version: "2.4"
+
+services:
+  chart:
+    build: .
+    mem_limit: 2g # по условию задачи
+    ports:
+      - "8080:8080"
