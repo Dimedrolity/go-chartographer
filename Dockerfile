@@ -15,4 +15,4 @@ COPY --from=builder /app/build/app /
 
 EXPOSE 8080
 
-CMD [ "/app", "./data" ]
+CMD /app ${DATA_DIR:-/data}
