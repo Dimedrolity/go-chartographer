@@ -23,10 +23,10 @@ jobs:
       - name: Test
         run: make test
 
-      - name: Build for windows
+      - name: Build for Windows
         run: make build_windows
 
-      - name: Build for linux
+      - name: Build for Linux
         run: make build_linux
 
       - name: Release and upload build file to assets
