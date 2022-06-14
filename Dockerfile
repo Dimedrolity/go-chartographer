@@ -15,4 +15,4 @@ COPY --from=builder /app/build/app /
 
 EXPOSE 8080
 
-CMD /app ${DATA_DIR:-/data}
+CMD /app ${IMG_DIR:-/data}

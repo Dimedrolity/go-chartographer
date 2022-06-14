@@ -4,5 +4,9 @@ services:
   chart:
     build: .
     mem_limit: 2g # по условию задачи
+    environment:
+      - IMG_DIR=${CONTAINER_IMG_DIR}
+    volumes:
+      - ${HOST_IMG_DIR}:${CONTAINER_IMG_DIR}
     ports:
       - "8080:8080"
