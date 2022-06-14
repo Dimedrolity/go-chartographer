@@ -6,7 +6,7 @@ test:
 build:
 	go build -o build/app cmd/main/main.go
 
-build_windows: GOOS=windows build
+build_windows:
 	GOOS=windows go build -o build/app_windows.exe cmd/main/main.go
 
 build_linux:
