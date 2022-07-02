@@ -1,4 +1,4 @@
-module go-chartographer
+module github.com/Dimedrolity/go-chartographer
 
 go 1.17
 

@@ -6,7 +6,7 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
-	. "go-chartographer/pkg/kvstore"
+	. "github.com/Dimedrolity/go-chartographer/pkg/kvstore"
 )
 
 // Методы тестируются в парах, так как нет доступа к внутренней структуре данных

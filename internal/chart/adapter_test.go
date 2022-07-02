@@ -7,7 +7,7 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
-	"go-chartographer/internal/chart"
+	"github.com/Dimedrolity/go-chartographer/internal/chart"
 )
 
 func TestAdapter(t *testing.T) {

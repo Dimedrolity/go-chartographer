@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"go-chartographer/internal/app"
+	"github.com/Dimedrolity/go-chartographer/internal/app"
 )
 
 func main() {

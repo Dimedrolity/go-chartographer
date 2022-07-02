@@ -8,9 +8,9 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
-	"go-chartographer/internal/chart"
-	"go-chartographer/internal/imgstore"
-	"go-chartographer/pkg/kvstore"
+	"github.com/Dimedrolity/go-chartographer/internal/chart"
+	"github.com/Dimedrolity/go-chartographer/internal/imgstore"
+	"github.com/Dimedrolity/go-chartographer/pkg/kvstore"
 )
 
 // region Создание изображения

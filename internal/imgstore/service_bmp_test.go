@@ -10,7 +10,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"golang.org/x/image/bmp"
 
-	"go-chartographer/internal/imgstore"
+	"github.com/Dimedrolity/go-chartographer/internal/imgstore"
 )
 
 // TestEncodeDecode - тест библиотеки "golang.org/x/image/bmp" для того, чтобы повысить доверие.

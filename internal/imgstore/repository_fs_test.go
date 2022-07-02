@@ -7,7 +7,7 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
-	"go-chartographer/internal/imgstore"
+	"github.com/Dimedrolity/go-chartographer/internal/imgstore"
 )
 
 // TestFileSystemTileRepo - интеграционные тесты, так как происходит взаимодействие с файловой системой.

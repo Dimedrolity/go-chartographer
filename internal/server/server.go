@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"go-chartographer/internal/chart"
+	"github.com/Dimedrolity/go-chartographer/internal/chart"
 )
 
 type Config struct {

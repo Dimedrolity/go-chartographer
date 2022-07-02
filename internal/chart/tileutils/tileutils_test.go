@@ -1,7 +1,7 @@
 package tileutils_test
 
 import (
-	. "go-chartographer/internal/chart/tileutils"
+	. "github.com/Dimedrolity/go-chartographer/internal/chart/tileutils"
 	"image"
 	"testing"
 

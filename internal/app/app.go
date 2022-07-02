@@ -1,10 +1,10 @@
 package app
 
 import (
-	"go-chartographer/internal/chart"
-	"go-chartographer/internal/imgstore"
-	"go-chartographer/internal/server"
-	"go-chartographer/pkg/kvstore"
+	"github.com/Dimedrolity/go-chartographer/internal/chart"
+	"github.com/Dimedrolity/go-chartographer/internal/imgstore"
+	"github.com/Dimedrolity/go-chartographer/internal/server"
+	"github.com/Dimedrolity/go-chartographer/pkg/kvstore"
 )
 
 // Run инициализирует зависимости сервера и запускает его.
